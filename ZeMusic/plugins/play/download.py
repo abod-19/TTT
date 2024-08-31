@@ -21,7 +21,7 @@ def remove_if_exists(path):
         
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = config.BOT_NAME + " ابحث"
-@app.on_message(command(["song", "/song", "بحث", Nem]))
+@app.on_message(command(["song", "/song", "بحث", Nem, "تنزيل"]))
 async def song_downloader(client, message: Message):
     query = " ".join(message.command[1:])
     m = await message.reply_text("<b>⇜ جـارِ البحث ..</b>")
