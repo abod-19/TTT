@@ -47,7 +47,7 @@ async def download_instareels(c: app, m: Message):
                 await m.reply_text("أنا غير قادر على الوصول إلى هذه النتيجه.")
 
 
-@app.on_message(filters.command(["تحميل استوري"], ["/", "!", "."]))
+@app.on_message(filters.command(["ستوري"], ["/", "!", "."]))
 async def instagram_reel(client, message):
     if len(message.command) == 2:
         url = message.command[1]
