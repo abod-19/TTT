@@ -34,7 +34,7 @@ def get_text(message: Message) -> [None, str]:
         return None
 
 
-@app.on_message(filters.command(["فيد", "yt"],""))
+@app.on_message(filters.command(["فيد", "yt", "تحميل", "تحميل فيديو"],""))
 async def ytmusic(client, message: Message):
     urlissed = get_text(message)
     user_id = message.from_user.id
