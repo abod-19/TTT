@@ -1,10 +1,8 @@
 import future
-
 import asyncio
 import os
 import time
 from urllib.parse import urlparse
-
 import wget
 from pyrogram import filters
 from pyrogram.types import Message
@@ -12,6 +10,9 @@ from youtubesearchpython import SearchVideos
 from yt_dlp import YoutubeDL
 from ZeMusic.platforms.Youtube import cookie_txt_file
 from ZeMusic import app
+import config
+
+lnk = "https://t.me/" + config.CHANNEL_LINK
 
 
 def get_file_extension_from_url(url):
@@ -34,7 +35,7 @@ def get_text(message: Message) -> [None, str]:
         return None
 
 
-@app.on_message(filters.command(["فيد", "yt", "تحميل", "تحميل فيديو"],""))
+@app.on_message(filters.command(["فيد", "yt", "حمل", "تحميل فيديو"],""))
 async def ytmusic(client, message: Message):
     urlissed = get_text(message)
     user_id = message.from_user.id
@@ -83,7 +84,7 @@ async def ytmusic(client, message: Message):
         return
     c_time = time.time()
     file_stark = f"{ytdl_data['id']}.mp4"
-    capy = f"❄ <b>ᴛɪᴛʟᴇ :</b> <a href='{mo}'>{thum}</a>\n🥀 <b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :</b> {chutiya}"
+    capy = f"{thum}"
     await client.send_video(
         message.chat.id,
         video=open(file_stark, "rb"),
@@ -97,6 +98,13 @@ async def ytmusic(client, message: Message):
             c_time,
             f"جاري تحميل `{urlissed}` من يوتيوب..",
             file_stark,
+        ),
+        reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk),
+                    ],
+                ]
         ),
         reply_to_message_id=message.id,
     )
