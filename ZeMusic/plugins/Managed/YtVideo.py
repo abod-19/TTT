@@ -41,7 +41,7 @@ async def ytmusic(client, message: Message):
     user_name = message.from_user.first_name
     chutiya = f"<a href='tg://user?id={user_id}'>{user_name}</a>"
 
-    pablo = await client.send_message(message.chat.id, f"جاري البحث عن المقطع..")
+    pablo = await message.reply_text("<b>جاري البحث عن المقطع..</b>")
     if not urlissed:
         await pablo.edit(
             "- لم يتم العثـور على نتائج حاول مجددا"
@@ -84,7 +84,7 @@ async def ytmusic(client, message: Message):
     c_time = time.time()
     file_stark = f"{ytdl_data['id']}.mp4"
     capy = f"❄ <b>ᴛɪᴛʟᴇ :</b> <a href='{mo}'>{thum}</a>\n🥀 <b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :</b> {chutiya}"
-    await client.send_video(
+    await client.reply_video(
         message.chat.id,
         video=open(file_stark, "rb"),
         duration=int(ytdl_data["duration"]),
