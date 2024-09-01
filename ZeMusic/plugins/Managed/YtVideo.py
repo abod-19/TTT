@@ -84,7 +84,7 @@ async def ytmusic(client, message: Message):
     c_time = time.time()
     file_stark = f"{ytdl_data['id']}.mp4"
     capy = f"❄ <b>ᴛɪᴛʟᴇ :</b> <a href='{mo}'>{thum}</a>\n🥀 <b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :</b> {chutiya}"
-    await client.reply_video(
+    await client.send_video(
         message.chat.id,
         video=open(file_stark, "rb"),
         duration=int(ytdl_data["duration"]),
@@ -98,6 +98,7 @@ async def ytmusic(client, message: Message):
             f"جاري تحميل `{urlissed}` من يوتيوب..",
             file_stark,
         ),
+        reply_to_message_id=message.id,
     )
     await pablo.delete()
     for files in (sedlyf, file_stark):
