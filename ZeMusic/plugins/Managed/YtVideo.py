@@ -8,6 +8,7 @@ from pyrogram import filters
 from pyrogram.types import Message
 from youtubesearchpython import SearchVideos
 from yt_dlp import YoutubeDL
+from pyrogram.types import Message, InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
 from ZeMusic.platforms.Youtube import cookie_txt_file
 from ZeMusic import app
 import config
