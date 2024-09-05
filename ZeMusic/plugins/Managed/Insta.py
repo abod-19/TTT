@@ -1,67 +1,35 @@
-import os
-import future
-import asyncio
 import requests
-import wget
-import time
-import yt_dlp
-from urllib.parse import urlparse
+from pyrogram import filters
+
 from ZeMusic import app
-from pyrogram import Client, filters
-from pyrogram.types import Message
 
 
-# ------------------------------------------------------------------------------- #
-
-
-                     #   INSTAGRAM REELS LELO SAB  #
-        
-
-# ------------------------------------------------------------------------------- #
-
-
-@app.on_message(filters.command(["انستا"], ["/", "!", "."]))
-async def download_instareels(c: app, m: Message):
-    try:
-        reel_ = m.command[1]
-    except IndexError:
-        await m.reply_text("أعطني رابطا لتحميل المقطع...")
+@app.on_message(filters.command(["ig", "instagram", "reel"]))
+async def download_instagram_video(client, message):
+    if len(message.command) < 2:
+        await message.reply_text(
+            "Pʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴛʜᴇ Iɴsᴛᴀɢʀᴀᴍ ʀᴇᴇʟ URL ᴀғᴛᴇʀ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ"
+        )
         return
-    if not reel_.startswith("https://www.instagram.com/reel/"):
-        await m.reply_text("من أجل الحصول على النتائج الصحيحه ، من الضروري وجود رابط صالح. يرجى تزويدي بالرابط المطلوب.")
-        return
-    OwO = reel_.split(".",1)
-    Reel_ = ".dd".join(OwO)
-    try:
-        await m.reply_video(Reel_)
-        return
-    except Exception:
-        try:
-            await m.reply_photo(Reel_)
-            return
-        except Exception:
-            try:
-                await m.reply_document(Reel_)
-                return
-            except Exception:
-                await m.reply_text("أنا غير قادر على الوصول إلى هذه النتيجه.")
+    a = await message.reply_text("ᴘʀᴏᴄᴇssɪɴɢ...")
+    url = message.text.split()[1]
+    api_url = (
+        f"https://nodejs-1xn1lcfy3-jobians.vercel.app/v2/downloader/instagram?url={url}"
+    )
 
+    response = requests.get(api_url)
+    data = response.json()
 
-@app.on_message(filters.command(["ستوري"], ["/", "!", "."]))
-async def instagram_reel(client, message):
-    if len(message.command) == 2:
-        url = message.command[1]
-        response = requests.post(f"https://lexica-api.vercel.app/download/instagram?url={url}")
-        data = response.json()
-
-        if data['code'] == 2:
-            media_urls = data['content']['mediaUrls']
-            if media_urls:
-                video_url = media_urls[0]['url']
-                await message.reply_video(f"{video_url}")
-            else:
-                await message.reply("لم يتم العثور على فيديو في الرد. قد يكون الحساب خاصا.")
-        else:
-            await message.reply("لم يكن الطلب ناجحا.")
+    if data["status"]:
+        video_url = data["data"][0]["url"]
+        await a.delete()
+        await client.send_video(message.chat.id, video_url)
     else:
-        await message.reply("يرجى تقديم عنوان URL صالح لـ Instagram باستخدام الأمر تحميل استوري..")
+        await a.edit("Fᴀɪʟᴇᴅ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ ʀᴇᴇʟ")
+
+
+__MODULE__ = "Iɴsᴛᴀɢʀᴀᴍ"
+__HELP__ = """/reel [ɪɴsᴛᴀɢʀᴀᴍ ʀᴇᴇʟ ᴜʀʟ] - Tᴏ ᴅᴏᴡɴʟᴏᴀᴅ ᴛʜᴇ ʀᴇᴇʟ ʙʏ ʙᴏᴛ
+/ig [ɪɴsᴛᴀɢʀᴀᴍ ʀᴇᴇʟ ᴜʀʟ] - Tᴏ ᴅᴏᴡɴʟᴏᴀᴅ ᴛʜᴇ ʀᴇᴇʟ ʙʏ ʙᴏᴛ
+/instagram [ɪɴsᴛᴀɢʀᴀᴍ ʀᴇᴇʟ ᴜʀʟ] - Tᴏ ᴅᴏᴡɴʟᴏᴀᴅ ᴛʜᴇ ʀᴇᴇʟ ʙʏ ʙᴏᴛ
+"""
