@@ -15,4 +15,4 @@ async def WelcomeDev(_, response: ChatMemberUpdated):
         
         await app.send_message(
             chat_id=response.chat.id,
-            text=f"⟡ انظم المطور <a href='tg://user?id={dev_id}'>{name}</a>\n⟡ {bio}")
+            text=f"⟡ انظم المطور :- <a href='tg://user?id={dev_id}'>{name}</a>")
