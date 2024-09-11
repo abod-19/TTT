@@ -1,3 +1,4 @@
+"""
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from ZeMusic import app
@@ -89,3 +90,4 @@ async def display_hms(client, callback):
             await callback.answer("• الهمسه لا تخصك.", show_alert=True)
     else:
         await callback.answer("• لا توجد همسه لك.", show_alert=True)
+"""
