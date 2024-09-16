@@ -51,7 +51,7 @@ async def leave_group(client, message):
 
     except Exception as e:
         if "USER_NOT_PARTICIPANT" in str(e):
-            await message.reply_text("-› المساعد غير موجود في هذه المجموعة.")
+            await message.reply_text("-› المساعد مغادر من قبل.")
         else:
             await message.reply_text(f"-› حدث خطأ أثناء مغادرة المجموعة: {e}")
 
