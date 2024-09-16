@@ -1,4 +1,3 @@
-from SafoneAPI import SafoneAPI
 from ZeMusic.core.bot import Mody
 from ZeMusic.core.dir import dirr
 from ZeMusic.core.git import git
@@ -14,8 +13,6 @@ heroku()
 
 app = Mody()
 userbot = Userbot()
-
-api = SafoneAPI()
 
 from .platforms import *
 
