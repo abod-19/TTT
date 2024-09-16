@@ -26,4 +26,3 @@ youtube-search-python
 telegraph
 numpy
 wget
-SafoneAPI
