@@ -2,7 +2,7 @@ from SafoneAPI import SafoneAPI
 import requests
 from pyrogram import filters
 from strings.filters import command
-from YukkiMusic import api, app
+from ZeMusic import app
 
 api = SafoneAPI()
 
