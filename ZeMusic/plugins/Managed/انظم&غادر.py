@@ -37,16 +37,25 @@ async def invite_assistant(client, message):
         await message.reply_text(f"-› حدث خطأ .: {e}")
         
 
-@app.on_message(command(["المساعد غادر","مساعد غادر","مساعد مغادره"]) & SUDOERS)
+@app.on_message(command(["المساعد غادر", "مساعد غادر", "مساعد مغادره"]) & SUDOERS)
 async def leave_group(client, message):
     try:
         userbot = await get_assistant(message.chat.id)
-        await userbot.leave_chat(message.chat.id)
 
+        if not await userbot.get_chat_member(message.chat.id, userbot.me.id):
+            await message.reply_text("-› المساعد مغادر من قبل.")
+            return
+        
+        await userbot.leave_chat(message.chat.id)
         await message.reply_text("-› غادر المساعد كما طلبت.")
 
     except Exception as e:
-        await message.reply_text(f"-› حدث خطأ أثناء مغادرة المجموعة: {e}")
+        if "USER_NOT_PARTICIPANT" in str(e):
+            await message.reply_text("-› المساعد غير موجود في هذه المجموعة.")
+        else:
+            await message.reply_text(f"-› حدث خطأ أثناء مغادرة المجموعة: {e}")
+
+
 
 @app.on_message(command([Nem]) & SUDOERS)
 async def leave_group(client, message):
@@ -54,8 +63,8 @@ async def leave_group(client, message):
         userbot = await get_assistant(message.chat.id)
         leave_message = "شكرًا لكم جميعًا، وداعاً!"
         await app.send_message(message.chat.id, leave_message)
-        await userbot.leave_chat(message.chat.id)
         await app.leave_chat(message.chat.id)
+        await userbot.leave_chat(message.chat.id)
 
         await message.reply_text("-› غادرت المجموعة كما طلبت.")
 
