@@ -12,9 +12,9 @@ git()
 dbb()
 heroku()
 
+api = SafoneAPI()
 app = Mody()
 userbot = Userbot()
-api = SafoneAPI()
 
 from .platforms import *
 
