@@ -1,13 +1,12 @@
 import requests
-from SafoneAPI import SafoneAPI
 from pyrogram import filters
-from strings.filters import command
+from pyrogram.enums import ChatAction
+
 from ZeMusic import app
 
-api = SafoneAPI()
 
-@app.on_message(command(["رون"]))
-async def bard(bot, message):
+@app.on_message(filters.command(["رون"],""))
+async def chatgpt_chat(bot, message):
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply_text("-› اكتب رون واي شي تريد تسالة راح يجاوبك .")
         return
@@ -18,8 +17,22 @@ async def bard(bot, message):
         user_input = " ".join(message.command[1:])
 
     try:
-        Z = await api.bard(user_input)
-        result = Z["candidates"][0]["content"]["parts"][0]["text"]
-        await message.reply_text(result)
+        response = requests.get(
+            f"https://chatgpt.apinepdev.workers.dev/?question={user_input}"
+        )
+        if response.status_code == 200:
+            await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
+            result = response.json()["answer"]
+            await message.reply_text(f"{result}", quote=True)
+        else:
+            pass
     except requests.exceptions.RequestException as e:
         pass
+
+
+__MODULE__ = "Aɪ"
+__HELP__ = """
+/advice - ɢᴇᴛ ʀᴀɴᴅᴏᴍ ᴀᴅᴠɪᴄᴇ ʙʏ ʙᴏᴛ
+/ai [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ᴄʜᴀᴛɢᴘᴛ's ᴀɪ
+/gemini [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ's ɢᴇᴍɪɴɪ ᴀɪ
+/bard [ǫᴜᴇʀʏ] -ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ's ʙᴀʀᴅ ᴀɪ"""
