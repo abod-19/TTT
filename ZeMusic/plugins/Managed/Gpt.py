@@ -1,4 +1,3 @@
-"""
 import requests
 from pyrogram import filters
 from strings.filters import command
@@ -24,4 +23,3 @@ async def bard(bot, message):
         await message.reply_text(result)
     except requests.exceptions.RequestException as e:
         pass
-"""
