@@ -23,7 +23,7 @@ sudoersdb = mongodb.sudoers
 usersdb = mongodb.tgusersdb
 
 ###############&&&&&&&&&&&&############
-logmdb = mongodb.logm
+#logmdb = mongodb.logm
 
 ##############$$$$$$$$$$$$$############
 # Shifting to memory [mongo sucks often]
@@ -45,17 +45,17 @@ skipmode = {}
 
 ###############&&&&&&&&&&&&############
 
-async def is_log_enabled():
-    settings = await logmdb.find_one({"name": "search"})
-    if settings:
-        return settings.get("enabled", False)
-    return False
+#async def is_log_enabled():
+    #settings = await logmdb.find_one({"name": "search"})
+    #if settings:
+        #return settings.get("enabled", False)
+    #return False
 
-async def enable_log():
-    await logmdb.update_one({"name": "search"}, {"$set": {"enabled": True}}, upsert=True)
+#async def enable_log():
+    #await logmdb.update_one({"name": "search"}, {"$set": {"enabled": True}}, upsert=True)
 
-async def disable_log():
-    await logmdb.update_one({"name": "search"}, {"$set": {"enabled": False}}, upsert=True)
+#async def disable_log():
+    #await logmdb.update_one({"name": "search"}, {"$set": {"enabled": False}}, upsert=True)
 
 ##############$$$$$$$$$$$$$############
 
