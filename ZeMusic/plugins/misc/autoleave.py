@@ -6,12 +6,11 @@ from pyrogram.enums import ChatType
 import config
 from ZeMusic import app
 from ZeMusic.core.call import Mody, autoend
-from ZeMusic.utils.database import get_client, is_active_chat, is_autoend, is_log_enabled
+from ZeMusic.utils.database import get_client, is_active_chat, is_autoend
 
 
 async def auto_leave():
-    #if AUTO_LEAVING_ASSISTANT == str(True):
-    if not await is_log_enabled():
+    if AUTO_LEAVING_ASSISTANT == str(True):
         while not await asyncio.sleep(100):
             from ZeMusic.core.userbot import assistants
 
