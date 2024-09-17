@@ -1,3 +1,4 @@
+"""
 import os
 import aiohttp
 import aiofiles
@@ -27,4 +28,4 @@ async def disable_log_comm(client, message: Message):
         return
     await disable_log()
     await message.reply_text("<b>تم تعطيل المغادرة بنجاح.</b>")
-    
+"""
