@@ -8,7 +8,6 @@ from ZeMusic import app
 from ZeMusic.core.call import Mody, autoend
 from ZeMusic.utils.database import get_client, is_active_chat, is_autoend, is_log_enabled
 
-if not await is_log_enabled():
 
 async def auto_leave():
     #if AUTO_LEAVING_ASSISTANT == str(True):
