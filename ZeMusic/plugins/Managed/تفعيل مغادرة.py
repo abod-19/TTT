@@ -12,7 +12,7 @@ from ZeMusic.utils.database import is_log_enabled, enable_log, disable_log
 
 
 @app.on_message(command(["تفعيل المغادرة", "تفعيل المغادره"]) & filters.user(OWNER_ID))
-async def enable_lo(client, message: Message):
+async def enable_log_comm(client, message: Message):
     if await is_log_enabled():
         await message.reply_text("<b>المغادرة مفعل من قبل.</b>")
         return
@@ -21,7 +21,7 @@ async def enable_lo(client, message: Message):
   
 
 @app.on_message(command(["تعطيل المغادره", "تعطيل المغادرة"]) & filters.user(OWNER_ID))
-async def disable_log(client, message: Message):
+async def disable_log_comm(client, message: Message):
     if not await is_log_enabled():
         await message.reply_text("<b>المغادرة معطل من قبل.</b>")
         return
