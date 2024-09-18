@@ -1,13 +1,12 @@
-import re
 from SafoneAPI import SafoneAPI
 import requests
 from pyrogram import filters
-from strings.filters import command
+from pyrogram.enums import ChatAction, ParseMode
 from ZeMusic import app
 
 api = SafoneAPI()
 
-@app.on_message(command(["رون"]))
+@app.on_message(filters.command(["رون"],""))
 async def bard(bot, message):
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply_text(
@@ -23,10 +22,6 @@ async def bard(bot, message):
     try:
         Z = await api.bard(user_input)
         result = Z["candidates"][0]["content"]["parts"][0]["text"]
-        
-        # إزالة التنسيقات مثل ** من النص
-        cleaned_result = re.sub(r'\*{1,2}', '', result)
-        
-        await message.reply_text(cleaned_result)
+        await message.reply_text(result)
     except requests.exceptions.RequestException as e:
         pass
