@@ -27,4 +27,4 @@ telegraph
 numpy
 wget
 SafoneAPI
-TheApi
+git+https://github.com/Vivekkumar-IN/TheApi@main
