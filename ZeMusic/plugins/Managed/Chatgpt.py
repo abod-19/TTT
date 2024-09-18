@@ -1,11 +1,12 @@
-import requests
 from pyrogram import filters
 from pyrogram.enums import ChatAction
+from TheApi import api
 
 from ZeMusic import app
+from config import BANNED_USERS
 
 
-@app.on_message(filters.command(["رون"],""))
+@app.on_message(filters.command(["chatgpt", "ai", "ask"]) & ~BANNED_USERS)
 async def chatgpt_chat(bot, message):
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply_text(
@@ -18,23 +19,14 @@ async def chatgpt_chat(bot, message):
     else:
         user_input = " ".join(message.command[1:])
 
-    try:
-        response = requests.get(
-            f"https://chatgpt.apinepdev.workers.dev/?question={user_input}"
-        )
-        if response.status_code == 200:
-            await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
-            result = response.json()["answer"]
-            await message.reply_text(f"{result}", quote=True)
-        else:
-            pass
-    except requests.exceptions.RequestException as e:
-        pass
+    await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
+    results = api.chatgpt(user_input)
+    await message.reply_text(results)
 
 
-__MODULE__ = "Aɪ"
+__MODULE__ = "CʜᴀᴛGᴘᴛ"
 __HELP__ = """
 /advice - ɢᴇᴛ ʀᴀɴᴅᴏᴍ ᴀᴅᴠɪᴄᴇ ʙʏ ʙᴏᴛ
-/ai [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ᴄʜᴀᴛɢᴘᴛ s ᴀɪ
-/gemini [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ s ɢᴇᴍɪɴɪ ᴀɪ
-/bard [ǫᴜᴇʀʏ] -ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ s ʙᴀʀᴅ ᴀɪ"""
+/ai [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ᴄʜᴀᴛɢᴘᴛ's ᴀɪ
+/gemini [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ's ɢᴇᴍɪɴɪ ᴀɪ
+/bard [ǫᴜᴇʀʏ] -ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ's ʙᴀʀᴅ ᴀɪ"""
