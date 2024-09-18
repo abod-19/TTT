@@ -27,6 +27,4 @@ telegraph
 numpy
 wget
 SafoneAPI
-googletrans
-googlesearch-python
-google_play_scraper
+TheApi
