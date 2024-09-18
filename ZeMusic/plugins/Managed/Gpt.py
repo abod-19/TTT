@@ -20,8 +20,10 @@ async def bard(bot, message):
         user_input = " ".join(message.command[1:])
 
     try:
+        await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
+        
         Z = await api.bard(user_input)
         result = Z["candidates"][0]["content"]["parts"][0]["text"]
-        await message.reply_text(result)
+        await message.reply_text(result, parse_mode=ParseMode.MARKDOWN)
     except requests.exceptions.RequestException as e:
         pass
