@@ -22,6 +22,8 @@ async def bard(bot, message):
     try:
         Z = await api.bard(user_input)
         result = Z["candidates"][0]["content"]["parts"][0]["text"]
+        # استبدال ** بعلامة <b>
+        result = result.replace("**", "<b>")
         await message.reply_text(result)
     except requests.exceptions.RequestException as e:
         pass
