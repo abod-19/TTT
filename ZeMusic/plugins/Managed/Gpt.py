@@ -1,3 +1,4 @@
+import re
 from SafoneAPI import SafoneAPI
 import requests
 from pyrogram import filters
@@ -22,8 +23,10 @@ async def bard(bot, message):
     try:
         Z = await api.bard(user_input)
         result = Z["candidates"][0]["content"]["parts"][0]["text"]
-        # استبدال ** بعلامة <b>
-        result = result.replace("**", "<b>")
-        await message.reply_text(result)
+        
+        # إزالة التنسيقات مثل ** من النص
+        cleaned_result = re.sub(r'\*{1,2}', '', result)
+        
+        await message.reply_text(cleaned_result)
     except requests.exceptions.RequestException as e:
         pass
