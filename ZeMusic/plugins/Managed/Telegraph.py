@@ -1,10 +1,16 @@
-import os, asyncio
+import os
 from typing import Optional
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from telegraph import upload_file
+from imgurpython import ImgurClient
 from ZeMusic import app
-from strings.filters import command
+
+# إعدادات API لـ Imgur (استبدل هذه القيم بالقيم الخاصة بك من Imgur)
+CLIENT_ID = "a7655efe0d76c1c"
+CLIENT_SECRET = "358c318228ef4abd45e5b5787920bf0b41eb2633"
+
+# إعداد اتصال Imgur
+imgur_client = ImgurClient(CLIENT_ID, CLIENT_SECRET)
 
 #---------------FUNCTION---------------#
 
@@ -21,7 +27,7 @@ def get_file_id(msg: Message) -> Optional[Message]:
 #---------------FUNCTION---------------#
 
 @app.on_message(filters.regex(r"^(تلغراف|ميديا|تلكراف|تلجراف|‹ تلغراف ›)$") & filters.private)
-async def telegraph_upload(bot, update):
+async def imgur_upload(bot, update):
     replied = update.reply_to_message
     if not replied:
         return await update.reply_text("⌯ ¦ قم بالرد على ملف وسائط مدعوم.\n⌯ ¦ حط صوره او فيديو و اكتب عليها.")
@@ -36,15 +42,13 @@ async def telegraph_upload(bot, update):
     
     # تحميل الملف
     media = await update.reply_to_message.download()
-    
-    # تحقق من نوع media
-    print(f"Media type: {type(media)}")  # تحقق مما إذا كان media مسار الملف
-    
-    await text.edit_text(text="<code>اكتمل التحميل. الآن يتم رفعه إلى التلغراف ...</code>", disable_web_page_preview=True)
+
+    await text.edit_text(text="<code>اكتمل التحميل. الآن يتم رفعه إلى Imgur ...</code>", disable_web_page_preview=True)
     
     try:
-        # رفع الملف إلى Telegra.ph (يجب تمرير قائمة تحتوي على مسار الملف)
-        response = upload_file([media])
+        # رفع الملف إلى Imgur
+        response = imgur_client.upload_from_path(media, anon=True)
+        imgur_url = response[ link ]
     except Exception as error:
         print(error)
         await text.edit_text(text=f"Error :- {error}", disable_web_page_preview=True)
@@ -59,8 +63,8 @@ async def telegraph_upload(bot, update):
     
     # تعديل الرسالة وإضافة الروابط
     await text.edit_text(
-        text=f"<b>⎉╎الــرابـط : </b><a href='https://telegra.ph{response[0]['src']}'>اضغــط هنـــا</a>\n"
-             f"<b>⎉╎مشاركة : </b><a href='https://telegram.me/share/url?url=https://telegra.ph{response[0]['src']}'>اضغــط هنـــا</a>",
+        text=f"<b>⎉╎الــرابـط : </b><a href= {imgur_url} >اضغــط هنـــا</a>\n"
+             f"<b>⎉╎مشاركة : </b><a href= https://telegram.me/share/url?url={imgur_url} >اضغــط هنـــا</a>",
         disable_web_page_preview=False,
         reply_markup=InlineKeyboardMarkup([[
             InlineKeyboardButton(text="✘ اغلاق ✘", callback_data="close")
