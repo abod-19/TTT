@@ -43,8 +43,8 @@ async def telegraph_upload(bot, update):
     await text.edit_text(text="<code>اكتمل التحميل. الآن يتم رفعه إلى التلغراف ...</code>", disable_web_page_preview=True)
     
     try:
-        # رفع الملف إلى Telegra.ph
-        response = upload_file(media)
+        # رفع الملف إلى Telegra.ph (يجب تمرير قائمة تحتوي على مسار الملف)
+        response = upload_file([media])
     except Exception as error:
         print(error)
         await text.edit_text(text=f"Error :- {error}", disable_web_page_preview=True)
@@ -59,8 +59,8 @@ async def telegraph_upload(bot, update):
     
     # تعديل الرسالة وإضافة الروابط
     await text.edit_text(
-        text=f"<b>⎉╎الــرابـط : </b><a href='https://telegra.ph{response[0]}'>اضغــط هنـــا</a>\n"
-             f"<b>⎉╎مشاركة : </b><a href='https://telegram.me/share/url?url=https://telegra.ph{response[0]}'>اضغــط هنـــا</a>",
+        text=f"<b>⎉╎الــرابـط : </b><a href='https://telegra.ph{response[0]['src']}'>اضغــط هنـــا</a>\n"
+             f"<b>⎉╎مشاركة : </b><a href='https://telegram.me/share/url?url=https://telegra.ph{response[0]['src']}'>اضغــط هنـــا</a>",
         disable_web_page_preview=False,
         reply_markup=InlineKeyboardMarkup([[
             InlineKeyboardButton(text="✘ اغلاق ✘", callback_data="close")
