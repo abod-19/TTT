@@ -27,3 +27,4 @@ telegraph
 numpy
 wget
 SafoneAPI
+imgurpython
