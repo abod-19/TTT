@@ -30,25 +30,21 @@ def get_file_id(msg: Message) -> Optional[Message]:
 async def imgur_upload(bot, update):
     replied = update.reply_to_message
     if not replied:
-        return await update.reply_text("⌯ ¦ قم بالرد على ملف وسائط مدعوم.\n⌯ ¦ حط صوره او فيديو و اكتب عليها.")
+        return await update.reply_text("⌯ ¦ قم بالرد على صورة مدعومة.\n⌯ ¦ حط صوره و اكتب عليها.")
     
-    # الحصول على معلومات الملف
     file_info = get_file_id(replied)
     if not file_info:
         return await update.reply_text("⌯ ¦ ياغبي غير مدعوم.\n⌯ ¦ حط صوره و اكتب عليها.")
     
-    # رسالة الانتظار
     text = await update.reply_text(text="<code>انتظر يتم التحميل ...</code>", disable_web_page_preview=True)
     
-    # تحميل الملف
     media = await update.reply_to_message.download()
-
     await text.edit_text(text="<code>اكتمل التحميل. الآن يتم رفعه إلى Imgur ...</code>", disable_web_page_preview=True)
     
     try:
-        # رفع الملف إلى Imgur
+        # رفع الصورة إلى Imgur
         response = imgur_client.upload_from_path(media, anon=True)
-        imgur_url = response[ link ]
+        imgur_url = response['link']  # تأكد من أن هذا هو المفتاح الصحيح
     except Exception as error:
         print(error)
         await text.edit_text(text=f"Error :- {error}", disable_web_page_preview=True)
@@ -63,8 +59,8 @@ async def imgur_upload(bot, update):
     
     # تعديل الرسالة وإضافة الروابط
     await text.edit_text(
-        text=f"<b>⎉╎الــرابـط : </b><a href= {imgur_url} >اضغــط هنـــا</a>\n"
-             f"<b>⎉╎مشاركة : </b><a href= https://telegram.me/share/url?url={imgur_url} >اضغــط هنـــا</a>",
+        text=f"<b>⎉╎الــرابـط : </b><a href='{imgur_url}'>اضغــط هنـــا</a>\n"
+             f"<b>⎉╎مشاركة : </b><a href='https://telegram.me/share/url?url={imgur_url}'>اضغــط هنـــا</a>",
         disable_web_page_preview=False,
         reply_markup=InlineKeyboardMarkup([[
             InlineKeyboardButton(text="✘ اغلاق ✘", callback_data="close")
