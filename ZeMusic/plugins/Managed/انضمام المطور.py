@@ -20,5 +20,5 @@ async def WelcomeDev(_, response: ChatMemberUpdated):
             chat_id=response.chat.id,
             reply_markup=markup,
             photo="downloads/developer.jpg", 
-            caption=f"↢ مرحباً مطوري نورت الشات ياعزيزي🧸  <a href='tg://user?id={dev_id}'>{name}</a> \n  "
+            caption=f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸"
         )
