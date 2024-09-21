@@ -12,7 +12,13 @@ async def WelcomeDev(_, response: ChatMemberUpdated):
         info = await app.get_chat(dev_id)
         name = info.first_name
         bio = info.bio
-        
-        await app.send_message(
+        markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(name, user_id=dev_id)]
+        ])
+        await app.download_media(info.photo.big_file_id, file_name=os.path.join("downloads", "developer.jpg"))
+        await app.send_photo(
             chat_id=response.chat.id,
-            text=f"⟡ انظم المطور :- <a href='tg://user?id={dev_id}'>{name}</a>")
+            reply_markup=markup,
+            photo="downloads/developer.jpg", 
+            caption=f"↢ مرحباً مطوري نورت الشات ياعزيزي🧸  <a href='tg://user?id={dev_id}'>{name}</a> \n  "
+        )
