@@ -38,7 +38,7 @@ async def assistant(c: Client, m: Message):
 
     if not photos:
         # إذا لم يكن هناك صور
-        await m.reply_text(f"⟡ معلومات الحساب المساعد :\n━━━━━━━━━━━━━\n• 𝙽𝚊𝚖𝚎 ↦ {anamee}\n• 𝚄𝚜𝚎𝚛 ↦ @{usern}\n• 𝙱𝚒𝚘 ↦ {bioo}",reply_markup=keyboard)
+        await m.reply_text(f"⟡ معلومات الحساب المساعد :\n━━━━━━━━━━━━━\n• 𝙽𝚊𝚖𝚎 ↦ {aname}\n• 𝚄𝚜𝚎𝚛 ↦ @{usern}\n• 𝙱𝚒𝚘 ↦ {bioo}",reply_markup=keyboard)
     else:
         # إذا كانت هناك صورة
         await m.reply_photo(
