@@ -1,4 +1,4 @@
-from pyrogram import Client
+from pyrogram import Client, filters
 from strings.filters import command
 from config import BANNED_USERS
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
