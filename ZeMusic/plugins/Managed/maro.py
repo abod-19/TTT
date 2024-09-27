@@ -14,11 +14,7 @@ async def get_time_and_date():
     return today, clock
 
 
-@app.on_message(
-    command(["المساعد", "الحساب المساعد"])
-    & ~filters.edited
-    & ~BANNED_USERS
-)
+@app.on_message(command(["المساعد", "الحساب المساعد"]) & ~BANNED_USERS)
 async def assistant(c: Client, m: Message):
     userbot = await get_assistant(m.chat.id)
     BOT_USERNAME = app.username
