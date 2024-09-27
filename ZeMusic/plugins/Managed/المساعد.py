@@ -5,7 +5,7 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from ZeMusic import app
 from ZeMusic.utils.database import get_assistant
 
-@app.on_message(command(["المساعد", "الحساب المساعد"]) & ~BANNED_USERS)
+@app.on_message(filters.regex(r"^(المساعد|الحساب المساعد)$") & ~BANNED_USERS)
 async def assistant(c: Client, m: Message):
     userbot = await get_assistant(m.chat.id)
     usern = userbot.username
@@ -18,7 +18,7 @@ async def assistant(c: Client, m: Message):
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[[
-                InlineKeyboardButton(f"{name}", url="tg://openmessage?user_id={idd}")
+                InlineKeyboardButton(f"{name}", url=f"tg://openmessage?user_id={idd}")
             ]]
     )
 
