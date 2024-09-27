@@ -10,7 +10,7 @@ async def assistant(c: Client, m: Message):
     userbot = await get_assistant(m.chat.id)
     BOT_USERNAME = app.username
     aname = userbot.name
-    anamee = f"[{userbot.first_name}](tg://user?id={userbot.id})"
+    anamee = f"<a href='tg://user?id={userbot.id}'>{userbot.first_name}</a>"
     idd = userbot.id
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
