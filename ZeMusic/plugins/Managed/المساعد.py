@@ -15,18 +15,28 @@ async def assistant(c: Client, m: Message):
     anamee = f"<a href='tg://user?id={idd}'>{aname}</a>"
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                f"{aname}", user_id=idd)
-        ],[
-            InlineKeyboardButton(
-                "ضيـف البـوت لمجمـوعتـك ✅", url=f"https://t.me/{BOT_USERNAME}?startgroup=new")
-        ],
-    ])
-    if not await c.get_chat_photos(idd, limit=1):
-        await m.reply_text(f"• الحساب المساعد الخاص بالبوت:\n{anamee}\n√", reply_markup=keyboard),
+            [
+                InlineKeyboardButton(f"{aname}", user_id=idd)
+            ],
+            [
+                InlineKeyboardButton(
+                    "ضيـف البـوت لمجمـوعتـك ✅", url=f"https://t.me/{BOT_USERNAME}?startgroup=new"
+                )
+            ],
+        ]
+    )
+
+    # نستخدم async for للحصول على الصور
+    photos = []
     async for photo in c.get_chat_photos(idd, limit=1):
+        photos.append(photo)
+
+    if not photos:
+        # إذا لم يكن هناك صور
+        await m.reply_text(f"• الحساب المساعد الخاص بالبوت:\n{anamee}\n√", reply_markup=keyboard)
+    else:
+        # إذا كانت هناك صورة
         await m.reply_photo(
-            photo.file_id, caption=f"• الحساب المساعد الخاص بالبوت:\n{anamee}\n√",
+            photos[0].file_id, caption=f"• الحساب المساعد الخاص بالبوت:\n{anamee}\n√",
             reply_markup=keyboard
         )
