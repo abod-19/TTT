@@ -40,11 +40,7 @@ async def assistant(c: Client, m: Message):
 
 
 
-@app.on_message(
-    command(["بوت حذف", "بوت الحذف"])
-    & ~filters.edited
-    & ~BANNED_USERS
-)
+@app.on_message(command(["بوت حذف", "بوت الحذف"]) & ~BANNED_USERS)
 async def d(c: Client, m: Message):
     dusr = await c.get_users("Qrhel_Bot")
     BOT_USERNAME = app.username
