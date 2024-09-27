@@ -11,8 +11,12 @@ async def assistant(c: Client, m: Message):
     BOT_USERNAME = app.username
     usern = userbot.username
     aname = userbot.name
-    bioo = userbot.bio
     idd = userbot.id
+
+    info = await app.get_chat(idd)
+    #name = info.first_name
+    bioo = info.bio
+    
     anamee = f"<a href='tg://user?id={idd}'>{aname}</a>"
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
