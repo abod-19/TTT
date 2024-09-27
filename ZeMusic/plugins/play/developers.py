@@ -1,18 +1,8 @@
-import asyncio
-
 import os
-import time
-import requests
-from config import START_IMG_URL
-from pyrogram import filters
-import random
-from pyrogram import Client, filters, emoji
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
-from strings.filters import command
-from ZeMusic import (Apple, Resso, SoundCloud, Spotify, Telegram, YouTube, app)
-from ZeMusic import app
-from random import  choice, randint
+from pyrogram import filters, Client
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
+from ZeMusic import app
 
 @app.on_message(filters.regex(r"^(المبرمج|مبرمج السورس|مبرمج|مطور السورس)$"))
 async def huhh(c: Client, m: Message):
@@ -40,7 +30,7 @@ async def huhh(c: Client, m: Message):
 
     if not photos:
         # إذا لم يكن هناك صور
-        await m.reply_text(f"⟡ 𝙳𝚎𝚟 𝚂𝚘𝚞𝚛𝚌𝚎 ↦ \n━━━━━━━━━━━━━\n• 𝙽𝚊𝚖𝚎 ↦ {aname}\n• 𝚄𝚜𝚎𝚛 ↦ @{usrnam}\n• 𝙱𝚒𝚘 ↦ {bioo}",reply_markup=keyboard)
+        await m.reply_text(f"⟡ 𝙳𝚎𝚟 𝚂𝚘𝚞𝚛𝚌𝚎 ↦ \n━━━━━━━━━━━━━\n• 𝙽𝚊𝚖𝚎 ↦ {aname}\n• 𝚄𝚜𝚎𝚛 ↦ @{usrnam}\n• 𝙱𝚒𝚘 ↦ {bioo}", reply_markup=keyboard)
     else:
         # إذا كانت هناك صورة
         await m.reply_photo(
