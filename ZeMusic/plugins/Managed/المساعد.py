@@ -18,7 +18,7 @@ async def assistant(c: Client, m: Message):
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[[
-                InlineKeyboardButton(f"{name}", user_id=idd)
+                InlineKeyboardButton(f"{name}", url="tg://openmessage?user_id={idd}")
             ]]
     )
 
