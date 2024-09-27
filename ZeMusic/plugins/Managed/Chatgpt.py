@@ -16,7 +16,7 @@ async def chat_gpt(bot, message):
         if len(message.command) < 2:
             await message.reply_text(f"**Hello {name}, How can I help you today?**")
         else:
-            query = message.text.split(   , 1)[1]
+            query = message.text.split(' ', 1)[1]
             response = api.gemini(query)["results"]
             await message.reply_text(f"{response}", parse_mode=ParseMode.MARKDOWN)
     except Exception as e:
