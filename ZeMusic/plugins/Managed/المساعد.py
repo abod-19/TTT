@@ -11,8 +11,8 @@ async def assistant(c: Client, m: Message):
     print(type(userbot))
     BOT_USERNAME = app.username
     aname = userbot.name
-    anamee = f"<a href='tg://user?id={userbot.id}'>{userbot.first_name}</a>"
     idd = userbot.id
+    anamee = f"<a href='tg://user?id={idd}'>{aname}</a>"
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
         [
