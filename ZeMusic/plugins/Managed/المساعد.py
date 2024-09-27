@@ -8,6 +8,7 @@ from ZeMusic.utils.database import get_assistant
 @app.on_message(command(["المساعد", "الحساب المساعد"]) & ~BANNED_USERS)
 async def assistant(c: Client, m: Message):
     userbot = await get_assistant(m.chat.id)
+    print(type(userbot))
     BOT_USERNAME = app.username
     aname = userbot.name
     anamee = f"<a href='tg://user?id={userbot.id}'>{userbot.first_name}</a>"
