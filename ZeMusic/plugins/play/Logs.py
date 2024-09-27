@@ -1,3 +1,4 @@
+import random
 from pyrogram import Client, filters
 from ZeMusic.core.userbot import Userbot
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
