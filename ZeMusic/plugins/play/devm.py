@@ -38,22 +38,4 @@ async def devid(c: Client, m: Message):
         await m.reply_photo(
             photos[0].file_id,
             caption=f"⟡ 𝙳𝚎𝚟 𝙱𝚘𝚝 ↦ {BOT_NAME}\n━━━━━━━━━━━━━\n• 𝙽𝚊𝚖𝚎 ↦ {aname}\n• 𝚄𝚜𝚎𝚛 ↦ @{usrnam}\n• 𝙱𝚒𝚘 ↦ {bioo}",
-            reply_markup=keyboard
-        )
-
-    """
-    await message.reply_photo(
-        photo=photo_path,
-        caption=f"<b>⌯ 𝙳𝚎𝚟 :</b> <a href='tg://user?id={OWNER_ID}'>{name}</a>\n\n<b>⌯ 𝚄𝚂𝙴𝚁 :</b> @{usrnam}",
-        reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(name, url=f"tg://user?id={OWNER_ID}"),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=config.CHANNEL_NAME, url=lnk),
-                ],
-            ]
-        ),)
-    """
+            reply_markup=keyboard)
