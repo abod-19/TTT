@@ -1,6 +1,7 @@
 import random
-from pyrogram import Client, filters
+from pyrogram import Client
 from pyrogram.types import Message
+from pyrogram import filters
 from pyrogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -32,26 +33,10 @@ async def on_new_chat_members(client: Client, message: Message):
 
         matlabi_jhanto = message.chat.title
         served_chats = len(await get_served_chats())
-        chat_id = message.chat.id
-
-        chat = await client.get_chat(int(chat_id))
-        cont = chat.members_count
-        
-        if message.chat.username:
-            chatusername = f"@{message.chat.username}"
-        else:
-            chatusername = "ᴩʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ"
-        lemda_text = (
-            f"🌹 تمت إضافة البوت إلى مجموعة جديدة.\n\n"
-            f"┏━━━━━━━━━━━━━━━━━┓\n"
-            f"┣★ <b>𝙲𝙷𝙰𝚃</b> › : {matlabi_jhanto}\n"
-            f"┣★ <b>𝙲𝙷𝙰𝚃 𝙸𝙳</b> › : {chat_id}\n"
-            f"┣★ <b>𝙲𝙷𝙰𝚃 𝚄𝙽𝙰𝙼𝙴</b> › : {chatusername}\n"
-            f"┣★ <b>𝙲𝙾𝚄𝙽𝚃</b> › : {cont}\n"
-            f"┣★ <b>𝚃𝙾𝚃𝙰𝙻 𝙲𝙷𝙰𝚃𝚂</b> › : {served_chats}\n"
-            f"┣★ <b>𝙰𝙳𝙳𝙴𝙳 𝙱𝚈</b> › :\n"
-            f"┗━━━ꪜ <a href='tg://user?id={added_id}'>{added_by}</a>"
-        )
+        chat = message.chat
+        cont = await app.get_chat_members_count(chat.id)
+        chatusername = (message.chat.username if message.chat.username else "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏᴜᴘ")
+        lemda_text = f"🌹 تمت اضافه البوت الى مجموعه جديدة .\n\n┏━━━━━━━━━━━━━━━━━┓\n┣★ <b>𝙲𝙷𝙰𝚃</b> › : {matlabi_jhanto}\n┣★ <b>𝙲𝙷𝙰𝚃 𝙸𝙳</b> › : {chat.id}\n┣★ <b>𝙲𝙷𝙰𝚃 𝚄𝙽𝙰𝙼𝙴</b> › : {chatusername}\n┣★ <b>𝙲𝙾𝚄𝙽𝚃</b> › : {cont}\n┣★ <b>𝚃𝙾𝚃𝙰𝙻 𝙲𝙷𝙰𝚃</b> › : {served_chats}\n┣★ <b>𝙰𝙳𝙳𝙴𝙳 𝙱𝚈</b> › :\n┗━━━ꪜ <a href='tg://user?id={added_id}'>{added_by}</a>"
         await app.send_photo(
             LOGGER_ID,
             photo=random.choice(photo),
@@ -63,5 +48,4 @@ async def on_new_chat_members(client: Client, message: Message):
                             f"{added_by}", url=f"tg://openmessage?user_id={added_id}")
                     ]
                 ]
-            )
-        )
+            ))
