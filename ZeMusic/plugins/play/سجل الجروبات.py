@@ -11,7 +11,7 @@ from ZeMusic import app
 from ZeMusic.utils.database import get_served_chats
 from config import OWNER_ID, LOGGER_ID
 
-photo = [
+photo_urls = [
     "https://te.legra.ph/file/758a5cf4598f061f25963.jpg",
     "https://te.legra.ph/file/30a1dc870bd1a485e3567.jpg",
     "https://te.legra.ph/file/d585beb2a6b3f553299d2.jpg",
@@ -74,7 +74,7 @@ async def on_new_chat_members(client: Client, message: Message):
         
         await app.send_photo(
             LOGGER_ID,
-            photo=random.choice(photo),
+            photo=random.choice(photo_urls),
             caption=lemda_text,
             reply_markup=InlineKeyboardMarkup(
                 [
