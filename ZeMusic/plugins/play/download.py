@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 import config
 import aiohttp
@@ -11,7 +12,6 @@ from pyrogram import Client, filters
 from pyrogram.errors import FloodWait
 from pyrogram.types import Message, InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
 from youtube_search import YoutubeSearch
-from asyncio import sleep
 
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
@@ -27,53 +27,51 @@ Nem = config.BOT_NAME + " ابحث"
 async def song_downloader(client, message: Message):
     query = " ".join(message.command[1:])
     m = await message.reply_text("<b>⇜ جـارِ البحث ..</b>")
-
-    await sleep(1)  # تأخير لتجنب الحظر من يوتيوب
-    
-    try:
-        results = YoutubeSearch(query, max_results=1).to_dict()
-        if not results or 'url_suffix' not in results[0] or 'title' not in results[0]:
-            await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
-            return
-
-        link = f"https://youtube.com{results[0]['url_suffix']}"
-        title = results[0]["title"][:40]
-        thumbnail = results[0]["thumbnails"][0]
-        thumb_name = f"{title}.jpg"
-        thumb = requests.get(thumbnail, allow_redirects=True)
-        open(thumb_name, "wb").write(thumb.content)
-        duration = results[0]["duration"]
-
-    except Exception as e:
-        await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا\n\nError: {str(e)}")
-        print(str(e))
-        return
-    
-    await m.edit("<b>جاري التحميل ♪</b>")
     
     ydl_opts = {
-        "format": "bestaudio",
+        "format": "bestaudio[ext=m4a]",
         "keepvideo": True,
         "prefer_ffmpeg": False,
         "geo_bypass": True,
         "outtmpl": "%(title)s.%(ext)s",
         "quiet": True,
-        "cookiefile": cookie_txt_file(),
+        "cookiefile": cookie_txt_file(),  # إضافة هذا السطر لتمرير ملف الكوكيز
     }
 
+    try:
+        results = YoutubeSearch(query, max_results=1).to_dict()
+        link = f"https://youtube.com{results[0]['url_suffix']}"
+        title = results[0]["title"][:40]
+
+        # تنظيف العنوان لإزالة الأحرف غير المسموح بها في اسم الملف
+        title_clean = re.sub(r'[\\/*?:"<>|]', "", title)
+
+        thumbnail = results[0]["thumbnails"][0]
+        thumb_name = f"{title_clean}.jpg"
+        thumb = requests.get(thumbnail, allow_redirects=True)
+        open(thumb_name, "wb").write(thumb.content)
+        duration = results[0]["duration"]
+
+    except Exception as e:
+        await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
+        print(str(e))
+        return
+    
+    await m.edit("<b>جاري التحميل ♪</b>")
+    
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(link, download=False)
             audio_file = ydl.prepare_filename(info_dict)
             ydl.process_info(info_dict)
-
+        
         rep = f"⟡ {app.mention}"
-        host = str(info_dict.get("uploader", "Unknown"))
+        host = str(info_dict["uploader"])
         secmul, dur, dur_arr = 1, 0, duration.split(":")
         for i in range(len(dur_arr) - 1, -1, -1):
             dur += int(float(dur_arr[i])) * secmul
             secmul *= 60
-
+        
         await message.reply_audio(
             audio=audio_file,
             caption=rep,
