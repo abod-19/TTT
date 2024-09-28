@@ -52,11 +52,16 @@ async def on_new_chat_members(client: Client, message: Message):
             f"┣★ <b>𝙰𝙳𝙳𝙴𝙳 𝙱𝚈</b> › :\n"
             f"┗━━━ꪜ <a href='tg://user?id={added_id}'>{added_by}</a>"
         )
-        await app.send_photo(LOGGER_ID, photo=random.choice(photo), lemda_text, reply_markup=InlineKeyboardMarkup(
+        await app.send_photo(
+            LOGGER_ID,
+            photo=random.choice(photo),
+            caption=lemda_text,
+            reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton(
                             f"{added_by}", url=f"tg://openmessage?user_id={added_id}")
                     ]
                 ]
-            ))
+            )
+        )
