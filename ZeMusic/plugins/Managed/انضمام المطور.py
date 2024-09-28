@@ -6,15 +6,12 @@ from ZeMusic.platforms.Youtube import cookie_txt_file
 from ZeMusic import app
 import config
 
-# إعدادات البوت (افتراضياً)
-
-
 # الإعدادات الخاصة بالبوت
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = config.BOT_NAME + " ابحث"
 
 # تعريف دالة التنزيل
-@app.on_message(filters.command(["song", "/song", "بحث", Nem, "تنزيل"],""))
+@app.on_message(filters.command(["song", "/song", "بحث", Nem, "تنزيل"]))
 async def song_downloader(client: Client, message: Message):
     # الحصول على رابط اليوتيوب من رسالة المستخدم
     if len(message.command) < 2:
@@ -34,9 +31,16 @@ async def song_downloader(client: Client, message: Message):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
-            "cookiefile": cookie_txt_file(),
         }],
+        'cookiefile': cookie_txt_file(),  # ضع المسار إلى ملف cookies.txt هنا
     }
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(youtube_url, download=False)
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(youtube_url, download=True)
+            audio_file = ydl.prepare_filename(info).replace('.webm', '.mp3')
+
+        await message.reply_audio(audio_file)
+        os.remove(audio_file)  # حذف الملف بعد الإرسال
+    except Exception as e:
+        await message.reply_text(f"حدث خطأ أثناء التنزيل: {str(e)}")
