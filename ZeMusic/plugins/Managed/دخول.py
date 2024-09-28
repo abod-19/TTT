@@ -1,27 +1,27 @@
 import asyncio
 from pyrogram import Client, filters
 from datetime import datetime
+from ZeMusic import app
 
-@app.on_message(filters.member_joined)
-async def get_chat_info(chat, already=False):
-    if not already:
-        chat = await app.get_chat(chat)
-    chat_id = chat.id
-    members = chat.members_count
-	await message.reply_text(f"""
+@app.on_message(filters.new_chat_members)
+async def get_chat_info(client, message):
+    chat = message.chat
+    members = await client.get_chat_members_count(chat.id)
+    await message.reply_text(f"""
 ● نورت يقمر ♥♡
 {message.from_user.first_name}
-●  يجب احترام الادمنية
-●  الالتزام بالقوانين في الوصف
-●  الاعضاء  {members} 
+● يجب احترام الادمنية
+● الالتزام بالقوانين في الوصف
+● الأعضاء: {members}
 """)
 
-
-@app.on_message(filters.member_left)
-async def leftmem(chat):
+@app.on_message(filters.left_chat_member)
+async def leftmem(client, message):
     await message.reply_text(f"""
-    ★انت مش جدع يا «{ message.from_user.first_name}» 
-★ حد يكون فى روم زى ده ويخرج 🥺❤️
-★ ده حتى كلنا اخوات واصحاب 🥺❤️
-★يلا بالسلامات 👋😂
-√""")
+★ انت مش جدع يا «{message.left_chat_member.first_name}»
+★ حد يكون في روم زي ده ويخرج 🥺❤️
+★ ده حتى كلنا إخوات وأصحاب 🥺❤️
+★ يلا بالسلامات 👋😂
+""")
+
+app.run()
