@@ -1,6 +1,12 @@
 import random
 from pyrogram import Client, filters
-from pyrogram.types import ChatMemberUpdated, InlineKeyboardMarkup, InlineKeyboardButton, Message
+from pyrogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    InputMediaPhoto,
+    InputMediaVideo,
+    Message,
+)
 from ZeMusic import app
 from ZeMusic.utils.database import get_served_chats
 from config import OWNER_ID, LOGGER_ID
