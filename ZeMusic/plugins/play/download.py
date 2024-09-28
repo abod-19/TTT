@@ -81,8 +81,8 @@ async def song_downloader(client, message: Message):
         await m.delete()
 
         except Exception as e:
-        await m.edit(f"error, wait for bot owner to fix\n\nError: {str(e)}")
-        print(e)
+            await m.edit(f"error, wait for bot owner to fix\n\nError: {str(e)}")
+            print(e)
 
     try:
         remove_if_exists(audio_file)
