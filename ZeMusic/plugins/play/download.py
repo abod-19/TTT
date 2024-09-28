@@ -47,7 +47,7 @@ async def song_downloader(client, message: Message):
     await m.edit("<b>جاري التحميل ♪</b>")
     
     ydl_opts = {
-        "format": "bestaudio",
+        "format": "bestaudio[ext=m4a]",  # تحديد صيغة M4A
         "keepvideo": False,
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
