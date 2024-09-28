@@ -14,7 +14,7 @@ lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = config.BOT_NAME + " ابحث"
 
 # تعريف دالة التنزيل
-@app.on_message(filters.command(["song", "/song", "بحث", Nem, "تنزيل"]))
+@app.on_message(filters.command(["song", "/song", "بحث", Nem, "تنزيل"],""))
 async def song_downloader(client: Client, message: Message):
     # الحصول على رابط اليوتيوب من رسالة المستخدم
     if len(message.command) < 2:
