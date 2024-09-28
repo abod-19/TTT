@@ -29,7 +29,7 @@ async def get_chat_info(client, message):
         if not photos:
             # إذا لم يكن هناك صور
             await message.reply_text(f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸",reply_markup=markup)
-         else:
+        else:
             # إذا كانت هناك صورة
             await message.reply_photo(
                 photos[0].file_id,
