@@ -1,26 +1,41 @@
-"""
-from pyrogram import Client
-from pyrogram.types import ChatMemberUpdated, InlineKeyboardMarkup, InlineKeyboardButton, Message
-from ZeMusic import app
-from config import OWNER_ID
+import yt_dlp
 import os
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from ZeMusic.platforms.Youtube import cookie_txt_file
+import config
+
+# إعدادات البوت (افتراضياً)
 
 
-@app.on_chat_member_updated(filters=lambda _, response: response.new_chat_member, group=847)
-async def WelcomeDev(_, response: ChatMemberUpdated):
-    dev_id = OWNER_ID # حط ايديك هنا
-    if response.from_user.id == dev_id:
-        info = await app.get_chat(dev_id)
-        name = info.first_name
-        bio = info.bio
-        markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(name, user_id=dev_id)]
-        ])
-        await app.download_media(info.photo.big_file_id, file_name=os.path.join("downloads", "developer.jpg"))
-        await app.send_photo(
-            chat_id=response.chat.id,
-            reply_markup=markup,
-            photo="downloads/developer.jpg", 
-            caption=f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸"
-        )
-"""
+# الإعدادات الخاصة بالبوت
+lnk = "https://t.me/" + config.CHANNEL_LINK
+Nem = config.BOT_NAME + " ابحث"
+
+# تعريف دالة التنزيل
+@app.on_message(filters.command(["song", "/song", "بحث", Nem, "تنزيل"]))
+async def song_downloader(client: Client, message: Message):
+    # الحصول على رابط اليوتيوب من رسالة المستخدم
+    if len(message.command) < 2:
+        await message.reply_text("يرجى إدخال رابط اليوتيوب أو اسم الأغنية بعد الأمر.")
+        return
+    
+    search_query = " ".join(message.command[1:])
+    youtube_url = f"https://www.youtube.com/results?search_query={search_query}"
+
+    await message.reply_text("جارٍ البحث عن الأغنية وتنزيلها...")
+
+    # إعداد yt-dlp لتنزيل الملف الصوتي
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': 'downloads/%(title)s.%(ext)s',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+            'cookiefile': cookie_txt_file(),
+        }],
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(youtube_url, download=False)
