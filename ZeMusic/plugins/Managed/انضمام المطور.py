@@ -3,6 +3,7 @@ import os
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from ZeMusic.platforms.Youtube import cookie_txt_file
+from ZeMusic import app
 import config
 
 # إعدادات البوت (افتراضياً)
