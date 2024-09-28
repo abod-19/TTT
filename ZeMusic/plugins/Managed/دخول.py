@@ -1,3 +1,4 @@
+"""
 import asyncio
 from pyrogram import Client, filters
 from datetime import datetime
@@ -37,7 +38,6 @@ async def get_chat_info(client, message):
                 reply_markup=markup)
 
 
-"""
 
 
 @app.on_message(filters.left_chat_member)
