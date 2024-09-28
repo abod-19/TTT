@@ -34,7 +34,7 @@ async def song_downloader(client: Client, message: Message):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
-            'cookiefile': cookie_txt_file(),
+            #'cookiefile': cookie_txt_file(),
         }],
     }
 
