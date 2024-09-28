@@ -2,15 +2,9 @@ import os
 import re
 import requests
 import config
-import aiohttp
-import aiofiles
-from ZeMusic.platforms.Youtube import cookie_txt_file
-
 import yt_dlp
-from yt_dlp import YoutubeDL
 from pyrogram import Client, filters
-from pyrogram.errors import FloodWait
-from pyrogram.types import Message, InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
 
 from ZeMusic import app
@@ -28,24 +22,15 @@ async def song_downloader(client, message: Message):
     query = " ".join(message.command[1:])
     m = await message.reply_text("<b>⇜ جـارِ البحث ..</b>")
     
-    ydl_opts = {
-        "format": "bestaudio[ext=m4a]",
-        "keepvideo": True,
-        "prefer_ffmpeg": False,
-        "geo_bypass": True,
-        "outtmpl": "%(title)s.%(ext)s",
-        "quiet": True,
-        "cookiefile": cookie_txt_file(),  # إضافة هذا السطر لتمرير ملف الكوكيز
-    }
-
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
+        if not results:
+            await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
+            return
+
         link = f"https://youtube.com{results[0]['url_suffix']}"
         title = results[0]["title"][:40]
-
-        # تنظيف العنوان لإزالة الأحرف غير المسموح بها في اسم الملف
         title_clean = re.sub(r'[\\/*?:"<>|]', "", title)
-
         thumbnail = results[0]["thumbnails"][0]
         thumb_name = f"{title_clean}.jpg"
         thumb = requests.get(thumbnail, allow_redirects=True)
@@ -59,24 +44,30 @@ async def song_downloader(client, message: Message):
     
     await m.edit("<b>جاري التحميل ♪</b>")
     
+    ydl_opts = {
+        "format": "bestaudio",
+        "keepvideo": False,
+        "geo_bypass": True,
+        "outtmpl": "%(title)s.%(ext)s",
+        "quiet": True,
+    }
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(link, download=False)
             audio_file = ydl.prepare_filename(info_dict)
             ydl.process_info(info_dict)
-        
-        rep = f"⟡ {app.mention}"
-        host = str(info_dict["uploader"])
+
         secmul, dur, dur_arr = 1, 0, duration.split(":")
         for i in range(len(dur_arr) - 1, -1, -1):
             dur += int(float(dur_arr[i])) * secmul
             secmul *= 60
-        
+
         await message.reply_audio(
             audio=audio_file,
-            caption=rep,
+            caption=f"⟡ {app.mention}",
             title=title,
-            performer=host,
+            performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
             duration=dur,
             reply_markup=InlineKeyboardMarkup(
