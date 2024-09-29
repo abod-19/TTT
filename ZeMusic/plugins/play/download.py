@@ -10,42 +10,43 @@ from ZeMusic.platforms.Youtube import cookie_txt_file
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 
+# دالة لحذف الملفات المؤقتة
 def remove_if_exists(path):
     if os.path.exists(path):
         os.remove(path)
 
-lnk = "https://t.me/" + config.CHANNEL_LINK
-Nem = config.BOT_NAME + " ابحث"
-
-@app.on_message(command(["song", "/song", "بحث", Nem, "تنزيل"]))
-async def song_downloader(client, message: Message):
-    query = " ".join(message.command[1:])
-    m = await message.reply_text("<b>⇜ جـارِ البحث ..</b>")
-    
+# دالة للبحث عن فيديو على يوتيوب
+async def search_youtube(query):
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
-        if not results:
-            await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
-            return
-
-        link = f"https://youtube.com{results[0]['url_suffix']}"
-        title = results[0]["title"][:40]
-        title_clean = re.sub(r'[\\/*?:"<>|]', "", title)  # تنظيف اسم الملف
-        thumbnail = results[0]["thumbnails"][0]
-        thumb_name = f"{title_clean}.jpg"
-        
-        # تحميل الصورة المصغرة
-        thumb = requests.get(thumbnail, allow_redirects=True)
-        open(thumb_name, "wb").write(thumb.content)
-        duration = results[0]["duration"]
-
+        if results:
+            return results[0]
     except Exception as e:
-        await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
-        print(str(e))
-        return
-    
-    await m.edit("<b>جاري التحميل ♪</b>")
-    
+        print(f"Error in search_youtube: {str(e)}")
+    return None
+
+# دالة لتحميل الصورة المصغرة
+async def download_thumbnail(url, title):
+    try:
+        title_clean = re.sub(r'[\\/*?:"<>|]', "", title)  # تنظيف اسم الملف
+        thumb_name = f"{title_clean}.jpg"
+        thumb = requests.get(url, allow_redirects=True)
+        open(thumb_name, "wb").write(thumb.content)
+        return thumb_name
+    except Exception as e:
+        print(f"Error in download_thumbnail: {str(e)}")
+    return None
+
+# دالة لحساب مدة الفيديو بالثواني
+def calculate_duration(duration_str):
+    secmul, dur, dur_arr = 1, 0, duration_str.split(":")
+    for i in range(len(dur_arr) - 1, -1, -1):
+        dur += int(float(dur_arr[i])) * secmul
+        secmul *= 60
+    return dur
+
+# دالة لتنزيل الصوت من يوتيوب
+async def download_audio(link, title_clean):
     ydl_opts = {
         "format": "bestaudio[ext=m4a]",  # تحديد صيغة M4A
         "keepvideo": False,
@@ -57,16 +58,51 @@ async def song_downloader(client, message: Message):
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
+            info_dict = ydl.extract_info(link, download=True)
             audio_file = ydl.prepare_filename(info_dict)
+            return audio_file, info_dict
+    except Exception as e:
+        print(f"Error in download_audio: {str(e)}")
+    return None, None
 
-        # حساب مدة الأغنية
-        secmul, dur, dur_arr = 1, 0, duration.split(":")
-        for i in range(len(dur_arr) - 1, -1, -1):
-            dur += int(float(dur_arr[i])) * secmul
-            secmul *= 60
+lnk = "https://t.me/" + config.CHANNEL_LINK
+Nem = config.BOT_NAME + " ابحث"
 
-        # إرسال الصوت
+@app.on_message(command(["song", "/song", "بحث", Nem, "تنزيل"]))
+async def song_downloader(client, message: Message):
+    query = " ".join(message.command[1:])
+    m = await message.reply_text("<b>⇜ جـارِ البحث ..</b>")
+    
+    # البحث عن الفيديو
+    video_info = await search_youtube(query)
+    if not video_info:
+        await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
+        return
+
+    link = f"https://youtube.com{video_info['url_suffix']}"
+    title = video_info["title"][:40]
+    thumbnail = video_info["thumbnails"][0]
+    duration = video_info["duration"]
+
+    # تحميل الصورة المصغرة
+    thumb_name = await download_thumbnail(thumbnail, title)
+    if not thumb_name:
+        await m.edit("- فشل في تحميل الصورة المصغرة.")
+        return
+
+    await m.edit("<b>جاري التحميل ♪</b>")
+
+    # تنزيل الصوت
+    audio_file, info_dict = await download_audio(link, title)
+    if not audio_file:
+        await m.edit(f"error, wait for bot owner to fix\n\nError: Failed to download audio.")
+        return
+
+    # حساب مدة الأغنية
+    dur = calculate_duration(duration)
+
+    # إرسال الصوت
+    try:
         await message.reply_audio(
             audio=audio_file,
             caption=f"⟡ {app.mention}",
@@ -83,7 +119,6 @@ async def song_downloader(client, message: Message):
             ),
         )
         await m.delete()
-
     except Exception as e:
         await m.edit(f"error, wait for bot owner to fix\n\nError: {str(e)}")
         print(e)
