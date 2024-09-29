@@ -1,6 +1,7 @@
 import os
 import re
-import requests
+import aiohttp
+import asyncio
 import config
 import yt_dlp
 from pyrogram import Client, filters
@@ -9,6 +10,7 @@ from youtube_search import YoutubeSearch
 from ZeMusic.platforms.Youtube import cookie_txt_file
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
+from concurrent.futures import ThreadPoolExecutor
 
 # دالة لحذف الملفات المؤقتة
 def remove_if_exists(path):
@@ -25,14 +27,17 @@ async def search_youtube(query):
         print(f"Error in search_youtube: {str(e)}")
     return None
 
-# دالة لتحميل الصورة المصغرة
+# دالة لتحميل الصورة المصغرة باستخدام aiohttp
 async def download_thumbnail(url, title):
     try:
         title_clean = re.sub(r'[\\/*?:"<>|]', "", title)  # تنظيف اسم الملف
         thumb_name = f"{title_clean}.jpg"
-        thumb = requests.get(url, allow_redirects=True)
-        open(thumb_name, "wb").write(thumb.content)
-        return thumb_name
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    with open(thumb_name, "wb") as f:
+                        f.write(await response.read())
+                    return thumb_name
     except Exception as e:
         print(f"Error in download_thumbnail: {str(e)}")
     return None
@@ -45,7 +50,7 @@ def calculate_duration(duration_str):
         secmul *= 60
     return dur
 
-# دالة لتنزيل الصوت من يوتيوب
+# دالة لتنزيل الصوت من يوتيوب في خيط منفصل
 async def download_audio(link, title_clean):
     ydl_opts = {
         "format": "bestaudio[ext=m4a]",  # تحديد صيغة M4A
@@ -56,13 +61,17 @@ async def download_audio(link, title_clean):
         "cookiefile": cookie_txt_file(),
     }
 
-    try:
+    def _download():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(link, download=True)
-            audio_file = ydl.prepare_filename(info_dict)
-            return audio_file, info_dict
-    except Exception as e:
-        print(f"Error in download_audio: {str(e)}")
+            return ydl.prepare_filename(info_dict), info_dict
+
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor() as executor:
+        try:
+            return await loop.run_in_executor(executor, _download)
+        except Exception as e:
+            print(f"Error in download_audio: {str(e)}")
     return None, None
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
