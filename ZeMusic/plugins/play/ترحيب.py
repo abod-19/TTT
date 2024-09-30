@@ -39,7 +39,8 @@ async def welcome_new_member(client: Client, message: Message):
 
             photos = []
             async for photo in client.get_chat_photos(dev_id, limit=1):
-            photos.append(photo)
+                
+                photos.append(photo)
 
             if not photos:
                 await message.reply_text(
