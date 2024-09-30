@@ -24,31 +24,33 @@ async def on_new_chat_members(client: Client, message: Message):
     chat = message.chat
     dev_id = OWNER_ID
 
-    # جزء الترحيب بالمطور
-    if message.from_user and message.from_user.id == dev_id:
-        info = await app.get_chat(dev_id)
-        name = info.first_name
-        markup = InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton(name, user_id=dev_id)]
-            ]
-        )
-
-        photos = []
-        async for photo in client.get_chat_photos(dev_id, limit=1):
-            photos.append(photo)
-
-        if not photos:
-            await message.reply_text(
-                f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸",
-                reply_markup=markup
+    for new_member in message.new_chat_members:
+        if new_member.id == dev_id:
+            info = await app.get_chat(dev_id)
+            name = info.first_name
+            markup = InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton(name, user_id=dev_id)]
+                ]
             )
-        else:
-            await message.reply_photo(
-                photos[0].file_id,
-                caption=f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸",
-                reply_markup=markup
-            )
+
+            photos = []
+            async for photo in client.get_chat_photos(dev_id, limit=1):
+                photos.append(photo)
+
+            if not photos:
+                await message.reply_text(
+                    f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸",
+                    reply_markup=markup
+                )
+            else:
+                await message.reply_photo(
+                    photos[0].file_id,
+                    caption=f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸",
+                    reply_markup=markup
+                )
+            break
+
 
     # جزء التعامل مع إضافة البوت إلى مجموعة جديدة
     if (await client.get_me()).id in [user.id for user in message.new_chat_members]:
