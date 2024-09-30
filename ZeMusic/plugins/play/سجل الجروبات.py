@@ -1,3 +1,4 @@
+"""
 import random
 from pyrogram import Client, filters
 from pyrogram.types import (
@@ -23,7 +24,7 @@ photo_urls = [
 async def on_new_chat_members(client: Client, message: Message):
     chat = message.chat
     dev_id = OWNER_ID
-"""
+
     for new_member in message.new_chat_members:
         if new_member.id == dev_id:
             info = await app.get_chat(dev_id)
@@ -50,7 +51,7 @@ async def on_new_chat_members(client: Client, message: Message):
                     reply_markup=markup
                 )
             break
-"""
+
 
     # جزء التعامل مع إضافة البوت إلى مجموعة جديدة
     if (await client.get_me()).id in [user.id for user in message.new_chat_members]:
@@ -84,3 +85,4 @@ async def on_new_chat_members(client: Client, message: Message):
                 ]
             )
         )
+"""
