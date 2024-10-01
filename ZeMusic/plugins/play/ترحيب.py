@@ -12,11 +12,11 @@ from ZeMusic.utils.database import get_served_chats
 from config import OWNER_ID, LOGGER_ID
 
 photo_urls = [
-    "https://te.legra.ph/file/758a5cf4598f061f25963.jpg",
-    "https://te.legra.ph/file/30a1dc870bd1a485e3567.jpg",
-    "https://te.legra.ph/file/d585beb2a6b3f553299d2.jpg",
-    "https://te.legra.ph/file/7df9e128dd261de2afd6b.jpg",
-    "https://te.legra.ph/file/f60ebb75ad6f2786efa4e.jpg",
+    "https://envs.sh/Wi_.jpg",
+    "https://envs.sh/Wi_.jpg",
+    "https://envs.sh/Wi_.jpg",
+    "https://envs.sh/Wi_.jpg",
+    "https://envs.sh/Wi_.jpg",
 ]
 
 @app.on_message(filters.new_chat_members & filters.group)
