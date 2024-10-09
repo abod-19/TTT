@@ -1,3 +1,4 @@
+"""
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from pyrogram.types import InlineKeyboardMarkup as Markup, InlineKeyboardButton as Button
@@ -33,3 +34,4 @@ async def command_handler(_: Client, message: Message):
                 f"⟡ عذرًا عزيزي {user} \n⟡ عليك الاشتراك في قناة البوت أولاً",
                 reply_markup=markup
             )
+"""
