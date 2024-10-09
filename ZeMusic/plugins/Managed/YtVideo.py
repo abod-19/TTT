@@ -1,3 +1,4 @@
+"""
 import future
 import asyncio
 import os
@@ -117,3 +118,4 @@ async def ytmusic(client, message: Message):
 
 __mod_name__ = "فيد"
 __help__ = """ 'فيد' لتحميل فيديو من اليوتيب """
+"""
