@@ -24,7 +24,7 @@ def get_file_extension_from_url(url):
 
 
 def get_text(message: Message) -> [None, str]:
-    """Extract Text From Commands"""
+    "Extract Text From Commands"
     text_to_return = message.text
     if message.text is None:
         return None
@@ -117,5 +117,5 @@ async def ytmusic(client, message: Message):
 
 
 __mod_name__ = "فيد"
-__help__ = """ 'فيد' لتحميل فيديو من اليوتيب """
+__help__ = " 'فيد' لتحميل فيديو من اليوتيب "
 """
