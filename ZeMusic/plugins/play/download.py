@@ -1,4 +1,3 @@
-"""
 import os
 import re
 import requests
@@ -7,7 +6,7 @@ import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
-from ZeMusic.platforms.Youtube import cookie_txt_file
+#from ZeMusic.platforms.Youtube import cookie_txt_file
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 
@@ -53,8 +52,9 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        "cookiefile": cookie_txt_file(),
-    }
+        #"cookiefile": cookie_txt_file(),
+        "proxy": "http://140.238.210.181:80",  # إضافة البروكسي هنا
+}
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -95,4 +95,3 @@ async def song_downloader(client, message: Message):
         remove_if_exists(thumb_name)
     except Exception as e:
         print(e)
-"""
