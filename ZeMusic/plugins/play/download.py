@@ -11,7 +11,8 @@ from ZeMusic.plugins.play.filters import command
 
 # إعدادات البروكسي
 PROXY = "http://premium-residential.geonode.com:9000"  # رابط البروكسي
-PROXY_AUTH = "geonode_toYHUJctUH:46ad34b5-142f-49ac-9ae1-c06f33295549"  # اسم المستخدم وكلمة المرور للبروكسي
+PROXY_USER = "geonode_toYHUJctUH"  # اسم المستخدم للبروكسي
+PROXY_PASS = "46ad34b5-142f-49ac-9ae1-c06f33295549"  # كلمة المرور للبروكسي
 
 def remove_if_exists(path):
     if os.path.exists(path):
@@ -37,8 +38,12 @@ async def song_downloader(client, message: Message):
         thumbnail = results[0]["thumbnails"][0]
         thumb_name = f"{title_clean}.jpg"
         
-        # تحميل الصورة المصغرة
-        thumb = requests.get(thumbnail, allow_redirects=True, proxies={"http": PROXY, "https": PROXY})
+        # تحميل الصورة المصغرة باستخدام البروكسي
+        proxies = {
+            "http": f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY}",
+            "https": f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY}",
+        }
+        thumb = requests.get(thumbnail, allow_redirects=True, proxies=proxies)
         open(thumb_name, "wb").write(thumb.content)
         duration = results[0]["duration"]
 
@@ -56,7 +61,7 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        "proxy": f"http://{PROXY_AUTH}@{PROXY}",  # إضافة إعداد البروكسي مع المصادقة
+        "proxy": f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY}",  # إضافة إعداد البروكسي مع المصادقة
     }
 
     try:
