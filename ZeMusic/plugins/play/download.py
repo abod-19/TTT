@@ -6,7 +6,7 @@ import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
-from ZeMusic.platforms.Youtube import cookie_txt_file
+#from ZeMusic.platforms.Youtube import cookie_txt_file
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 
@@ -58,7 +58,7 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",
         "quiet": True,
-        "cookiefile": cookie_txt_file(),
+        #"cookiefile": cookie_txt_file(),
         "proxy": proxy["http"],  # استخدام بروكسي في ydl_opts
     }
 
