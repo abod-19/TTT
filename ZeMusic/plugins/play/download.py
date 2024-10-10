@@ -6,7 +6,6 @@ import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
-#from ZeMusic.platforms.Youtube import cookie_txt_file
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 
@@ -16,6 +15,12 @@ def remove_if_exists(path):
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = config.BOT_NAME + " ابحث"
+
+# إعداد البروكسي
+proxies = {
+    'http': 'http://username:password@proxy_address:port',
+    'https': 'http://username:password@proxy_address:port',
+}
 
 @app.on_message(command(["song", "/song", "بحث", Nem, "تنزيل"]))
 async def song_downloader(client, message: Message):
@@ -34,8 +39,8 @@ async def song_downloader(client, message: Message):
         thumbnail = results[0]["thumbnails"][0]
         thumb_name = f"{title_clean}.jpg"
         
-        # تحميل الصورة المصغرة
-        thumb = requests.get(thumbnail, allow_redirects=True)
+        # تحميل الصورة المصغرة باستخدام البروكسي
+        thumb = requests.get(thumbnail, allow_redirects=True, proxies=proxies)
         open(thumb_name, "wb").write(thumb.content)
         duration = results[0]["duration"]
 
@@ -52,9 +57,8 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        #"cookiefile": cookie_txt_file(),
-        "proxy": "http://140.238.210.181:80",  # إضافة البروكسي هنا
-}
+        "proxy": 'http://geonode_toYHUJctUH:46ad34b5-142f-49ac-9ae1-c06f33295549@51.159.152.12:1000',  # إضافة إعداد البروكسي
+    }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
