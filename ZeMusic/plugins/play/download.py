@@ -6,13 +6,15 @@ import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
+from ZeMusic.platforms.Youtube import cookie_txt_file
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 
-# إعدادات البروكسي
-PROXY = "http://premium-residential.geonode.com:9000"  # رابط البروكسي
-PROXY_USER = "geonode_toYHUJctUH"  # اسم المستخدم للبروكسي
-PROXY_PASS = "46ad34b5-142f-49ac-9ae1-c06f33295549"  # كلمة المرور للبروكسي
+# Proxy details
+proxy = {
+    "http": "http://geonode.toYHUctUH:46ad34b5-142f-49ac-9aef-c06f33295549@51.159.152.12:9000",
+    "https": "http://geonode.toYHUctUH:46ad34b5-142f-49ac-9aef-c06f33295549@51.159.152.12:9000",
+}
 
 def remove_if_exists(path):
     if os.path.exists(path):
@@ -34,16 +36,12 @@ async def song_downloader(client, message: Message):
 
         link = f"https://youtube.com{results[0]['url_suffix']}"
         title = results[0]["title"][:40]
-        title_clean = re.sub(r'[\\/*?:"<>|]', "", title)  # تنظيف اسم الملف
+        title_clean = re.sub(r'[\\/*?:"<>|]', "", title)
         thumbnail = results[0]["thumbnails"][0]
         thumb_name = f"{title_clean}.jpg"
         
-        # تحميل الصورة المصغرة باستخدام البروكسي
-        proxies = {
-            "http": f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY}",
-            "https": f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY}",
-        }
-        thumb = requests.get(thumbnail, allow_redirects=True, proxies=proxies)
+        # تحميل الصورة المصغرة باستخدام بروكسي
+        thumb = requests.get(thumbnail, allow_redirects=True, proxies=proxy)
         open(thumb_name, "wb").write(thumb.content)
         duration = results[0]["duration"]
 
@@ -54,28 +52,26 @@ async def song_downloader(client, message: Message):
     
     await m.edit("<b>جاري التحميل ♪</b>")
     
-    # إعدادات yt_dlp مع البروكسي
     ydl_opts = {
-        "format": "bestaudio[ext=m4a]",  # تحديد صيغة M4A
+        "format": "bestaudio[ext=m4a]",
         "keepvideo": False,
         "geo_bypass": True,
-        "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
+        "outtmpl": f"{title_clean}.%(ext)s",
         "quiet": True,
-        "proxy": f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY}",  # إضافة إعداد البروكسي مع المصادقة
+        "cookiefile": cookie_txt_file(),
+        "proxy": proxy["http"],  # استخدام بروكسي في ydl_opts
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
+            info_dict = ydl.extract_info(link, download=True)
             audio_file = ydl.prepare_filename(info_dict)
 
-        # حساب مدة الأغنية
         secmul, dur, dur_arr = 1, 0, duration.split(":")
         for i in range(len(dur_arr) - 1, -1, -1):
             dur += int(float(dur_arr[i])) * secmul
             secmul *= 60
 
-        # إرسال الصوت
         await message.reply_audio(
             audio=audio_file,
             caption=f"⟡ {app.mention}",
@@ -97,7 +93,6 @@ async def song_downloader(client, message: Message):
         await m.edit(f"error, wait for bot owner to fix\n\nError: {str(e)}")
         print(e)
 
-    # حذف الملفات المؤقتة
     try:
         remove_if_exists(audio_file)
         remove_if_exists(thumb_name)
