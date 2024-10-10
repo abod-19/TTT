@@ -18,8 +18,8 @@ Nem = config.BOT_NAME + " ابحث"
 
 # إعداد البروكسي
 proxies = {
-    'http': 'http://username:password@proxy_address:port',
-    'https': 'http://username:password@proxy_address:port',
+    'http': 'http://geonode_toYHUJctUH:46ad34b5-142f-49ac-9ae1-c06f33295549@51.159.152.12:1000',
+    'https': 'http://geonode_toYHUJctUH:46ad34b5-142f-49ac-9ae1-c06f33295549@51.159.152.12:1000',
 }
 
 @app.on_message(command(["song", "/song", "بحث", Nem, "تنزيل"]))
