@@ -18,8 +18,10 @@ Nem = config.BOT_NAME + " ابحث"
 
 # إعداد البروكسي
 proxies = {
-    'http': 'http://geonode_toYHUJctUH:46ad34b5-142f-49ac-9ae1-c06f33295549@51.159.152.12:1000',
-    'https': 'http://geonode_toYHUJctUH:46ad34b5-142f-49ac-9ae1-c06f33295549@51.159.152.12:1000',
+    #'http': 'http://myusername:mypassword@premium-residential.geonode.com:9000',  # مع المصادقة
+     'http': 'http://premium-residential.geonode.com:9000',  # بدون مصادقة
+    #'https': 'http://myusername:mypassword@premium-residential.geonode.com:9000',  # مع المصادقة
+    'https': 'http://premium-residential.geonode.com:9000',  # بدون مصادقة
 }
 
 @app.on_message(command(["song", "/song", "بحث", Nem, "تنزيل"]))
@@ -35,7 +37,7 @@ async def song_downloader(client, message: Message):
 
         link = f"https://youtube.com{results[0]['url_suffix']}"
         title = results[0]["title"][:40]
-        title_clean = re.sub(r'[\\/*?:"<>|]', "", title)  # تنظيف اسم الملف
+        title_clean = re.sub(r'[\\/*?:"<>|]', "", title)
         thumbnail = results[0]["thumbnails"][0]
         thumb_name = f"{title_clean}.jpg"
         
@@ -52,17 +54,18 @@ async def song_downloader(client, message: Message):
     await m.edit("<b>جاري التحميل ♪</b>")
     
     ydl_opts = {
-        "format": "bestaudio[ext=m4a]",  # تحديد صيغة M4A
+        "format": "bestaudio[ext=m4a]",
         "keepvideo": False,
         "geo_bypass": True,
-        "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
+        "outtmpl": f"{title_clean}.%(ext)s",
         "quiet": True,
-        "proxy": 'http://geonode_toYHUJctUH:46ad34b5-142f-49ac-9ae1-c06f33295549@51.159.152.12:1000',  # إضافة إعداد البروكسي
+        #"proxy": 'http://myusername:mypassword@premium-residential.geonode.com:9000',  # إعداد البروكسي مع المصادقة
+        "proxy": 'http://premium-residential.geonode.com:9000',  # إعداد البروكسي بدون مصادقة
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
+            info_dict = ydl.extract_info(link, download=True)
             audio_file = ydl.prepare_filename(info_dict)
 
         # حساب مدة الأغنية
