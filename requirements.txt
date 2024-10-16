@@ -29,3 +29,9 @@ wget
 SafoneAPI
 imgurpython
 MukeshAPI
+lyricsgenius
+pytube
+urllib3
+uvloop
+flask
+gunicorn
