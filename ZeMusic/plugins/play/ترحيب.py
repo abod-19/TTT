@@ -6,6 +6,7 @@ from ZeMusic.utils.database import get_served_chats
 from config import OWNER_ID, LOGGER_ID
 from pyrogram.enums import ChatMemberStatus
 from datetime import datetime, timedelta
+from ZeMusic.utils.database import is_welcome_enabled, enable_welcome, disable_welcome
 
 photo_urls = [
     "https://envs.sh/Wi_.jpg",
@@ -71,6 +72,9 @@ async def welcome_new_member(client: Client, message: Message):
         
         # ترحيب بالأعضاء الجدد
         else:
+            chat_id = message.chat.id  # الحصول على معرف الدردشة
+            if not await is_welcome_enabled(chat_id):
+                return
             chat_photo = chat.photo
             async for member in client.get_chat_members(chat.id):
                 if member.status == ChatMemberStatus.OWNER:
@@ -85,7 +89,7 @@ async def welcome_new_member(client: Client, message: Message):
             now = datetime.utcnow() + timedelta(hours=3)
             welcome_text = (
                 f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
-                f"__{chat.title}__\n\n"
+                f"{chat.title}\n\n"
                 f"➥• Welcome  : {new_member.mention}\n"
                 f"➥• User : @{new_member.username or 'No username'}\n"
                 f"➥• time : {now.strftime('%I:%M %p')}\n"
@@ -97,3 +101,40 @@ async def welcome_new_member(client: Client, message: Message):
                 await message.reply_photo(photo=photo_file, caption=welcome_text, reply_markup=keyboard)
             else:
                 await message.reply_text(welcome_text, reply_markup=keyboard)
+
+# أمر للتعطيل
+@app.on_message(filters.regex(r"^(تعطيل الترحيب الذكي)$"))
+async def disable_welcome_command(client, message: Message, _):
+    chat_id = message.chat.id  # الحصول على معرف الدردشة
+    user_id = message.from_user.id
+    async for member in client.get_chat_members(chat_id):
+        if member.status == ChatMemberStatus.OWNER:  # جلب منشئ المجموعة فقط
+            owner_id = member.user.id
+            break
+    if user_id != owner_id:
+        return    
+    if not await is_welcome_enabled(chat_id):
+        await message.reply_text("<b>الترحيب الذكي معطل من قبل.</b>")
+        return
+    await disable_welcome(chat_id)
+    await message.reply_text("<b>تم تعطيل الترحيب الذكي بنجاح.</b>")
+
+#######&&&&&&#######
+
+#امر للتفعيل
+@app.on_message(filters.regex(r"^(تفعيل الترحيب الذكي)$"))
+async def enable_welcome_command(client, message: Message, _):
+    chat_id = message.chat.id  # الحصول على معرف الدردشة
+    user_id = message.from_user.id
+    async for member in client.get_chat_members(chat_id):
+        if member.status == ChatMemberStatus.OWNER:  # جلب منشئ المجموعة فقط
+            owner_id = member.user.id
+            break
+    if user_id != owner_id:
+        return
+    if await is_welcome_enabled(chat_id):
+        await message.reply_text("<b>الترحيب الذكي مفعل من قبل.</b>")
+        return
+    await enable_welcome(chat_id)
+    await message.reply_text("<b>تم تفعيل الترحيب الذكي بنجاح.</b>")
+    
