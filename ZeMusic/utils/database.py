@@ -42,20 +42,23 @@ playmode = {}
 playtype = {}
 skipmode = {}
 
+###############&&&&&&&&&&&&############
+wedb = mongodb.we
+
 
 ###############&&&&&&&&&&&&############
 
-#async def is_log_enabled():
-    #settings = await logmdb.find_one({"name": "search"})
-    #if settings:
-        #return settings.get("enabled", False)
-    #return False
+async def is_welcome_enabled(chat_id):
+    settings = await wedb.find_one({"name": "search", "chat_id": chat_id})
+    if settings:
+        return settings.get("enabled", False)
+    return False
 
-#async def enable_log():
-    #await logmdb.update_one({"name": "search"}, {"$set": {"enabled": True}}, upsert=True)
+async def enable_welcome(chat_id):
+    await wedb.update_one({"name": "search", "chat_id": chat_id}, {"$set": {"enabled": True}}, upsert=True)
 
-#async def disable_log():
-    #await logmdb.update_one({"name": "search"}, {"$set": {"enabled": False}}, upsert=True)
+async def disable_welcome(chat_id):
+    await wedb.update_one({"name": "search", "chat_id": chat_id}, {"$set": {"enabled": False}}, upsert=True)
 
 ##############$$$$$$$$$$$$$############
 
