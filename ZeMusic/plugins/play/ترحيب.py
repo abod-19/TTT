@@ -43,7 +43,7 @@ async def welcome_new_member(client: Client, message: Message):
                 )
         
         # التعامل مع إضافة البوت إلى مجموعة جديدة
-        elif new_member.id == bot_id:
+        if new_member.id == bot_id:
             added_by = message.from_user.first_name if message.from_user else "مستخدم غير معروف"
             added_id = message.from_user.id
             served_chats = len(await get_served_chats())
