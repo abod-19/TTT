@@ -5,8 +5,8 @@ from pyrogram.types import (
     InlineKeyboardMarkup,
     Message,
 )
-from YukkiMusic import app
-from YukkiMusic.utils.database import get_served_chats
+from ZeMusic import app
+from ZeMusic.utils.database import get_served_chats
 from config import OWNER_ID, LOGGER_ID
 from datetime import datetime, timedelta
 from pyrogram.enums import ChatMemberStatus
