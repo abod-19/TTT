@@ -22,10 +22,6 @@ skipdb = mongodb.skipmode
 sudoersdb = mongodb.sudoers
 usersdb = mongodb.tgusersdb
 
-###############&&&&&&&&&&&&############
-#logmdb = mongodb.logm
-
-##############$$$$$$$$$$$$$############
 # Shifting to memory [mongo sucks often]
 active = []
 activevideo = []
@@ -44,6 +40,22 @@ skipmode = {}
 
 ###############&&&&&&&&&&&&############
 wedb = mongodb.we
+lfdb = mongodb.lf
+
+
+###############&&&&&&&&&&&&############
+
+async def is_loge_enabled(chat_id):
+    settings = await lfdb.find_one({"name": "search", "chat_id": chat_id})
+    if settings:
+        return settings.get("enabled", False)
+    return False
+
+async def enable_loge(chat_id):
+    await lfdb.update_one({"name": "search", "chat_id": chat_id}, {"$set": {"enabled": True}}, upsert=True)
+
+async def disable_loge(chat_id):
+    await lfdb.update_one({"name": "search", "chat_id": chat_id}, {"$set": {"enabled": False}}, upsert=True)
 
 
 ###############&&&&&&&&&&&&############
