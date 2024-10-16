@@ -70,9 +70,9 @@ async def on_left_chat_member(client: Client, message: Message):
         await userbot.one.start()
         await userbot.one.leave_chat(chat_id)
     else:
-        chat_id = message.chat.id  # الحصول على معرف الدردشة
-            if not await is_loge_enabled(chat_id):
-                return
+        chat_id = message.chat.id
+        if not await is_loge_enabled(chat_id):
+            return
         # إذا كان المستخدم العادي هو الذي غادر
         await app.send_message(user_id, 
             f"<b>• في امان الله ياعيوني يا 〖 {message.left_chat_member.mention} ⁪⁬⁮⁮⁮⁮〗.\n</b>"
