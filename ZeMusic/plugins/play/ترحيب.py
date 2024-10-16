@@ -103,7 +103,7 @@ async def welcome_new_member(client: Client, message: Message):
                 await message.reply_text(welcome_text, reply_markup=keyboard)
 
 # أمر للتعطيل
-@app.on_message(filters.regex(r"^(تعطيل الترحيب الذكي)$"))
+@app.on_message(filters.command(["تعطيل الترحيب الذكي"]))
 async def disable_welcome_command(client, message: Message, _):
     chat_id = message.chat.id  # الحصول على معرف الدردشة
     user_id = message.from_user.id
@@ -122,7 +122,7 @@ async def disable_welcome_command(client, message: Message, _):
 #######&&&&&&#######
 
 #امر للتفعيل
-@app.on_message(filters.regex(r"^(تفعيل الترحيب الذكي)$"))
+@app.on_message(filters.command(["تفعيل الترحيب الذكي"]))
 async def enable_welcome_command(client, message: Message, _):
     chat_id = message.chat.id  # الحصول على معرف الدردشة
     user_id = message.from_user.id
