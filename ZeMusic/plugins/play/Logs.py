@@ -68,21 +68,31 @@ async def on_left_chat_member(client: Client, message: Message):
             )
         )
         await userbot.one.start()
-        await userbot.one.leave_chat(chat_id)
+        
+        try:
+            await userbot.one.leave_chat(chat_id)
+        except Exception as e:
+            # تجاهل الخطأ إذا حدث أثناء مغادرة البوت للمحادثة
+            print(f"Error leaving chat: {e}")
     else:
-        chat_id = message.chat.id
-        if not await is_loge_enabled(chat_id):
-            return
-        # إذا كان المستخدم العادي هو الذي غادر
-        await app.send_message(user_id, 
-            f"<b>• في امان الله ياعيوني يا 〖 {message.left_chat_member.mention} ⁪⁬⁮⁮⁮⁮〗.\n</b>"
-            f"<b>• اذا فكرت ترجع قروبنا {gti}\n</b>"
-            f"<b>• اذا كان سبب مغادرتك ازعاج من مشرف\n</b>"
-            f"<b>• يمكنك تقديم شكوه للمالك والرجوع للجروب\n</b>"
-            f"<b>• من خلال الازرار بالاسفل 🧚🏻‍♀️</b>"
-            f"<a href='{link}'>ㅤ</a>",
-            reply_markup=reply_markup
-        )
+        try:
+            chat_id = message.chat.id
+            if not await is_loge_enabled(chat_id):
+                return
+            # إذا كان المستخدم العادي هو الذي غادر
+            await app.send_message(user_id, 
+                f"<b>• في امان الله ياعيوني يا 〖 {message.left_chat_member.mention} ⁪⁬⁮⁮⁮⁮〗.\n</b>"
+                f"<b>• اذا فكرت ترجع قروبنا {gti}\n</b>"
+                f"<b>• اذا كان سبب مغادرتك ازعاج من مشرف\n</b>"
+                f"<b>• يمكنك تقديم شكوه للمالك والرجوع للجروب\n</b>"
+                f"<b>• من خلال الازرار بالاسفل 🧚🏻‍♀️</b>"
+                f"<a href='{link}'>ㅤ</a>",
+                reply_markup=reply_markup
+            )
+        except Exception as e:
+            # تجاهل الأخطاء إذا حدثت في else
+            print(f"من غادر هو المالك او مستخدم غير معروف: {e}")
+
 
 @app.on_message(filters.regex(r"^(تعطيل المغادرة الذكي)$"))
 async def disable_loge_command(client, message: Message):
@@ -118,4 +128,3 @@ async def enable_loge_command(client, message: Message):
         return
     await enable_loge(chat_id)
     await message.reply_text("<b>تم تفعيل المغادرة الذكي بنجاح.</b>")
-    
