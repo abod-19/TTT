@@ -7,6 +7,7 @@ from pyrogram.types import (
     Message,
 )
 from config import LOGGER_ID as LOG_ID
+from ZeMusic.utils.decorators import AdminActual
 from ZeMusic.utils.database import is_loge_enabled, enable_loge, disable_loge
 from ZeMusic import app
 from pyrogram.enums import ChatMemberStatus
@@ -95,15 +96,9 @@ async def on_left_chat_member(client: Client, message: Message):
 
 
 @app.on_message(filters.regex(r"^(تعطيل المغادرة الذكي)$"))
+@AdminActual
 async def disable_loge_command(client, message: Message):
     chat_id = message.chat.id  # الحصول على معرف الدردشة
-    user_id = message.from_user.id
-    async for member in client.get_chat_members(chat_id):
-        if member.status == ChatMemberStatus.OWNER:  # جلب منشئ المجموعة فقط
-            owner_id = member.user.id
-            break
-    if user_id != owner_id:
-        return    
     if not await is_loge_enabled(chat_id):
         await message.reply_text("<b>المغادرة الذكي معطل من قبل.</b>")
         return
@@ -114,15 +109,9 @@ async def disable_loge_command(client, message: Message):
 
 #امر للتفعيل
 @app.on_message(filters.regex(r"^(تفعيل المغادرة الذكي)$"))
+@AdminActual
 async def enable_loge_command(client, message: Message):
     chat_id = message.chat.id  # الحصول على معرف الدردشة
-    user_id = message.from_user.id
-    async for member in client.get_chat_members(chat_id):
-        if member.status == ChatMemberStatus.OWNER:  # جلب منشئ المجموعة فقط
-            owner_id = member.user.id
-            break
-    if user_id != owner_id:
-        return
     if await is_loge_enabled(chat_id):
         await message.reply_text("<b>المغادرة الذكي مفعل من قبل.</b>")
         return
