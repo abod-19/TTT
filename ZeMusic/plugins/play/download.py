@@ -26,7 +26,7 @@ async def song_downloader(client, message: Message):
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
         if not results:
-            await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
+            await m.edit("- لم يتم العثـور على نتائج 💔")
             return
 
         link = f"https://youtube.com{results[0]['url_suffix']}"
@@ -41,7 +41,7 @@ async def song_downloader(client, message: Message):
         duration = results[0]["duration"]
 
     except Exception as e:
-        await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
+        await m.edit("- لم يتم العثـور على نتائج 🙂")
         print(str(e))
         return
     
