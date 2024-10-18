@@ -10,11 +10,6 @@ from youtube_search import YoutubeSearch
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 
-# Proxy details
-proxy = {
-    "http": "http://geonode.toYHUctUH:46ad34b5-142f-49ac-9aef-c06f33295549@51.159.152.12:9000",
-    "https": "http://geonode.toYHUctUH:46ad34b5-142f-49ac-9aef-c06f33295549@51.159.152.12:9000",
-}
 
 def remove_if_exists(path):
     if os.path.exists(path):
@@ -59,7 +54,8 @@ async def song_downloader(client, message: Message):
         "outtmpl": f"{title_clean}.%(ext)s",
         "quiet": True,
         #"cookiefile": cookie_txt_file(),
-        "proxy": proxy["http"],  # استخدام بروكسي في ydl_opts
+        "username": "oauth2",
+        "password": "",
     }
 
     try:
