@@ -34,6 +34,4 @@ pytube
 urllib3
 uvloop
 flask
-gunicorn
-ytmusicapi
-kvsqlite
+https://github.com/coletdjnz/yt-dlp-youtube-oauth2/archive/refs/heads/master.zip
