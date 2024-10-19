@@ -10,10 +10,9 @@ heroku3
 motor
 pillow
 psutil
-#ntgcalls==1.1.2
 py-tgcalls==0.9.7
 pykeyboard
-pyrogram==2.0.106
+pyrogram==2.0.101
 python-dotenv
 pyyaml
 requests
@@ -28,4 +27,4 @@ telegraph
 numpy
 wget
 SafoneAPI 
-https://github.com/Vivekkumar-IN/yt-dlp-youtube-oauth2
+git+https://github.com/Vivekkumar-IN/yt-dlp-youtube-oauth2
