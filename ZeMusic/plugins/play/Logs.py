@@ -98,7 +98,7 @@ async def on_left_chat_member(client: Client, message: Message):
 
 @app.on_message(command(["تعطيل المغادرة الذكي"]) & filters.group)
 @AdminActual
-async def disable_loge_command(client, message: Message):
+async def disable_loge_command(client, message: Message, _):
     chat_id = message.chat.id  # الحصول على معرف الدردشة
     if not await is_loge_enabled(chat_id):
         await message.reply_text("<b>المغادرة الذكي معطل من قبل.</b>")
@@ -111,7 +111,7 @@ async def disable_loge_command(client, message: Message):
 #امر للتفعيل
 @app.on_message(command(["تفعيل المغادرة الذكي"]) & filters.group)
 @AdminActual
-async def enable_loge_command(client, message: Message):
+async def enable_loge_command(client, message: Message, _):
     chat_id = message.chat.id  # الحصول على معرف الدردشة
     if await is_loge_enabled(chat_id):
         await message.reply_text("<b>المغادرة الذكي مفعل من قبل.</b>")
