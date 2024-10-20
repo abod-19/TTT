@@ -7,6 +7,7 @@ from pyrogram.types import (
     Message,
 )
 from config import LOGGER_ID as LOG_ID
+from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.decorators import AdminActual
 from ZeMusic.utils.database import is_loge_enabled, enable_loge, disable_loge
 from ZeMusic import app
@@ -95,7 +96,7 @@ async def on_left_chat_member(client: Client, message: Message):
             print(f"من غادر هو المالك او مستخدم غير معروف: {e}")
 
 
-@app.on_message(filters.regex(r"^(تعطيل المغادرة الذكي)$"))
+@app.on_message(command(["تعطيل المغادرة الذكي"]) & filters.group)
 @AdminActual
 async def disable_loge_command(client, message: Message):
     chat_id = message.chat.id  # الحصول على معرف الدردشة
@@ -108,7 +109,7 @@ async def disable_loge_command(client, message: Message):
 #######&&&&&&#######
 
 #امر للتفعيل
-@app.on_message(filters.regex(r"^(تفعيل المغادرة الذكي)$"))
+@app.on_message(command(["تفعيل المغادرة الذكي"]) & filters.group)
 @AdminActual
 async def enable_loge_command(client, message: Message):
     chat_id = message.chat.id  # الحصول على معرف الدردشة
