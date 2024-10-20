@@ -107,7 +107,7 @@ async def welcome_new_member(client: Client, message: Message):
 # أمر للتعطيل
 @app.on_message(command(["تعطيل الترحيب الذكي"]) & filters.group)
 @AdminActual
-async def disable_welcome_command(client, message: Message):
+async def disable_welcome_command(client, message: Message, _):
     chat_id = message.chat.id  # الحصول على معرف الدردشة
     if not await is_welcome_enabled(chat_id):
         await message.reply_text("<b>الترحيب الذكي معطل من قبل.</b>")
@@ -120,7 +120,7 @@ async def disable_welcome_command(client, message: Message):
 #امر للتفعيل
 @app.on_message(command(["تفعيل الترحيب الذكي"]) & filters.group)
 @AdminActual
-async def enable_welcome_command(client, message: Message):
+async def enable_welcome_command(client, message: Message, _):
     chat_id = message.chat.id  # الحصول على معرف الدردشة
     if await is_welcome_enabled(chat_id):
         await message.reply_text("<b>الترحيب الذكي مفعل من قبل.</b>")
