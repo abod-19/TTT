@@ -1,3 +1,12 @@
+#
+# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
+#
+# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
+# and is released under the "GNU v3.0 License Agreement".
+# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
+#
+# All rights reserved.
+#
 import asyncio
 import glob
 import os
@@ -24,40 +33,27 @@ def cookies():
     return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
 
-def get_ytdl_options(ytdl_opts, commamdline=True) -> Union[str, dict, list]:
-    if commamdline:
-        if isinstance(ytdl_opts, list):
-            if os.getenv("TOKEN_DATA"):
-                ytdl_opts += ["--username", "oauth2", "--password", "''"]
-            else:
-                ytdl_opts += ["--cookies", cookies()]
-        elif isinstance(ytdl_opts, str):
-            if os.getenv("TOKEN_DATA"):
-                ytdl_opts += "--username oauth2 --password '' "
-            else:
-                ytdl_opts += f"--cookies {cookies()}"
-        elif isinstance(ytdl_opts, dict):
-            if os.getenv("TOKEN_DATA"):
-                ytdl_opts.update({"username": "oauth2", "password": ""})
-            else:
-                ytdl_opts["cookiefile"] = cookies()
-    else:
-        if isinstance(ytdl_opts, list):
-            if os.getenv("TOKEN_DATA"):
-                ytdl_opts += ["username", "oauth2", "password", "''"]
-            else:
-                ytdl_opts += ["cookiefile", cookies()]
-        elif isinstance(ytdl_opts, str):
-            if os.getenv("TOKEN_DATA"):
-                ytdl_opts += "username oauth2 password '' "
-            else:
-                ytdl_opts += f"cookiefile {cookies()}"
-        elif isinstance(ytdl_opts, dict):
-            if os.getenv("TOKEN_DATA"):
-                ytdl_opts.update({"username": "oauth2", "password": ""})
-            else:
-                ytdl_opts["cookiefile"] = cookies()
-
+def get_ytdl_options(ytdl_opts: Union[str, dict, list], commandline: bool = True) -> Union[str, dict, list]:
+    token_data = os.getenv("TOKEN_DATA")
+    
+    if isinstance(ytdl_opts, list):
+        if token_data:
+            ytdl_opts += ["--username" if commandline else "username", "oauth2", "--password" if commandline else "password", "''"]
+        else:
+            ytdl_opts += ["--cookies" if commandline else "cookiefile", cookies()]
+    
+    elif isinstance(ytdl_opts, str):
+        if token_data:
+            ytdl_opts += "--username oauth2 --password '' " if commandline else "username oauth2 password '' "
+        else:
+            ytdl_opts += f"--cookies {cookies()}" if commandline else f"cookiefile {cookies()}"
+    
+    elif isinstance(ytdl_opts, dict):
+        if token_data:
+            ytdl_opts.update({"username": "oauth2", "password": ""})
+        else:
+            ytdl_opts["cookiefile"] = cookies()
+    
     return ytdl_opts
 
 
@@ -173,8 +169,6 @@ class YouTubeAPI:
             "-g",
             "-f",
             "best[height<=?720][width<=?1280]",
-            #"--cookies",
-            #cookies(),
             f"{link}",
         ]
         cmd = get_ytdl_options(cmd)
@@ -400,10 +394,10 @@ class YouTubeAPI:
                     "-g",
                     "-f",
                     "best[height<=?720][width<=?1280]",
+                    link,
                 ]
-                command += get_ytdl_options([])
-                command.append(link)
-
+                command = get_ytdl_options(command)
+                
                 proc = await asyncio.create_subprocess_exec(
                     *command,
                     stdout=asyncio.subprocess.PIPE,
