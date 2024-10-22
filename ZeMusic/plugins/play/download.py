@@ -60,7 +60,7 @@ async def song_downloader(client, message: Message):
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
     }
     # استدعاء دالة get_ytdl_options وتحديث الخيارات بناءً على مخرجاتها
-    options = get_ytdl_options(ytdl_opts, commandline=False)
+    options = get_ytdl_options(ydl_opts, commandline=False)
     try:
         with yt_dlp.YoutubeDL(options) as ydl:
             info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
