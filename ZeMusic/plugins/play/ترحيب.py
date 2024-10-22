@@ -15,7 +15,7 @@ photo_urls = [
     "https://envs.sh/Wi_.jpg",
 ]
 
-@app.on_message(filters.new_chat_members & filters.group)
+@app.on_message(filters.new_chat_members, group=-2)
 async def welcome_new_member(client: Client, message: Message):
     chat = message.chat
     dev_id = OWNER_ID
