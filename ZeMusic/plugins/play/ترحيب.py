@@ -13,9 +13,6 @@ from ZeMusic.utils.database import is_welcome_enabled, enable_welcome, disable_w
 photo_urls = [
     "https://envs.sh/Wi_.jpg",
     "https://envs.sh/Wi_.jpg",
-    "https://envs.sh/Wi_.jpg",
-    "https://envs.sh/Wi_.jpg",
-    "https://envs.sh/Wi_.jpg",
 ]
 
 @app.on_message(filters.new_chat_members & filters.group)
