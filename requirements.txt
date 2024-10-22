@@ -26,6 +26,7 @@ youtube-search-python
 telegraph
 numpy
 wget
+SafoneAPI
 MukeshAPI
 imgurpython
 git+https://github.com/Vivekkumar-IN/yt-dlp-youtube-oauth2
