@@ -6,7 +6,7 @@ import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
-from ZeMusic.platforms.Youtube import cookies
+from ZeMusic.platforms.Youtube import get_ytdl_options
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 
@@ -63,7 +63,7 @@ async def song_downloader(client, message: Message):
     }
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(get_ytdl_options({"quiet": True})) as ydl:
             info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
             audio_file = ydl.prepare_filename(info_dict)
 
