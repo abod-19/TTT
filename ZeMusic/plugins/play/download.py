@@ -58,12 +58,11 @@ async def song_downloader(client, message: Message):
         "keepvideo": False,
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
-        "quiet": True,
-        #"cookiefile": cookies(),
+        **get_ytdl_options({"quiet": True})
     }
 
     try:
-        with yt_dlp.YoutubeDL(get_ytdl_options({"quiet": True})) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
             audio_file = ydl.prepare_filename(info_dict)
 
