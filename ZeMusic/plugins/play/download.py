@@ -59,14 +59,10 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
     }
-    
+    # استدعاء دالة get_ytdl_options وتحديث الخيارات بناءً على مخرجاتها
+    options = get_ytdl_options(ytdl_opts, commandline=False)
     try:
-        with yt_dlp.YoutubeDL(get_ytdl_options(format="bestaudio[ext=m4a]", 
-                                       keepvideo=False, 
-                                       geo_bypass=True, 
-                                       outtmpl=f"{title_clean}.%(ext)s", 
-                                       quiet=True)) as ydl:
-    # بقية الكود
+        with yt_dlp.YoutubeDL(options) as ydl:
             info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
             audio_file = ydl.prepare_filename(info_dict)
 
