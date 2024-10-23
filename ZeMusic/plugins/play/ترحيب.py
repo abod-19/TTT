@@ -101,7 +101,7 @@ async def welcome_new_member(client: Client, message: Message):
                 except Exception as error:
                     print(error)
                 welcome_text = (
-                    f"<a href='{upload_url}'>‌ْ</a>"
+                    f"<a href='{upload_url}'>رابط الصوره</a>\n"
                     f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
                     f"{chat.title}\n\n"
                     f"➥• Welcome  : {new_member.mention}\n"
