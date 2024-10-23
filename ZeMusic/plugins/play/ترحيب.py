@@ -113,8 +113,8 @@ async def welcome_new_member(client: Client, message: Message):
                     f"{chat.title}\n\n"
                     f"➥• Welcome  : {new_member.mention}\n"
                     f"➥• User : @{new_member.username or 'No username'}\n"
-                    f"➥• time : {now.strftime( %I:%M %p )}\n"
-                    f"➥• date : {now.strftime( %Y/%m/%d )}"
+                    f"➥• time : {now.strftime('%I:%M %p')}\n"
+                    f"➥• date : {now.strftime('%Y/%m/%d')}"
                 )
                 await message.reply_text(welcome_text, reply_markup=keyboard)
             else:
@@ -123,8 +123,8 @@ async def welcome_new_member(client: Client, message: Message):
                     f"{chat.title}\n\n"
                     f"➥• Welcome  : {new_member.mention}\n"
                     f"➥• User : @{new_member.username or 'No username'}\n"
-                    f"➥• time : {now.strftime( %I:%M %p )}\n"
-                    f"➥• date : {now.strftime( %Y/%m/%d )}"
+                    f"➥• time : {now.strftime('%I:%M %p')}\n"
+                    f"➥• date : {now.strftime('%Y/%m/%d')}"
                 )
                 await message.reply_text(welcome_text, reply_markup=keyboard)
 
