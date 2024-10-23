@@ -95,7 +95,7 @@ async def welcome_new_member(client: Client, message: Message):
         
                 if resp.status_code == 200:
                     upload_url = f"{resp.text}"    
-            finally:
+            
                 try:
                     os.remove(photo_file)
                 except Exception as error:
