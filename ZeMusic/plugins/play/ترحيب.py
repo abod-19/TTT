@@ -89,24 +89,17 @@ async def welcome_new_member(client: Client, message: Message):
 
             if chat_photo:
                 photo_file = await client.download_media(chat_photo.big_file_id)
-                try:
-                    # رفع الملف إلى envs.sh
-                    with open(photo_file, "rb") as f:
-                        data = f.read()
-                        resp = requests.post("https://envs.sh", files={"file": data})
+                with open(photo_file, "rb") as f:
+                    data = f.read()
+                    resp = requests.post("https://envs.sh", files={"file": data})
         
-                    if resp.status_code == 200:
-                        upload_url = f"{resp.text}"
-                    else:
-                        return
+                if resp.status_code == 200:
+                    upload_url = f"{resp.text}"    
+            finally:
+                try:
+                    os.remove(photo_file)
                 except Exception as error:
                     print(error)
-                    return    
-                finally:
-                    try:
-                        os.remove(photo_file)
-                    except Exception as error:
-                        print(error)
                 welcome_text = (
                     f"<a href='{upload_url}'>‌</a>"
                     f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
