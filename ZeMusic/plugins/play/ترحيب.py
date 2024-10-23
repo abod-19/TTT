@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.decorators import AdminActual
 from ZeMusic.utils.database import is_welcome_enabled, enable_welcome, disable_welcome
-
+import requests
 photo_urls = [
     "https://envs.sh/Wi_.jpg",
     "https://envs.sh/Wi_.jpg",
