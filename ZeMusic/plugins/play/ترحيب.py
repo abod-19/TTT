@@ -86,19 +86,46 @@ async def welcome_new_member(client: Client, message: Message):
             )
 
             now = datetime.utcnow() + timedelta(hours=3)
-            welcome_text = (
-                f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
-                f"{chat.title}\n\n"
-                f"➥• Welcome  : {new_member.mention}\n"
-                f"➥• User : @{new_member.username or 'No username'}\n"
-                f"➥• time : {now.strftime('%I:%M %p')}\n"
-                f"➥• date : {now.strftime('%Y/%m/%d')}"
-            )
 
             if chat_photo:
                 photo_file = await client.download_media(chat_photo.big_file_id)
-                await message.reply_photo(photo=photo_file, caption=welcome_text, reply_markup=keyboard)
+                try:
+                    # رفع الملف إلى envs.sh
+                    with open(photo_file, "rb") as f:
+                        data = f.read()
+                        resp = requests.post("https://envs.sh", files={"file": data})
+        
+                    if resp.status_code == 200:
+                        upload_url = f"{resp.text}"
+                    else:
+                        return
+                except Exception as error:
+                    print(error)
+                    return    
+                finally:
+                    try:
+                        os.remove(photo_file)
+                    except Exception as error:
+                        print(error)
+                welcome_text = (
+                    f"<a href='{upload_url}'>‌</a>"
+                    f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
+                    f"{chat.title}\n\n"
+                    f"➥• Welcome  : {new_member.mention}\n"
+                    f"➥• User : @{new_member.username or  No username }\n"
+                    f"➥• time : {now.strftime( %I:%M %p )}\n"
+                    f"➥• date : {now.strftime( %Y/%m/%d )}"
+                )
+                await message.reply_text(welcome_text, reply_markup=keyboard)
             else:
+                welcome_text = (
+                    f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
+                    f"{chat.title}\n\n"
+                    f"➥• Welcome  : {new_member.mention}\n"
+                    f"➥• User : @{new_member.username or  No username }\n"
+                    f"➥• time : {now.strftime( %I:%M %p )}\n"
+                    f"➥• date : {now.strftime( %Y/%m/%d )}"
+                )
                 await message.reply_text(welcome_text, reply_markup=keyboard)
 
 # أمر للتعطيل
