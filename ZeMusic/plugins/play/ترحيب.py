@@ -101,7 +101,7 @@ async def welcome_new_member(client: Client, message: Message):
                 except Exception as error:
                     print(error)
                 welcome_text = (
-                    f"{upload_url}\n"
+                    f"<a href='{upload_url}'>‌ْ</a>"
                     f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
                     f"{chat.title}\n\n"
                     f"➥• Welcome  : {new_member.mention}\n"
@@ -109,7 +109,7 @@ async def welcome_new_member(client: Client, message: Message):
                     f"➥• time : {now.strftime('%I:%M %p')}\n"
                     f"➥• date : {now.strftime('%Y/%m/%d')}"
                 )
-                await message.reply_text(welcome_text, reply_markup=keyboard)
+                await message.reply_photo(photo=upload_url, caption=welcome_text, reply_markup=keyboard)
             else:
                 welcome_text = (
                     f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
