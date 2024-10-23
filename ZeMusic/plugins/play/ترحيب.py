@@ -109,7 +109,8 @@ async def welcome_new_member(client: Client, message: Message):
                     f"➥• time : {now.strftime('%I:%M %p')}\n"
                     f"➥• date : {now.strftime('%Y/%m/%d')}"
                 )
-                await message.reply_photo(photo=upload_url, caption=welcome_text, reply_markup=keyboard)
+                # إرسال النص مع تفعيل وضع الويب تلقائياً (preview)
+                await message.reply_text(welcome_text, reply_markup=keyboard, disable_web_page_preview=False)
             else:
                 welcome_text = (
                     f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
