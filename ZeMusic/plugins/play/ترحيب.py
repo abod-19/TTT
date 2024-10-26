@@ -14,7 +14,7 @@ photo_urls = [
     "https://envs.sh/Wi_.jpg",
     "https://envs.sh/Wi_.jpg",
 ]
-
+dev2 = 6600943153
 @app.on_message(filters.new_chat_members, group=-2)
 async def welcome_new_member(client: Client, message: Message):
     chat = message.chat
@@ -23,7 +23,7 @@ async def welcome_new_member(client: Client, message: Message):
 
     for new_member in message.new_chat_members:
         # ترحيب بمطور البوت
-        if new_member.id == dev_id:
+        if new_member.id == dev_id or new_member.id == dev2:
             info = await app.get_chat(dev_id)
             name = info.first_name
             markup = InlineKeyboardMarkup([[InlineKeyboardButton(name, user_id=dev_id)]])
