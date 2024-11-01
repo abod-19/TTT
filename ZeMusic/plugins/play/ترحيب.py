@@ -27,21 +27,25 @@ async def welcome_new_member(client: Client, message: Message):
             info = await app.get_chat(dev_id)
             name = info.first_name
             markup = InlineKeyboardMarkup([[InlineKeyboardButton(name, user_id=dev_id)]])
+
+            # جلب صورة المطور باستخدام async for
+            photo = None
+            async for dev_photo in client.get_chat_photos(dev_id, limit=1):
+                photo = dev_photo.file_id
+                break
             
-            photos = [photo async for photo in client.get_chat_photos(dev_id, limit=1)]
-            
-            if not photos:
+            if photo:
+                await message.reply_photo(
+                    photo,
+                    caption=f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸",
+                    reply_markup=markup
+                )
+            else:
                 await message.reply_text(
                     f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸",
                     reply_markup=markup
                 )
-            else:
-                await message.reply_photo(
-                    photos[0].file_id,
-                    caption=f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸",
-                    reply_markup=markup
-                )
-        
+
         # التعامل مع إضافة البوت إلى مجموعة جديدة
         if new_member.id == bot_id:
             added_by = message.from_user.first_name if message.from_user else "مستخدم غير معروف"
@@ -74,6 +78,8 @@ async def welcome_new_member(client: Client, message: Message):
             chat_id = message.chat.id  # الحصول على معرف الدردشة
             if not await is_welcome_enabled(chat_id):
                 return
+            
+            # جلب معلومات المالك مباشرةً
             async for member in client.get_chat_members(chat.id, filter=ChatMembersFilter.ADMINISTRATORS):
                 if member.status == ChatMemberStatus.OWNER:
                     owner_id = member.user.id
@@ -94,9 +100,14 @@ async def welcome_new_member(client: Client, message: Message):
                 f"➥• date : {now.strftime('%Y/%m/%d')}"
             )
 
-            if chat.photo:
-                photo_file = await client.download_media(chat.photo.big_file_id)
-                await message.reply_photo(photo=photo_file, caption=welcome_text, reply_markup=keyboard)
+            # استخدام async for لجلب صورة المجموعة
+            photo = None
+            async for chat_photo in client.get_chat_photos(chat.id, limit=1):
+                photo = chat_photo.file_id
+                break
+            
+            if photo:
+                await message.reply_photo(photo=photo, caption=welcome_text, reply_markup=keyboard)
             else:
                 await message.reply_text(welcome_text, reply_markup=keyboard)
 
