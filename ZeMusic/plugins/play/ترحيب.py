@@ -32,13 +32,13 @@ async def welcome_new_member(client: Client, message: Message):
             
             if not photos:
                 await message.reply_text(
-                    f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸",
+                    f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸.",
                     reply_markup=markup
                 )
             else:
                 await message.reply_photo(
                     photos[0].file_id,
-                    caption=f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸",
+                    caption=f"↢ مرحباً مطوري <a href='tg://user?id={dev_id}'>{name}</a> نورت الشات ياعزيزي🧸.",
                     reply_markup=markup
                 )
         
