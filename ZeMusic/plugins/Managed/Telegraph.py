@@ -51,17 +51,13 @@ async def cloud_upload(bot, update):
             json_resp = resp.json()
             upload_url = json_resp.get("image", {}).get("url")  # الرابط المباشر للصورة
             if not upload_url:
-                print("خطأ في جلب رابط الصورة من الاستجابة:", resp.text)
-                await text.edit_text("لم يتم العثور على رابط الصورة في الاستجابة.")
+                await text.edit_text(f"لم يتم العثور على رابط الصورة في الاستجابة. التفاصيل:\n{resp.text}")
                 return
         else:
-            print("خطأ أثناء الرفع، كود الاستجابة:", resp.status_code)
-            print("تفاصيل الخطأ:", resp.text)
-            await text.edit_text("حدث خطأ أثناء الرفع إلى Postimages. حاول مرة أخرى لاحقاً.")
+            await text.edit_text(f"حدث خطأ أثناء الرفع إلى Postimages.\nكود الاستجابة: {resp.status_code}\nالتفاصيل: {resp.text}")
             return
     except Exception as error:
-        print("استثناء عام:", error)
-        await text.edit_text(text=f"Error :- {error}", disable_web_page_preview=True)       
+        await text.edit_text(f"استثناء عام أثناء الرفع:\n{error}")
         return    
     finally:
         try:
