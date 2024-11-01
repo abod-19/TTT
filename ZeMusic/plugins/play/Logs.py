@@ -8,9 +8,9 @@ from ZeMusic.utils.decorators import AdminActual
 from ZeMusic.utils.database import is_loge_enabled, enable_loge, disable_loge
 from ZeMusic import app
 from pyrogram.enums import ChatMemberStatus
+from pyrogram.enums import ChatMembersFilter
 
 userbot = Userbot()
-
 # قائمة الصور
 photo = [
     "https://envs.sh/Wi_.jpg",
@@ -69,7 +69,7 @@ async def on_left_chat_member(client: Client, message: Message):
                 return
 
             # جلب معلومات المالك
-            async for member in client.get_chat_members(chat_id):
+            async for member in client.get_chat_members(chat.id, filter=ChatMembersFilter.ADMINISTRATORS):
                 if member.status == ChatMemberStatus.OWNER:
                     owner_id = member.user.id
                     owner_name = member.user.first_name
