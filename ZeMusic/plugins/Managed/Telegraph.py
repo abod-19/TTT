@@ -61,8 +61,7 @@ async def cloud_upload(bot, update):
             print(error)
 
     await text.edit_text(
-        text=f"<b>⎉╎الــرابـط : </b><a href='{upload_url}'>اضغــط هنـــا</a>"
-        #<b>⎉╎الــرابـط :</b> {upload_url}",
+        text=f"<b>⎉╎الــرابـط : </b><a href='{upload_url}'>اضغــط هنـــا</a>",
         disable_web_page_preview=False,
         reply_markup=InlineKeyboardMarkup( [[
             InlineKeyboardButton(text="✘ اغلاق ✘", callback_data="close")
