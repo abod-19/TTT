@@ -27,6 +27,7 @@ async def welcome_new_member(client: Client, message: Message):
             info = await app.get_chat(dev_id)
             name = info.first_name
             markup = InlineKeyboardMarkup([[InlineKeyboardButton(name, user_id=dev_id)]])
+            
             photos = [photo async for photo in client.get_chat_photos(dev_id, limit=1)]
             
             if not photos:
@@ -47,7 +48,7 @@ async def welcome_new_member(client: Client, message: Message):
             added_id = message.from_user.id
             served_chats = len(await get_served_chats())
             cont = await app.get_chat_members_count(chat.id)
-            chatusername = message.chat.username or "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏ𝐮𝐩"
+            chatusername = message.chat.username or "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏᴜ𝑝"
             
             caption = (
                 f"🌹 تمت إضافة البوت إلى مجموعة جديدة.\n\n"
@@ -73,11 +74,12 @@ async def welcome_new_member(client: Client, message: Message):
             chat_id = message.chat.id  # الحصول على معرف الدردشة
             if not await is_welcome_enabled(chat_id):
                 return
-            
-            # جلب معلومات المالك مباشرةً
-            owner_member = await client.get_chat_member(chat.id, ChatMemberStatus.OWNER)
-            owner_id = owner_member.user.id
-            owner_name = owner_member.user.first_name
+            chat_photo = chat.photo
+            async for member in client.get_chat_members(chat.id):
+                if member.status == ChatMemberStatus.OWNER:
+                    owner_id = member.user.id
+                    owner_name = member.user.first_name
+                    break
             
             keyboard = InlineKeyboardMarkup(
                 [[InlineKeyboardButton(owner_name, url=f"tg://openmessage?user_id={owner_id}")]]
@@ -93,8 +95,8 @@ async def welcome_new_member(client: Client, message: Message):
                 f"➥• date : {now.strftime('%Y/%m/%d')}"
             )
 
-            if chat.photo:
-                photo_file = await client.download_media(chat.photo.big_file_id)
+            if chat_photo:
+                photo_file = await client.download_media(chat_photo.big_file_id)
                 await message.reply_photo(photo=photo_file, caption=welcome_text, reply_markup=keyboard)
             else:
                 await message.reply_text(welcome_text, reply_markup=keyboard)
@@ -111,6 +113,7 @@ async def disable_welcome_command(client, message: Message, _):
     await message.reply_text("<b>تم تعطيل الترحيب الذكي بنجاح.</b>")
 
 #######&&&&&&#######
+
 #امر للتفعيل
 @app.on_message(command(["تفعيل الترحيب الذكي"]) & filters.group)
 @AdminActual
