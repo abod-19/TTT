@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.decorators import AdminActual
 from ZeMusic.utils.database import is_welcome_enabled, enable_welcome, disable_welcome
-
+from pyrogram.enums import ChatMembersFilter
 photo_urls = [
     "https://envs.sh/Wi_.jpg",
     "https://envs.sh/Wi_.jpg",
@@ -48,7 +48,7 @@ async def welcome_new_member(client: Client, message: Message):
             added_id = message.from_user.id
             served_chats = len(await get_served_chats())
             cont = await app.get_chat_members_count(chat.id)
-            chatusername = message.chat.username or "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏᴜ𝑝"
+            chatusername = message.chat.username or "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏ𝐮𝐩"
             
             caption = (
                 f"🌹 تمت إضافة البوت إلى مجموعة جديدة.\n\n"
@@ -74,8 +74,7 @@ async def welcome_new_member(client: Client, message: Message):
             chat_id = message.chat.id  # الحصول على معرف الدردشة
             if not await is_welcome_enabled(chat_id):
                 return
-            chat_photo = chat.photo
-            async for member in client.get_chat_members(chat.id):
+            async for member in client.get_chat_members(chat.id, filter=ChatMembersFilter.ADMINISTRATORS):
                 if member.status == ChatMemberStatus.OWNER:
                     owner_id = member.user.id
                     owner_name = member.user.first_name
@@ -95,8 +94,8 @@ async def welcome_new_member(client: Client, message: Message):
                 f"➥• date : {now.strftime('%Y/%m/%d')}"
             )
 
-            if chat_photo:
-                photo_file = await client.download_media(chat_photo.big_file_id)
+            if chat.photo:
+                photo_file = await client.download_media(chat.photo.big_file_id)
                 await message.reply_photo(photo=photo_file, caption=welcome_text, reply_markup=keyboard)
             else:
                 await message.reply_text(welcome_text, reply_markup=keyboard)
