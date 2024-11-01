@@ -10,6 +10,8 @@ from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.decorators import AdminActual
 from ZeMusic.utils.database import is_welcome_enabled, enable_welcome, disable_welcome
 from pyrogram.enums import ChatMembersFilter
+
+urlm = "https://telegra.ph/file/a78511ddc8f5984416836.jpg"
 photo_urls = [
     "https://envs.sh/Wi_.jpg",
     "https://envs.sh/Wi_.jpg",
@@ -86,6 +88,7 @@ async def welcome_new_member(client: Client, message: Message):
 
             now = datetime.utcnow() + timedelta(hours=3)
             welcome_text = (
+                f"<a href='{urlm}'>‌‌</a>"
                 f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
                 f"{chat.title}\n\n"
                 f"➥• Welcome  : {new_member.mention}\n"
@@ -94,11 +97,7 @@ async def welcome_new_member(client: Client, message: Message):
                 f"➥• date : {now.strftime('%Y/%m/%d')}"
             )
 
-            if chat.photo:
-                photo_file = await client.download_media(chat.photo.big_file_id)
-                await message.reply_photo(photo=photo_file, caption=welcome_text, reply_markup=keyboard)
-            else:
-                await message.reply_text(welcome_text, reply_markup=keyboard)
+            await message.reply_text(welcome_text, reply_markup=keyboard)
 
 # أمر للتعطيل
 @app.on_message(command(["تعطيل الترحيب الذكي"]) & filters.group)
