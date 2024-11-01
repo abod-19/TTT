@@ -1,4 +1,3 @@
-# كود جلب الادمن فقط عند البحث على المالك
 import random
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
