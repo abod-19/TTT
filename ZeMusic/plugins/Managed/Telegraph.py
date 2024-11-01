@@ -43,7 +43,8 @@ async def cloud_upload(bot, update):
                 "expiry": "0"  # ترك الصورة بدون انتهاء صلاحية
             }
             headers = {
-                "Referer": "https://postimages.org/"
+                "Referer": "https://postimages.org/",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"
             }
             resp = requests.post("https://postimages.org/json/rr", files=files, data=data, headers=headers)
         
