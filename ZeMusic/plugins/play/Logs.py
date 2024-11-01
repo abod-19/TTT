@@ -63,28 +63,30 @@ async def on_left_chat_member(client: Client, message: Message):
 
     # إذا غادر مستخدم عادي
     else:
-        try:
-            # التأكد من تفعيل المغادرة الذكية
-            if not await is_loge_enabled(chat_id):
+        if not await is_loge_enabled(chat_id):
                 return
-
+        buttons = [
+            [
+                InlineKeyboardButton(gti, url=f"{link}")
+            ],
+        ]
+        try:
             # جلب معلومات المالك
             async for member in client.get_chat_members(chat.id, filter=ChatMembersFilter.ADMINISTRATORS):
                 if member.status == ChatMemberStatus.OWNER:
                     owner_id = member.user.id
                     owner_name = member.user.first_name
+                    buttons.append(
+                        [
+                            InlineKeyboardButton(f"{owner_name}", url=f"tg://openmessage?user_id={owner_id}")
+                        ],
+                    )
+                    break
+        except Exception as e:
+            print(f"خطاء في جلب معلومات المالك : {e}")
 
-            # إعداد الأزرار مع معلومات المالك
-            buttons = [
-                [
-                    InlineKeyboardButton(f"{owner_name}", url=f"tg://openmessage?user_id={owner_id}")
-                ],
-                [
-                    InlineKeyboardButton(gti, url=f"{link}")
-                ],
-            ]
-            reply_markup = InlineKeyboardMarkup(buttons)
-
+        reply_markup = InlineKeyboardMarkup(buttons)
+        try:
             # إرسال رسالة وداع للمستخدم المغادر
             await app.send_message(
                 user_id, 
@@ -97,7 +99,7 @@ async def on_left_chat_member(client: Client, message: Message):
                 reply_markup=reply_markup
             )
         except Exception as e:
-            print(f"من غادر هو المالك او مستخدم غير معروف: {e}")
+            print(f"خطاء في الارسال قد يكون قام بحظر البوت : {e}")
 
 # أمر تعطيل المغادرة الذكية
 @app.on_message(command(["تعطيل المغادرة الذكي"]) & filters.group)
