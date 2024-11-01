@@ -9,12 +9,12 @@ from datetime import datetime, timedelta
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.decorators import AdminActual
 from ZeMusic.utils.database import is_welcome_enabled, enable_welcome, disable_welcome
-import requests
+
 photo_urls = [
     "https://envs.sh/Wi_.jpg",
     "https://envs.sh/Wi_.jpg",
 ]
-dev2 = 6600943153
+
 @app.on_message(filters.new_chat_members, group=-2)
 async def welcome_new_member(client: Client, message: Message):
     chat = message.chat
@@ -23,13 +23,10 @@ async def welcome_new_member(client: Client, message: Message):
 
     for new_member in message.new_chat_members:
         # ترحيب بمطور البوت
-        if new_member.id == dev_id or new_member.id == dev2:
-            if new_member.id == dev2:
-                dev_id = dev2
+        if new_member.id == dev_id:
             info = await app.get_chat(dev_id)
             name = info.first_name
             markup = InlineKeyboardMarkup([[InlineKeyboardButton(name, user_id=dev_id)]])
-            
             photos = [photo async for photo in client.get_chat_photos(dev_id, limit=1)]
             
             if not photos:
@@ -50,7 +47,7 @@ async def welcome_new_member(client: Client, message: Message):
             added_id = message.from_user.id
             served_chats = len(await get_served_chats())
             cont = await app.get_chat_members_count(chat.id)
-            chatusername = message.chat.username or "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏᴜ𝑝"
+            chatusername = message.chat.username or "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏ𝐮𝐩"
             
             caption = (
                 f"🌹 تمت إضافة البوت إلى مجموعة جديدة.\n\n"
@@ -76,52 +73,30 @@ async def welcome_new_member(client: Client, message: Message):
             chat_id = message.chat.id  # الحصول على معرف الدردشة
             if not await is_welcome_enabled(chat_id):
                 return
-            chat_photo = chat.photo
-            async for member in client.get_chat_members(chat.id):
-                if member.status == ChatMemberStatus.OWNER:
-                    owner_id = member.user.id
-                    owner_name = member.user.first_name
-                    break
+            
+            # جلب معلومات المالك مباشرةً
+            owner_member = await client.get_chat_member(chat.id, ChatMemberStatus.OWNER)
+            owner_id = owner_member.user.id
+            owner_name = owner_member.user.first_name
             
             keyboard = InlineKeyboardMarkup(
                 [[InlineKeyboardButton(owner_name, url=f"tg://openmessage?user_id={owner_id}")]]
             )
 
             now = datetime.utcnow() + timedelta(hours=3)
+            welcome_text = (
+                f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
+                f"{chat.title}\n\n"
+                f"➥• Welcome  : {new_member.mention}\n"
+                f"➥• User : @{new_member.username or 'No username'}\n"
+                f"➥• time : {now.strftime('%I:%M %p')}\n"
+                f"➥• date : {now.strftime('%Y/%m/%d')}"
+            )
 
-            if chat_photo:
-                photo_file = await client.download_media(chat_photo.big_file_id)
-                with open(photo_file, "rb") as f:
-                    data = f.read()
-                    resp = requests.post("https://envs.sh", files={"file": data})
-        
-                if resp.status_code == 200:
-                    upload_url = f"{resp.text}"    
-            
-                try:
-                    os.remove(photo_file)
-                except Exception as error:
-                    print(error)
-                welcome_text = (
-                    f"<a href='{upload_url}'>رابط الصوره</a>\n"
-                    f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
-                    f"{chat.title}\n\n"
-                    f"➥• Welcome  : {new_member.mention}\n"
-                    f"➥• User : @{new_member.username or 'No username'}\n"
-                    f"➥• time : {now.strftime('%I:%M %p')}\n"
-                    f"➥• date : {now.strftime('%Y/%m/%d')}"
-                )
-                # إرسال النص مع تفعيل وضع الويب تلقائياً (preview)
-                await message.reply_text(welcome_text, reply_markup=keyboard, disable_web_page_preview=False)
+            if chat.photo:
+                photo_file = await client.download_media(chat.photo.big_file_id)
+                await message.reply_photo(photo=photo_file, caption=welcome_text, reply_markup=keyboard)
             else:
-                welcome_text = (
-                    f"𝐰𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩.🧸\n\n"
-                    f"{chat.title}\n\n"
-                    f"➥• Welcome  : {new_member.mention}\n"
-                    f"➥• User : @{new_member.username or 'No username'}\n"
-                    f"➥• time : {now.strftime('%I:%M %p')}\n"
-                    f"➥• date : {now.strftime('%Y/%m/%d')}"
-                )
                 await message.reply_text(welcome_text, reply_markup=keyboard)
 
 # أمر للتعطيل
@@ -136,7 +111,6 @@ async def disable_welcome_command(client, message: Message, _):
     await message.reply_text("<b>تم تعطيل الترحيب الذكي بنجاح.</b>")
 
 #######&&&&&&#######
-
 #امر للتفعيل
 @app.on_message(command(["تفعيل الترحيب الذكي"]) & filters.group)
 @AdminActual
