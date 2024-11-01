@@ -35,18 +35,21 @@ async def cloud_upload(bot, update):
     
     await text.edit_text(text="<code>اكتمل التحميل. الآن يتم رفعه إلى Postimages ...</code>", disable_web_page_preview=True)                                            
     try:
-        # رفع الملف إلى Postimages بدون API
+        # رفع الملف إلى Postimages عبر نموذج الرفع العام
         with open(media, "rb") as f:
             files = {"file": f}
             data = {
-                "upload_session": "null",  # بدون مفتاح API
-                "expire": "0"  # إبقاء الصورة بدون انتهاء صلاحية
+                "upload_session": "null",  # بديل لعدم استخدام مفتاح API
+                "expiry": "0"  # ترك الصورة بدون انتهاء صلاحية
             }
-            resp = requests.post("https://postimages.org/json/rr", files=files, data=data)
+            headers = {
+                "Referer": "https://postimages.org/"
+            }
+            resp = requests.post("https://postimages.org/json/rr", files=files, data=data, headers=headers)
         
         if resp.status_code == 200:
             json_resp = resp.json()
-            upload_url = json_resp["url"]  # الرابط المباشر للصورة
+            upload_url = json_resp["image"]["url"]  # الرابط المباشر للصورة
         else:
             await text.edit_text("حدث خطأ أثناء الرفع إلى Postimages. حاول مرة أخرى لاحقاً.")
             return
@@ -61,7 +64,7 @@ async def cloud_upload(bot, update):
             print(error)
 
     await text.edit_text(
-        text=f"<b>⎉╎الــرابـط : </b><a href='{upload_url}'>اضغــط هنـــا</a>",
+        text=f"<b>⎉╎الــرابـط :</b> {upload_url}",
         disable_web_page_preview=False,
         reply_markup=InlineKeyboardMarkup( [[
             InlineKeyboardButton(text="✘ اغلاق ✘", callback_data="close")
