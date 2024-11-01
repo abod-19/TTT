@@ -1,16 +1,10 @@
 import os
+import requests
 from typing import Optional
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from imgurpython import ImgurClient
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
 from ZeMusic import app
-
-# إعدادات API لـ Imgur (استبدل هذه القيم بالقيم الخاصة بك من Imgur)
-CLIENT_ID = "a7655efe0d76c1c"
-CLIENT_SECRET = "358c318228ef4abd45e5b5787920bf0b41eb2633"
-
-# إعداد اتصال Imgur
-imgur_client = ImgurClient(CLIENT_ID, CLIENT_SECRET)
+from strings.filters import command
 
 #---------------FUNCTION---------------#
 
@@ -27,42 +21,53 @@ def get_file_id(msg: Message) -> Optional[Message]:
 #---------------FUNCTION---------------#
 
 @app.on_message(filters.regex(r"^(تلغراف|ميديا|تلكراف|تلجراف|‹ تلغراف ›)$") & filters.private)
-async def imgur_upload(bot, update):
+async def cloud_upload(bot, update):
     replied = update.reply_to_message
     if not replied:
-        return await update.reply_text("⌯ ¦ قم بالرد على صورة مدعومة.\n⌯ ¦ حط صوره و اكتب عليها.")
+        return await update.reply_text("⌯ ¦ قم بالرد على ملف وسائط مدعوم.\n⌯ ¦ حط صوره او فيديو و اكتب عليها.")
     
     file_info = get_file_id(replied)
     if not file_info:
         return await update.reply_text("⌯ ¦ ياغبي غير مدعوم.\n⌯ ¦ حط صوره و اكتب عليها.")
     
-    text = await update.reply_text(text="<code>انتظر يتم التحميل ...</code>", disable_web_page_preview=True)
+    text = await update.reply_text(text="<code>انتظر يتم التحميل ...</code>", disable_web_page_preview=True)   
+    media = await update.reply_to_message.download()   
     
-    media = await update.reply_to_message.download()
-    await text.edit_text(text="<code>اكتمل التحميل. الآن يتم رفعه إلى Imgur ...</code>", disable_web_page_preview=True)
-    
+    await text.edit_text(text="<code>اكتمل التحميل. الآن يتم رفعه إلى Postimages ...</code>", disable_web_page_preview=True)                                            
     try:
-        # رفع الصورة إلى Imgur
-        response = imgur_client.upload_from_path(media, anon=True)
-        imgur_url = response['link']  # تأكد من أن هذا هو المفتاح الصحيح
+        # رفع الملف إلى Postimages بدون API
+        with open(media, "rb") as f:
+            files = {"file": f}
+            data = {
+                "upload_session": "null",  # بدون مفتاح API
+                "expire": "0"  # إبقاء الصورة بدون انتهاء صلاحية
+            }
+            resp = requests.post("https://postimages.org/json/rr", files=files, data=data)
+        
+        if resp.status_code == 200:
+            json_resp = resp.json()
+            upload_url = json_resp["url"]  # الرابط المباشر للصورة
+        else:
+            await text.edit_text("حدث خطأ أثناء الرفع إلى Postimages. حاول مرة أخرى لاحقاً.")
+            return
     except Exception as error:
         print(error)
-        await text.edit_text(text=f"Error :- {error}", disable_web_page_preview=True)
-        return
-    
-    try:
-        # حذف الملف المحلي بعد الرفع
-        os.remove(media)
-    except Exception as error:
-        print(error)
-        return
-    
-    # تعديل الرسالة وإضافة الروابط
+        await text.edit_text(text=f"Error :- {error}", disable_web_page_preview=True)       
+        return    
+    finally:
+        try:
+            os.remove(media)
+        except Exception as error:
+            print(error)
+
     await text.edit_text(
-        text=f"<b>⎉╎الــرابـط : </b><a href='{imgur_url}'>اضغــط هنـــا</a>\n"
-             f"<b>⎉╎مشاركة : </b><a href='https://telegram.me/share/url?url={imgur_url}'>اضغــط هنـــا</a>",
+        text=f"<b>⎉╎الــرابـط :</b> {upload_url}",
         disable_web_page_preview=False,
-        reply_markup=InlineKeyboardMarkup([[
+        reply_markup=InlineKeyboardMarkup( [[
             InlineKeyboardButton(text="✘ اغلاق ✘", callback_data="close")
         ]])
     )
+
+@app.on_callback_query(filters.regex("close"))
+async def close_button(_, query: CallbackQuery):
+    await query.message.delete()
