@@ -9,12 +9,12 @@ from datetime import datetime, timedelta
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.decorators import AdminActual
 from ZeMusic.utils.database import is_welcome_enabled, enable_welcome, disable_welcome
-from pyrogram.enums import ChatMembersFilter
+
 photo_urls = [
     "https://envs.sh/Wi_.jpg",
     "https://envs.sh/Wi_.jpg",
 ]
-# تعديل دالة الترحيب بالأعضاء الجدد
+
 @app.on_message(filters.new_chat_members, group=-2)
 async def welcome_new_member(client: Client, message: Message):
     chat = message.chat
@@ -27,6 +27,7 @@ async def welcome_new_member(client: Client, message: Message):
             info = await app.get_chat(dev_id)
             name = info.first_name
             markup = InlineKeyboardMarkup([[InlineKeyboardButton(name, user_id=dev_id)]])
+            
             photos = [photo async for photo in client.get_chat_photos(dev_id, limit=1)]
             
             if not photos:
@@ -47,7 +48,7 @@ async def welcome_new_member(client: Client, message: Message):
             added_id = message.from_user.id
             served_chats = len(await get_served_chats())
             cont = await app.get_chat_members_count(chat.id)
-            chatusername = message.chat.username or "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏ𝐮𝐩"
+            chatusername = message.chat.username or "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏᴜ𝑝"
             
             caption = (
                 f"🌹 تمت إضافة البوت إلى مجموعة جديدة.\n\n"
@@ -73,9 +74,8 @@ async def welcome_new_member(client: Client, message: Message):
             chat_id = message.chat.id  # الحصول على معرف الدردشة
             if not await is_welcome_enabled(chat_id):
                 return
-            
-            # جلب معلومات المالك مباشرةً باستخدام ChatMembersFilter.ADMINISTRATORS
-            async for member in client.get_chat_members(chat.id, filter=ChatMembersFilter.ADMINISTRATORS):
+            chat_photo = chat.photo
+            async for member in client.get_chat_members(chat.id):
                 if member.status == ChatMemberStatus.OWNER:
                     owner_id = member.user.id
                     owner_name = member.user.first_name
@@ -95,8 +95,8 @@ async def welcome_new_member(client: Client, message: Message):
                 f"➥• date : {now.strftime('%Y/%m/%d')}"
             )
 
-            if chat.photo:
-                photo_file = await client.download_media(chat.photo.big_file_id)
+            if chat_photo:
+                photo_file = await client.download_media(chat_photo.big_file_id)
                 await message.reply_photo(photo=photo_file, caption=welcome_text, reply_markup=keyboard)
             else:
                 await message.reply_text(welcome_text, reply_markup=keyboard)
