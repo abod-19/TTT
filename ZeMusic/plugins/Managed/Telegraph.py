@@ -1,10 +1,53 @@
 import os
-import requests
+import aiohttp
+import asyncio
+import re
+import secrets
+import string
+import datetime
+import time
+from pathlib import Path
 from typing import Optional
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
 from ZeMusic import app
-from strings.filters import command
+
+class PostImagCC:
+    @staticmethod
+    def __get_common_post_data(html: str):
+        token = re.findall(r'["\']token["\'].*?[\'"](\w+)["\']', html)
+        now = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+        ui = f'[24,2294,960,"true","","","{now}"]'
+        upload_session = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32))
+        session_upload = str(time.time() * 1000000)
+        
+        post_data = {
+            "token": token[0],
+            "upload_session": upload_session,
+            "numfiles": "1",
+            "ui": ui,
+            "optsize": "0",
+            "session_upload": session_upload,
+        }
+        return post_data
+
+    async def post_file(self, file_path: Path, resp_short: bool = False):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://postimages.org") as resp:
+                html = await resp.text()
+
+            data = self.__get_common_post_data(html)
+            form = aiohttp.FormData()
+            form.add_field("file", file_path.open("rb"))
+            for key, value in data.items():
+                form.add_field(key, value)
+                
+            async with session.post("https://postimages.org/json/rr", data=form) as resp:
+                res = await resp.json()
+                short_url = res["url"]
+            return short_url
+
+post_image_service = PostImagCC()
 
 #---------------FUNCTION---------------#
 
@@ -32,33 +75,14 @@ async def cloud_upload(bot, update):
     
     text = await update.reply_text(text="<code>انتظر يتم التحميل ...</code>", disable_web_page_preview=True)   
     media = await update.reply_to_message.download()   
-    
+
     await text.edit_text(text="<code>اكتمل التحميل. الآن يتم رفعه إلى Postimages ...</code>", disable_web_page_preview=True)                                            
     try:
-        # رفع الملف إلى Postimages عبر نموذج الرفع العام
-        with open(media, "rb") as f:
-            files = {"file": f}
-            data = {
-                "upload_session": "null",  # بديل لعدم استخدام مفتاح API
-                "expiry": "0"  # ترك الصورة بدون انتهاء صلاحية
-            }
-            headers = {
-                "Referer": "https://postimages.org/",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"
-            }
-            resp = requests.post("https://postimages.org/json/rr", files=files, data=data, headers=headers)
+        # رفع الملف إلى Postimages باستخدام الكلاس
+        upload_url = await post_image_service.post_file(Path(media))
         
-        if resp.status_code == 200:
-            json_resp = resp.json()
-            upload_url = json_resp.get("image", {}).get("url")  # الرابط المباشر للصورة
-            if not upload_url:
-                await text.edit_text(f"لم يتم العثور على رابط الصورة في الاستجابة. التفاصيل:\n{resp.text}")
-                return
-        else:
-            await text.edit_text(f"حدث خطأ أثناء الرفع إلى Postimages.\nكود الاستجابة: {resp.status_code}\nالتفاصيل: {resp.text}")
-            return
     except Exception as error:
-        await text.edit_text(f"استثناء عام أثناء الرفع:\n{error}")
+        await text.edit_text(f"حدث خطأ أثناء الرفع:\n{error}")
         return    
     finally:
         try:
