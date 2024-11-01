@@ -9,12 +9,12 @@ from datetime import datetime, timedelta
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.decorators import AdminActual
 from ZeMusic.utils.database import is_welcome_enabled, enable_welcome, disable_welcome
-
+from pyrogram.enums import ChatMembersFilter
 photo_urls = [
     "https://envs.sh/Wi_.jpg",
     "https://envs.sh/Wi_.jpg",
 ]
-
+# تعديل دالة الترحيب بالأعضاء الجدد
 @app.on_message(filters.new_chat_members, group=-2)
 async def welcome_new_member(client: Client, message: Message):
     chat = message.chat
@@ -74,8 +74,8 @@ async def welcome_new_member(client: Client, message: Message):
             if not await is_welcome_enabled(chat_id):
                 return
             
-            # جلب معلومات المالك مباشرةً
-            async for member in client.get_chat_members(chat.id, filter="administrators"):
+            # جلب معلومات المالك مباشرةً باستخدام ChatMembersFilter.ADMINISTRATORS
+            async for member in client.get_chat_members(chat.id, filter=ChatMembersFilter.ADMINISTRATORS):
                 if member.status == ChatMemberStatus.OWNER:
                     owner_id = member.user.id
                     owner_name = member.user.first_name
