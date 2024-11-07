@@ -1,15 +1,14 @@
-from config import BANNED_USERS
+import requests
 from pyrogram import filters
-from pyrogram.enums import ChatAction
-from TheApi import api
+from SafoneAPI import SafoneAPI
 from ZeMusic import app
 
 
-@app.on_message(filters.command(["رون"],"") & ~BANNED_USERS)
-async def chatgpt_chat(bot, message):
+@app.on_message(filters.command(["رون"],""))
+async def bard(bot, message):
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply_text(
-            "Example:\n\n`/ai write simple website code using html css, js?`"
+            "Example:\n\n`/bard tell me about lord rama and sita in brief `"
         )
         return
 
@@ -18,14 +17,9 @@ async def chatgpt_chat(bot, message):
     else:
         user_input = " ".join(message.command[1:])
 
-    await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
-    results = api.chatgpt(user_input)
-    await message.reply_text(results)
-
-
-__MODULE__ = "CʜᴀᴛGᴘᴛ"
-__HELP__ = """
-/advice - ɢᴇᴛ ʀᴀɴᴅᴏᴍ ᴀᴅᴠɪᴄᴇ ʙʏ ʙᴏᴛ
-/ai [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ᴄʜᴀᴛɢᴘᴛ s ᴀɪ
-/gemini [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ s ɢᴇᴍɪɴɪ ᴀɪ
-/bard [ǫᴜᴇʀʏ] -ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ s ʙᴀʀᴅ ᴀɪ"""
+    try:
+        Z = await SafoneAPI().bard(user_input)
+        result = Z["candidates"][0]["content"]["parts"][0]["text"]
+        await message.reply_text(result)
+    except requests.exceptions.RequestException as e:
+        pass
