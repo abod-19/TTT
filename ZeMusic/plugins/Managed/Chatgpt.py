@@ -2,7 +2,7 @@ from config import BANNED_USERS
 from pyrogram import filters
 from pyrogram.enums import ChatAction
 from TheApi import api
-from YukkiMusic import app
+from ZeMusic import app
 
 
 @app.on_message(filters.command(["رون"],"") & ~BANNED_USERS)
