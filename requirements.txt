@@ -26,6 +26,6 @@ youtube-search-python
 telegraph
 numpy
 wget
-TheApi
 imgurpython
+git+https://github.com/Vivekkumar-IN/TheApi@main
 git+https://github.com/Vivekkumar-IN/yt-dlp-youtube-oauth2
