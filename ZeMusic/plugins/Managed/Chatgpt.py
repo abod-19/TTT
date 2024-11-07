@@ -1,23 +1,31 @@
-import requests
-from ZeMusic import app
-import time
-from pyrogram.enums import ChatAction, ParseMode
+from config import BANNED_USERS
 from pyrogram import filters
-from MukeshAPI import api
+from pyrogram.enums import ChatAction
+from TheApi import api
+from YukkiMusic import app
 
-@app.on_message(filters.command(["chatgpt", "ai", "ask", "", "iri"], prefixes=[".", "J", "j", "s", "", "/"]))
-async def chat_gpt(bot, message):
-    try:
-        await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
 
-        # Check if name is defined, if not, set a default value
-        name = message.from_user.first_name if message.from_user else "User"
+@app.on_message(filters.command(["رون"],"") & ~BANNED_USERS)
+async def chatgpt_chat(bot, message):
+    if len(message.command) < 2 and not message.reply_to_message:
+        await message.reply_text(
+            "Example:\n\n`/ai write simple website code using html css, js?`"
+        )
+        return
 
-        if len(message.command) < 2:
-            await message.reply_text(f"**Hello {name}, How can I help you today?**")
-        else:
-            query = message.text.split(' ', 1)[1]
-            response = api.gemini(query)["results"]
-            await message.reply_text(f"{response}", parse_mode=ParseMode.MARKDOWN)
-    except Exception as e:
-        await message.reply_text(f"**Error: {e}**")
+    if message.reply_to_message and message.reply_to_message.text:
+        user_input = message.reply_to_message.text
+    else:
+        user_input = " ".join(message.command[1:])
+
+    await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
+    results = api.chatgpt(user_input)
+    await message.reply_text(results)
+
+
+__MODULE__ = "CʜᴀᴛGᴘᴛ"
+__HELP__ = """
+/advice - ɢᴇᴛ ʀᴀɴᴅᴏᴍ ᴀᴅᴠɪᴄᴇ ʙʏ ʙᴏᴛ
+/ai [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ᴄʜᴀᴛɢᴘᴛ s ᴀɪ
+/gemini [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ s ɢᴇᴍɪɴɪ ᴀɪ
+/bard [ǫᴜᴇʀʏ] -ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ s ʙᴀʀᴅ ᴀɪ"""
