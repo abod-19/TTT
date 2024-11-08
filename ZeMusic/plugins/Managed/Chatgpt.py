@@ -15,14 +15,16 @@ def fetch_from_openai(client, message):
         return
 
     try:
-        # إرسال السؤال إلى OpenAI API للحصول على إجابة
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # استخدم gpt-3.5 أو gpt-4 حسب الحاجة
-            messages=[{"role": "user", "content": query}],
+        # إرسال السؤال إلى OpenAI API للحصول على إجابة باستخدام الواجهة الجديدة
+        response = openai.completions.create(
+            model="gpt-3.5-turbo",  # أو gpt-4 إذا كان لديك حق الوصول
+            prompt=query,
+            max_tokens=150,  # يمكنك تعديل هذا حسب طول الإجابة
+            temperature=0.7,  # تحكم في إبداع الإجابة
         )
 
         # استخراج الإجابة من الاستجابة
-        answer = response['choices'][0]['message']['content'].strip()
+        answer = response['choices'][0]['text'].strip()
 
         if answer:
             message.reply_text(f"الإجابة: {answer}")
