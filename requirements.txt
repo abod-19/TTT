@@ -27,9 +27,5 @@ telegraph
 numpy
 wget
 imgurpython
-openai
-lexica-api
-MukeshAPI
-SafoneAPI
-git+https://github.com/Vivekkumar-IN/TheApi@main
+openai==0.28
 git+https://github.com/Vivekkumar-IN/yt-dlp-youtube-oauth2
