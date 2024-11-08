@@ -27,4 +27,5 @@ telegraph
 numpy
 wget
 imgurpython
+openai
 git+https://github.com/Vivekkumar-IN/yt-dlp-youtube-oauth2
