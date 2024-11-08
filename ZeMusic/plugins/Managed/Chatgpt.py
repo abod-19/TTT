@@ -1,10 +1,13 @@
 import requests
+import openai
 from pyrogram import Client, filters
 from ZeMusic import app
 
+# إعداد مفتاح OpenAI API
+openai.api_key = "YOUR_OPENAI_API_KEY"  # استبدل بـ API Key الخاص بك
 
 @app.on_message(filters.command(["رون"], ""))
-def fetch_from_gemini(client, message):
+def fetch_from_openai(client, message):
     # استخراج السؤال من الرسالة بعد "رون"
     query = " ".join(message.command[1:])
     
@@ -13,15 +16,21 @@ def fetch_from_gemini(client, message):
         return
 
     try:
-        # إرسال طلب إلى API جيميني للحصول على البيانات
-        response = requests.get(f"https://api.gemini.com/v1/pubticker/{query}")
-        if response.status_code == 200:
-            data = response.json()
-            # عرض البيانات المسترجعة من API
-            message.reply_text(f"الإجابة: {data['last']}")  # أو تخصيص الجزء الذي تريد عرضه من البيانات
-        else:
-            error_message = response.text
-            message.reply_text(f"حدث خطأ أثناء جلب البيانات. الكود: {response.status_code}، التفاصيل: {error_message}")
+        # إرسال السؤال إلى OpenAI API للحصول على إجابة
+        response = openai.Completion.create(
+            model="gpt-4",  # أو يمكنك استخدام gpt-3.5 حسب الحاجة
+            prompt=query,
+            max_tokens=150,  # يمكنك تعديل هذا حسب طول الإجابة
+            temperature=0.7,  # تحكم في إبداع الإجابة
+        )
 
+        # استخراج الإجابة من الاستجابة
+        answer = response.choices[0].text.strip()
+
+        if answer:
+            message.reply_text(f"الإجابة: {answer}")
+        else:
+            message.reply_text("لم أتمكن من إيجاد إجابة للسؤال.")
+    
     except Exception as e:
         message.reply_text(f"حدث خطأ: {str(e)}")
