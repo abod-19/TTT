@@ -1,10 +1,9 @@
-import requests
 import openai
 from pyrogram import Client, filters
 from ZeMusic import app
 
 # إعداد مفتاح OpenAI API
-openai.api_key = "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"  # استبدل بـ API Key الخاص بك
+openai.api_key = "YOUR_OPENAI_API_KEY"  # استبدل بـ API Key الخاص بك
 
 @app.on_message(filters.command(["رون"], ""))
 def fetch_from_openai(client, message):
@@ -17,15 +16,13 @@ def fetch_from_openai(client, message):
 
     try:
         # إرسال السؤال إلى OpenAI API للحصول على إجابة
-        response = openai.Completion.create(
-            model="gpt-3.5-turbo",  # أو يمكنك استخدام gpt-3.5 حسب الحاجة
-            prompt=query,
-            max_tokens=150,  # يمكنك تعديل هذا حسب طول الإجابة
-            temperature=0.7,  # تحكم في إبداع الإجابة
+        response = openai.chat_completions.create(
+            model="gpt-4",  # أو يمكنك استخدام gpt-3.5 حسب الحاجة
+            messages=[{"role": "user", "content": query}],
         )
 
         # استخراج الإجابة من الاستجابة
-        answer = response.choices[0].text.strip()
+        answer = response['choices'][0]['message']['content'].strip()
 
         if answer:
             message.reply_text(f"الإجابة: {answer}")
