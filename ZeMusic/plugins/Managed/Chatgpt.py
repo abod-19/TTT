@@ -16,11 +16,15 @@ def fetch_from_openai(client, message):
 
     try:
         # إرسال السؤال إلى OpenAI API للحصول على إجابة باستخدام الواجهة الجديدة
-        response = openai.completions.create(
-            model="gpt-3.5",  # أو gpt-4 إذا كان لديك حق الوصول
-            prompt=query,
-            max_tokens=150,  # يمكنك تعديل هذا حسب طول الإجابة
-            temperature=0.7,  # تحكم في إبداع الإجابة
+        response = openai.Completion.create(
+            prompt=prompt,
+            temperature=temperature,
+            max_tokens=400,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+            # stop=stop_sequence,
+            model='text-davinci-003',
         )
 
         # استخراج الإجابة من الاستجابة
