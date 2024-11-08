@@ -16,7 +16,7 @@ def fetch_from_openai(client, message):
 
     try:
         # إرسال السؤال إلى OpenAI API للحصول على إجابة
-        response = openai.chat_completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",  # استخدم gpt-3.5 أو gpt-4 حسب الحاجة
             messages=[{"role": "user", "content": query}],
         )
