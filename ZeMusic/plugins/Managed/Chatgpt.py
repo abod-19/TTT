@@ -9,7 +9,7 @@ def fetch_from_gemini(client, message):
     query = " ".join(message.command[1:])
     
     if not query:
-        message.reply("يرجى إضافة سؤال بعد أمر  جميني .")
+        message.reply("يرجى إضافة سؤال بعد أمر **رون** .")
         return
 
     try:
@@ -17,9 +17,10 @@ def fetch_from_gemini(client, message):
         response = requests.get(f"https://api.gemini.com/v1/your_endpoint?query={query}")
         if response.status_code == 200:
             data = response.json()
-            # إعداد الرد المناسب بناءً على البيانات المستلمة
             message.reply_text(f"الإجابة: {data}")
         else:
-            message.reply_text("حدث خطأ أثناء جلب البيانات. يرجى المحاولة لاحقاً.")
+            error_message = response.text
+            message.reply_text(f"حدث خطأ أثناء جلب البيانات. الكود: {response.status_code}، التفاصيل: {error_message}")
+
     except Exception as e:
         message.reply_text(f"حدث خطأ: {str(e)}")
