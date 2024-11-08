@@ -1,25 +1,25 @@
 import requests
-from pyrogram import filters
-from SafoneAPI import SafoneAPI
+from pyrogram import Client, filters
 from ZeMusic import app
 
 
 @app.on_message(filters.command(["رون"],""))
-async def bard(bot, message):
-    if len(message.command) < 2 and not message.reply_to_message:
-        await message.reply_text(
-            "Example:\n\n`/bard tell me about lord rama and sita in brief `"
-        )
+def fetch_from_gemini(client, message):
+    # استخراج السؤال من الرسالة بعد "جميني"
+    query = " ".join(message.command[1:])
+    
+    if not query:
+        message.reply("يرجى إضافة سؤال بعد أمر  جميني .")
         return
 
-    if message.reply_to_message and message.reply_to_message.text:
-        user_input = message.reply_to_message.text
-    else:
-        user_input = " ".join(message.command[1:])
-
     try:
-        Z = await SafoneAPI().bard(user_input)
-        result = Z["candidates"][0]["content"]["parts"][0]["text"]
-        await message.reply_text(result)
-    except requests.exceptions.RequestException as e:
-        pass
+        # إرسال طلب إلى API جيميني للحصول على البيانات
+        response = requests.get(f"https://api.gemini.com/v1/your_endpoint?query={query}")
+        if response.status_code == 200:
+            data = response.json()
+            # إعداد الرد المناسب بناءً على البيانات المستلمة
+            message.reply_text(f"الإجابة: {data}")
+        else:
+            message.reply_text("حدث خطأ أثناء جلب البيانات. يرجى المحاولة لاحقاً.")
+    except Exception as e:
+        message.reply_text(f"حدث خطأ: {str(e)}")
