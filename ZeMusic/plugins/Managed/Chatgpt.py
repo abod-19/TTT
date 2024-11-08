@@ -4,7 +4,7 @@ from pyrogram import Client, filters
 from ZeMusic import app
 
 # إعداد مفتاح OpenAI API
-openai.api_key = "YOUR_OPENAI_API_KEY"  # استبدل بـ API Key الخاص بك
+openai.api_key = "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"  # استبدل بـ API Key الخاص بك
 
 @app.on_message(filters.command(["رون"], ""))
 def fetch_from_openai(client, message):
