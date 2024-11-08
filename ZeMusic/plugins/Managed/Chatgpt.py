@@ -17,7 +17,7 @@ def fetch_from_openai(client, message):
     try:
         # إرسال السؤال إلى OpenAI API للحصول على إجابة باستخدام الواجهة الجديدة
         response = openai.completions.create(
-            model="gpt-3.5-turbo",  # أو gpt-4 إذا كان لديك حق الوصول
+            model="gpt-3.5",  # أو gpt-4 إذا كان لديك حق الوصول
             prompt=query,
             max_tokens=150,  # يمكنك تعديل هذا حسب طول الإجابة
             temperature=0.7,  # تحكم في إبداع الإجابة
