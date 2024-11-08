@@ -27,6 +27,7 @@ telegraph
 numpy
 wget
 imgurpython
+openai
 lexica-api
 MukeshAPI
 SafoneAPI
