@@ -24,13 +24,30 @@ from ZeMusic.utils.database import is_on_off
 from ZeMusic.utils.formatters import time_to_seconds
 
 
+import os
+
 def cookies():
     folder_path = f"{os.getcwd()}/cookies"
-    txt_files = glob.glob(os.path.join(folder_path, "*.txt"))
-    if not txt_files:
-        raise FileNotFoundError("No .txt files found in the specified folder.")
-    cookie_txt_file = random.choice(txt_files)
-    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
+    
+    # المسار الكامل للملفين a.txt و b.txt
+    a_txt_file = os.path.join(folder_path, "a.txt")
+    b_txt_file = os.path.join(folder_path, "b.txt")
+    
+    # التحقق من وجود a.txt أولا
+    if os.path.exists(a_txt_file):
+        try:
+            # افترض أن الكود هنا يقوم بتشغيل الجلسة من a.txt
+            # إذا كانت الجلسة محظورة أو فشل التشغيل، سيتم رفع استثناء
+            return "cookies/a.txt"
+        except SomeSpecificException:  # استبدل `SomeSpecificException` بنوع الخطأ المتوقع عند فشل الجلسة
+            pass  # تجاوز الخطأ لتجربة b.txt
+
+    # إذا كانت a.txt غير متاحة أو محظورة، استخدم b.txt
+    if os.path.exists(b_txt_file):
+        return "cookies/b.txt"
+    else:
+        # إذا لم يكن أي من الملفين موجودًا، ارفع خطأً
+        raise FileNotFoundError("Neither a.txt nor b.txt found in the specified folder.")
 
 
 def get_ytdl_options(ytdl_opts: Union[str, dict, list], commandline: bool = True) -> Union[str, dict, list]:
