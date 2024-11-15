@@ -7,8 +7,7 @@ from config import BOT_NAME
 from pyrogram.enums import ParseMode
 
 italy = [
-         "قول <pre style='color: red;'>{BOT_NAME}</pre> غنيلي",  # اللون الأحمر
-         "<pre style='color: blue;'>هلا</pre>\nلبيه وش اغني لك"  # اللون الأزرق
+         "<blockquote>هذا نص مقتبس من مصدر آخر.</blockquote>"
          ]
 
 @app.on_message(filters.regex(r"^(بوت)$"))
