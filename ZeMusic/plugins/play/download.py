@@ -77,6 +77,7 @@ async def song_downloader(client, message: Message):
 
         # إرسال الصوت
         await message.reply_audio(
+            chat_id=message.chat.id,
             audio=audio_file,
             caption=f"⟡ {app.mention}",
             title=title,
