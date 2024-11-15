@@ -21,8 +21,12 @@ def remove_if_exists(path):
 lnk = f"https://t.me/{config.CHANNEL_LINK}"
 Nem = config.BOT_NAME + " ابحث"
 
-@app.on_message(command(["song", "/song", "بحث", Nem,"يوت"]) & filters.group)
+@app.on_message(command(["song", "/song", "بحث", Nem, "يوت"]) & filters.group)
 async def song_downloader(client, message: Message):
+    if not message.chat.id:
+        await message.reply_text("خطأ: لم يتم العثور على chat_id.")
+        return
+
     query = " ".join(message.command[1:])
     m = await message.reply_text("<b>⇜ جـارِ البحث ..</b>")
     
@@ -34,11 +38,10 @@ async def song_downloader(client, message: Message):
 
         link = f"https://youtube.com{results[0]['url_suffix']}"
         title = results[0]["title"][:40]
-        title_clean = re.sub(r'[\\/*?:"<>|]', "", title)  # تنظيف اسم الملف
+        title_clean = re.sub(r'[\\/*?:"<>|]', "", title)
         thumbnail = results[0]["thumbnails"][0]
         thumb_name = f"{title_clean}.jpg"
 
-        # تحميل الصورة المصغرة
         async with aiohttp.ClientSession() as session:
             async with session.get(thumbnail) as resp:
                 if resp.status == 200:
@@ -52,14 +55,12 @@ async def song_downloader(client, message: Message):
         await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
         print(str(e))
         return
-    
+
     await m.edit("<b>جاري التحميل ♪</b>")
     
     ydl_opts = {
-        "format": "bestaudio[ext=m4a]",  # تحديد صيغة M4A
-        "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
-        "username": "oauth2",
-        "password": "",
+        "format": "bestaudio[ext=m4a]",
+        "outtmpl": f"{title_clean}.%(ext)s",
         "keepvideo": False,
         "geo_bypass": True,
         "quiet": True,
@@ -67,16 +68,14 @@ async def song_downloader(client, message: Message):
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
+            info_dict = ydl.extract_info(link, download=True)
             audio_file = ydl.prepare_filename(info_dict)
 
-        # حساب مدة الأغنية
         secmul, dur, dur_arr = 1, 0, duration.split(":")
         for i in range(len(dur_arr) - 1, -1, -1):
             dur += int(float(dur_arr[i])) * secmul
             secmul *= 60
 
-        # إرسال الصوت
         await message.reply_audio(
             audio=audio_file,
             caption=f"⟡ {app.mention}",
@@ -85,20 +84,18 @@ async def song_downloader(client, message: Message):
             thumb=thumb_name,
             duration=dur,
             reply_markup=InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk),
-                    ],
-                ]
+                [[InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk)]]
             ),
         )
         await m.delete()
 
+    except yt_dlp.utils.DownloadError as e:
+        await m.edit(f"خطأ في التنزيل: {str(e)}")
+        print(e)
     except Exception as e:
-        await m.edit(f"error, wait for bot owner to fix\n\nError: {str(e)}")
+        await m.edit(f"خطأ غير متوقع: {str(e)}")
         print(e)
 
-    # حذف الملفات المؤقتة
     try:
         remove_if_exists(audio_file)
         remove_if_exists(thumb_name)
