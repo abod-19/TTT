@@ -7,7 +7,7 @@ from config import BOT_NAME
 from pyrogram.enums import ParseMode
 
 italy = [
-         "<blockquote>هذا نص مقتبس من مصدر آخر.</blockquote>"
+         "> هذا نص مقتبس من مصدر آخر."
          ]
 
 @app.on_message(filters.regex(r"^(بوت)$"))
@@ -15,4 +15,4 @@ async def Italymusic(client, message):
     if "بوت" in message.text:
         response = random.choice(italy)
         response = response.format(nameuser=message.from_user.first_name, BOT_NAME=BOT_NAME)
-        await message.reply(response, parse_mode=ParseMode.HTML)  # تفعيل التنسيق باستخدام HTML
+        await message.reply(response, parse_mode=ParseMode.MARKDOWN)  # تفعيل التنسيق باستخدام HTML
