@@ -4,6 +4,7 @@ import random
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from config import BOT_NAME
+from pyrogram.enums import ParseMode
 
 italy = [
          "قول <pre style='color: red;'>{BOT_NAME}</pre> غنيلي",  # اللون الأحمر
