@@ -28,5 +28,4 @@ numpy
 wget
 imgurpython
 openai
-git+https://github.com/Vivekkumar-IN/yt-dlp-youtube-oauth2
-git+https://github.com/coletdjnz/yt-dlp-youtube-oauth2/archive/refs/heads/master.zip
+pyrotgfork
