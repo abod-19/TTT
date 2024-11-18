@@ -2,8 +2,6 @@ import os
 import re
 import requests
 import config
-import aiohttp
-import aiofiles
 import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
@@ -12,19 +10,24 @@ from ZeMusic.platforms.Youtube import cookies
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 
-
 def remove_if_exists(path):
     if os.path.exists(path):
         os.remove(path)
 
-      
-lnk = f"https://t.me/{config.CHANNEL_LINK}"
-Nem = config.BOT_NAME + " ابحث"
+lnk = "https://t.me/" + config.CHANNEL_LINK
+Nem = f"{config.BOT_NAME} ابحث"
+Nam = f"{config.BOT_NAME} بحث"
 
-@app.on_message(command(["song", "/song", "بحث", Nem,"يوت"]) & filters.group)
+@app.on_message(command(["song", "/song", "بحث", Nem, Nam]))
 async def song_downloader(client, message: Message):
-    query = " ".join(message.command[1:])
-    m = await message.reply_text("<b>⇜ جـارِ البحث ..</b>")
+    if message.text in ["song", "/song", "بحث", Nem, Nam]:
+        return
+    elif message.command[0] in config.BOT_NAME:
+        query = " ".join(message.command[2:])
+    else:
+        query = " ".join(message.command[1:])
+        
+    m = await message.reply_text("<b>جـارِ البحث ♪</b>")
     
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
@@ -37,15 +40,10 @@ async def song_downloader(client, message: Message):
         title_clean = re.sub(r'[\\/*?:"<>|]', "", title)  # تنظيف اسم الملف
         thumbnail = results[0]["thumbnails"][0]
         thumb_name = f"{title_clean}.jpg"
-
+        
         # تحميل الصورة المصغرة
-        async with aiohttp.ClientSession() as session:
-            async with session.get(thumbnail) as resp:
-                if resp.status == 200:
-                    f = await aiofiles.open(thumb_name, mode='wb')
-                    await f.write(await resp.read())
-                    await f.close()
-
+        thumb = requests.get(thumbnail, allow_redirects=True)
+        open(thumb_name, "wb").write(thumb.content)
         duration = results[0]["duration"]
 
     except Exception as e:
@@ -68,7 +66,7 @@ async def song_downloader(client, message: Message):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
             audio_file = ydl.prepare_filename(info_dict)
-
+            
         # حساب مدة الأغنية
         secmul, dur, dur_arr = 1, 0, duration.split(":")
         for i in range(len(dur_arr) - 1, -1, -1):
@@ -78,7 +76,7 @@ async def song_downloader(client, message: Message):
         # إرسال الصوت
         await message.reply_audio(
             audio=audio_file,
-            caption=f"<pre>⟡ {app.mention}</pre>",
+            caption=f"⟡ {app.mention}",
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
