@@ -78,7 +78,7 @@ async def song_downloader(client, message: Message):
         # إرسال الصوت
         await message.reply_audio(
             audio=audio_file,
-            caption=f"⟡ {app.mention}",
+            caption=f"<pre>⟡ {app.mention}</pre>",
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
