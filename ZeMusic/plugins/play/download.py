@@ -1,6 +1,7 @@
 import requests
 import os
 import subprocess
+from bs4 import BeautifulSoup
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import config
