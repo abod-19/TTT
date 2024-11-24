@@ -2,6 +2,7 @@ from pyrogram import filters
 from pyrogram.types import Message
 from config import BANNED_USERS
 import config
+from ZeMusic import app
 from ZeMusic.platforms.Soundcloud import SoundAPI  # تأكد من مسار الاستيراد حسب مكان الكود
 from ZeMusic.utils.decorators.play import PlayWrapper
 from ZeMusic.utils.stream.stream import stream
