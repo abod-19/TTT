@@ -1,9 +1,11 @@
 from os import path
-from yt_dlp import YoutubeDL
 from ZeMusic.utils.formatters import seconds_to_min
+import requests
 
 class SoundAPI:
     def __init__(self):
+        self.base_url = "https://api.soundcloud.com"
+        self.client_id = "b277e5a6-7a42-4b09-b0bf-6d61daa0fd92"  # تأكد من إضافة client_id الخاص بك من SoundCloud
         self.opts = {
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "format": "best",
@@ -13,47 +15,68 @@ class SoundAPI:
         }
 
     async def valid(self, link: str):
-        if "soundcloud" in link:
+        if "soundcloud.com" in link:
             return True
         else:
             return False
 
     async def download(self, url):
-        d = YoutubeDL(self.opts)
-        try:
-            info = d.extract_info(url)
-        except:
+        # تحميل المقطع من SoundCloud
+        track_id = self.get_track_id(url)
+        if not track_id:
             return False
-        xyz = path.join("downloads", f"{info['id']}.{info['ext']}")
-        duration_min = seconds_to_min(info["duration"])
+        
+        track_info = self.get_track_info(track_id)
+        if not track_info:
+            return False
+
+        track_url = track_info['stream_url'] + "?client_id=" + self.client_id
+        duration_min = seconds_to_min(track_info['duration'] / 1000)  # تحويل المدة من ميلي ثانية إلى دقائق
+        
+        # حفظ البيانات حول المسار
         track_details = {
-            "title": info["title"],
-            "duration_sec": info["duration"],
+            "title": track_info["title"],
+            "duration_sec": track_info["duration"] / 1000,  # تحويل المدة من ميلي ثانية إلى ثواني
             "duration_min": duration_min,
-            "uploader": info["uploader"],
-            "filepath": xyz,
+            "uploader": track_info["user"]["username"],
+            "filepath": track_url,
         }
-        return track_details, xyz
+        return track_details, track_url
 
     async def search(self, query: str):
-        """بحث عن الأغنية باستخدام النص المدخل"""
-        d = YoutubeDL(self.opts)
-        search_url = f"ytsearch:{query} soundcloud"
+        """بحث عن الأغنية باستخدام النص المدخل في SoundCloud"""
+        search_url = f"{self.base_url}/tracks?client_id={self.client_id}&q={query}"
+
         try:
-            info = d.extract_info(search_url, download=False)
+            response = requests.get(search_url)
+            tracks = response.json()
+            if not tracks:
+                return None
         except Exception as e:
             return None
 
-        if 'entries' not in info or len(info['entries']) == 0:
-            return None
-
         # استخراج أول نتيجة من البحث
-        track = info['entries'][0]
+        track = tracks[0]
         track_details = {
             "title": track['title'],
-            "url": track['url'],
-            "duration_sec": track['duration'],
-            "uploader": track['uploader'],
-            "thumbnail": track.get('thumbnail', None),
+            "url": track['permalink_url'],
+            "duration_sec": track['duration'] / 1000,  # تحويل المدة من ميلي ثانية إلى ثواني
+            "uploader": track['user']['username'],
+            "thumbnail": track.get('artwork_url', None),
         }
         return track_details
+
+    def get_track_id(self, url):
+        """استخراج track_id من الرابط"""
+        if 'soundcloud.com' in url:
+            return url.split("/")[-1]
+        return None
+
+    def get_track_info(self, track_id):
+        """جلب معلومات الأغنية من SoundCloud"""
+        track_info_url = f"{self.base_url}/tracks/{track_id}?client_id={self.client_id}"
+        try:
+            response = requests.get(track_info_url)
+            return response.json()
+        except:
+            return None
