@@ -67,18 +67,17 @@ async def play_commnd(
         if text:
             try:
                 # البحث عن الأغنية في SoundCloud باستخدام النص المدخل
-                results = await SoundCloud.search(text)  # البحث عن الأغنية عبر SoundCloud
+                sound_api = SoundAPI()
+                track_details = await sound_api.search(text)
                 
-                if not results:
+                if not track_details:
                     return await mystic.edit_text("لم يتم العثور على أي أغنية بهذه الكلمات.")
                 
-                # اختيار أول نتيجة (يمكنك تعديل ذلك حسب حاجتك)
-                track = results[0]
-                track_url = track['url']
-                track_details = await SoundCloud.get_track_details(track_url)
+                track_url = track_details[ url ]
+                track_duration = track_details[ duration_sec ]
                 
-                duration_sec = track_details["duration_sec"]
-                if duration_sec > config.DURATION_LIMIT:
+                # التحقق من المدة
+                if track_duration > config.DURATION_LIMIT:
                     return await mystic.edit_text(
                         f"المدة تتجاوز الحد المسموح به وهو {config.DURATION_LIMIT_MIN} دقيقة."
                     )
