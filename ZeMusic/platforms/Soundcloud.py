@@ -1,9 +1,6 @@
 from os import path
-
 from yt_dlp import YoutubeDL
-
 from ZeMusic.utils.formatters import seconds_to_min
-
 
 class SoundAPI:
     def __init__(self):
@@ -37,3 +34,26 @@ class SoundAPI:
             "filepath": xyz,
         }
         return track_details, xyz
+
+    async def search(self, query: str):
+        """بحث عن الأغنية باستخدام النص المدخل"""
+        d = YoutubeDL(self.opts)
+        search_url = f"ytsearch:{query} soundcloud"
+        try:
+            info = d.extract_info(search_url, download=False)
+        except Exception as e:
+            return None
+
+        if 'entries' not in info or len(info['entries']) == 0:
+            return None
+
+        # استخراج أول نتيجة من البحث
+        track = info['entries'][0]
+        track_details = {
+            "title": track['title'],
+            "url": track['url'],
+            "duration_sec": track['duration'],
+            "uploader": track['uploader'],
+            "thumbnail": track.get('thumbnail', None),
+        }
+        return track_details
