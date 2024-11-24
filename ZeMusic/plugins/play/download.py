@@ -1,5 +1,6 @@
 import os
-import subprocess
+import re
+import requests
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import config
@@ -30,61 +31,29 @@ async def song_downloader(client, message: Message):
     m = await message.reply_text("<b>جـارِ البحث ♪</b>")
 
     # البحث عن رابط الأغنية في SoundCloud
-    search_url = f"https://soundcloud.com/search?q={query}"
-    await m.edit("<b>جاري الحصول على الرابط من SoundCloud...</b>")
-
     try:
-        # استخدام scdl لتنزيل الأغنية
-        output_dir = "downloads"
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # استخدام subprocess.Popen بدلاً من subprocess.run لتقليل الأخطاء
-        process = subprocess.Popen(
-            ["scdl", "-l", search_url, "-c", "-f", "-o", output_dir],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        stdout, stderr = process.communicate()
+        data = requests.get(f"https://m.soundcloud.com/search?q={query}")
+        urls = re.findall(r'data-testid="cell-entity-link" href="([^"]+)', data.text)
+        names = re.findall(r'<div class="Information_CellTitle__2KitR">([^<]+)', data.text)
 
-        if process.returncode != 0:
-            error_message = stderr.decode().strip()
-            await m.edit(f"- لم يتم العثور على أي نتائج. حاول مرة أخرى.\nتفاصيل الخطأ: {error_message}")
-            return
+        result = []
+        for i in range(len(urls)):
+            result.append({'name': names[i], 'url': f'{urls[i]}'})
 
-        # العثور على الملف الذي تم تنزيله
-        downloaded_files = os.listdir(output_dir)
-        if not downloaded_files:
-            await m.edit("- لم يتم العثور على أي ملفات تم تنزيلها.")
-            return
+        buttons = []
+        count = 0
+        for a in result:
+            if count == 5:
+                break
+            url = a['url']
+            buttons.append([
+                InlineKeyboardButton(a['name'], switch_inline_query_current_chat=f'{url}#SOUND')
+            ])
+            count += 1
 
-        audio_file = os.path.join(output_dir, downloaded_files[0])
-
-        # إرسال الملف الصوتي
-        await message.reply_audio(
-            audio=audio_file,
-            caption=f"<pre>⟡ {app.mention}</pre>",
-            reply_markup=InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk),
-                    ],
-                ]
-            ),
-        )
-        await m.delete()
-
-    except subprocess.SubprocessError as e:
-        await m.edit(f"⚠️ حدث خطأ أثناء معالجة الطلب: {str(e)}")
-        print(f"SubprocessError: {e}")
+        btns = InlineKeyboardMarkup(buttons)
+        await m.edit(f"<b>نتائج البحث لـ {query}:</b>", reply_markup=btns)
 
     except Exception as e:
-        await m.edit(f"⚠️ حدث خطأ غير متوقع: {str(e)}")
-        print(f"Unexpected Error: {e}")
-
-    finally:
-        # حذف الملفات المؤقتة
-        try:
-            if 'audio_file' in locals() and audio_file:
-                remove_if_exists(audio_file)
-        except Exception as e:
-            print(f"خطأ أثناء تنظيف الملفات: {str(e)}")
+        await m.edit(f"⚠️ حدث خطأ أثناء معالجة الطلب: {str(e)}")
+        print(f"Error: {e}")
