@@ -32,18 +32,22 @@ async def song_downloader(client, message: Message):
     # البحث عن رابط الأغنية في SoundCloud
     search_url = f"https://soundcloud.com/search?q={query}"
     await m.edit("<b>جاري الحصول على الرابط من SoundCloud...</b>")
-    
+
     try:
         # استخدام scdl لتنزيل الأغنية
         output_dir = "downloads"
         os.makedirs(output_dir, exist_ok=True)
-        process = subprocess.run(
+        
+        # استخدام subprocess.Popen بدلاً من subprocess.run لتقليل الأخطاء
+        process = subprocess.Popen(
             ["scdl", "-l", search_url, "-c", "-f", "-o", output_dir],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
+        stdout, stderr = process.communicate()
+
         if process.returncode != 0:
-            error_message = process.stderr.decode().strip()
+            error_message = stderr.decode().strip()
             await m.edit(f"- لم يتم العثور على أي نتائج. حاول مرة أخرى.\nتفاصيل الخطأ: {error_message}")
             return
 
