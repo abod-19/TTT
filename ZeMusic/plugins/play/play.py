@@ -1,30 +1,10 @@
-import random
-import string
-
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message
-from pytgcalls.exceptions import NoActiveGroupCall
-
+from pyrogram.types import Message
+from config import BANNED_USERS
 import config
-from ZeMusic import Apple, Resso, SoundCloud, Spotify, Telegram, YouTube, app
-from ZeMusic.core.call import Mody
-from ZeMusic.utils import seconds_to_min, time_to_seconds
-from ZeMusic.utils.channelplay import get_channeplayCB
-from ZeMusic.utils.decorators.language import languageCB
-from ZeMusic.utils.decorators.play import PlayWrapper
-from ZeMusic.utils.formatters import formats
-from ZeMusic.utils.inline import (
-    botplaylist_markup,
-    livestream_markup,
-    playlist_markup,
-    slider_markup,
-    track_markup,
-)
-from ZeMusic.utils.logger import play_logs
-from ZeMusic.utils.stream.stream import stream
-from config import BANNED_USERS, lyrical
-# تأكد من أن هذا الاستيراد موجود في أعلى الكود
 from ZeMusic.platforms.Soundcloud import SoundAPI  # تأكد من مسار الاستيراد حسب مكان الكود
+from ZeMusic.utils.decorators.play import PlayWrapper
+from ZeMusic.utils.stream.stream import stream
 
 @app.on_message(
     filters.command(
