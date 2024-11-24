@@ -24,7 +24,7 @@ from ZeMusic.utils.logger import play_logs
 from ZeMusic.utils.stream.stream import stream
 from config import BANNED_USERS, lyrical
 # تأكد من أن هذا الاستيراد موجود في أعلى الكود
-from ZeMusic.utils.soundcloud_api import SoundAPI  # تأكد من مسار الاستيراد حسب مكان الكود
+from ZeMusic.platforms.Soundcloud import SoundAPI  # تأكد من مسار الاستيراد حسب مكان الكود
 
 @app.on_message(
     filters.command(
