@@ -23,8 +23,9 @@ from ZeMusic.utils.inline import (
 from ZeMusic.utils.logger import play_logs
 from ZeMusic.utils.stream.stream import stream
 from config import BANNED_USERS, lyrical
+# تأكد من أن هذا الاستيراد موجود في أعلى الكود
+from ZeMusic.utils.soundcloud_api import SoundAPI  # تأكد من مسار الاستيراد حسب مكان الكود
 
-Nem = config.BOT_NAME + " شغل"
 @app.on_message(
     filters.command(
         [
@@ -32,7 +33,6 @@ Nem = config.BOT_NAME + " شغل"
             "تشغيل",
             "شغل",
             "فيديو",
-            Nem,
             "play",
             "vplay",
             "cplay",
@@ -67,14 +67,14 @@ async def play_commnd(
         if text:
             try:
                 # البحث عن الأغنية في SoundCloud باستخدام النص المدخل
-                sound_api = SoundAPI()
+                sound_api = SoundAPI()  # تأكد من أنك أنشأت الكائن بشكل صحيح
                 track_details = await sound_api.search(text)
                 
                 if not track_details:
                     return await mystic.edit_text("لم يتم العثور على أي أغنية بهذه الكلمات.")
                 
-                track_url = track_details[ url ]
-                track_duration = track_details[ duration_sec ]
+                track_url = track_details['url']
+                track_duration = track_details['duration_sec']
                 
                 # التحقق من المدة
                 if track_duration > config.DURATION_LIMIT:
