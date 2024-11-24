@@ -332,7 +332,7 @@ async def play_commnd(
         if "-v" in query:
             query = query.replace("-v", "")
         try:
-            details, track_id = await YouTube.track(query)
+            details, track_id = await SoundCloud.track(query)
         except:
             return await mystic.edit_text(_["play_3"])
         streamtype = "youtube"
@@ -461,7 +461,7 @@ async def play_music(client, CallbackQuery, _):
         _["play_2"].format(channel) if channel else _["play_1"]
     )
     try:
-        details, track_id = await YouTube.track(vidid, True)
+        details, track_id = await SoundCloud.track(vidid, True)
     except:
         return await mystic.edit_text(_["play_3"])
     if details["duration_min"]:
@@ -632,7 +632,7 @@ async def slider_queries(client, CallbackQuery, _):
             await CallbackQuery.answer(_["playcb_2"])
         except:
             pass
-        title, duration_min, thumbnail, vidid = await YouTube.slider(query, query_type)
+        title, duration_min, thumbnail, vidid = await SoundCloud.slider(query, query_type)
         buttons = slider_markup(_, vidid, user_id, query, query_type, cplay, fplay)
         med = InputMediaPhoto(
             media=thumbnail,
@@ -653,7 +653,7 @@ async def slider_queries(client, CallbackQuery, _):
             await CallbackQuery.answer(_["playcb_2"])
         except:
             pass
-        title, duration_min, thumbnail, vidid = await YouTube.slider(query, query_type)
+        title, duration_min, thumbnail, vidid = await SoundCloud.slider(query, query_type)
         buttons = slider_markup(_, vidid, user_id, query, query_type, cplay, fplay)
         med = InputMediaPhoto(
             media=thumbnail,
