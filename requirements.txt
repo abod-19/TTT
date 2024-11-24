@@ -30,3 +30,4 @@ imgurpython
 openai
 pyrotgfork
 scdl
+beautifulsoup4
