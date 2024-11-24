@@ -41,7 +41,7 @@ Nem = config.BOT_NAME + " شغل"
             "vplayforce",
             "cplayforce",
             "cvplayforce",
-        ],""
+        ], ""
     )
     & ~BANNED_USERS
 )
@@ -61,6 +61,47 @@ async def play_commnd(
     user_id = message.from_user.id if message.from_user else "1121532100"
     user_name = message.from_user.first_name if message.from_user else "None"
 
+    # إذا كان هناك نص مرفق بالرسالة (مثل "ماجد المهندس احبك")
+    if not url:
+        text = message.text.split(" ", 1)[1] if len(message.text.split()) > 1 else None
+        if text:
+            try:
+                # البحث عن الأغنية في SoundCloud باستخدام النص المدخل
+                results = await SoundCloud.search(text)  # البحث عن الأغنية عبر SoundCloud
+                
+                if not results:
+                    return await mystic.edit_text("لم يتم العثور على أي أغنية بهذه الكلمات.")
+                
+                # اختيار أول نتيجة (يمكنك تعديل ذلك حسب حاجتك)
+                track = results[0]
+                track_url = track['url']
+                track_details = await SoundCloud.get_track_details(track_url)
+                
+                duration_sec = track_details["duration_sec"]
+                if duration_sec > config.DURATION_LIMIT:
+                    return await mystic.edit_text(
+                        f"المدة تتجاوز الحد المسموح به وهو {config.DURATION_LIMIT_MIN} دقيقة."
+                    )
+
+                # بدء بث الأغنية
+                await stream(
+                    _,
+                    mystic,
+                    user_id,
+                    track_details,
+                    chat_id,
+                    user_name,
+                    message.chat.id,
+                    streamtype="soundcloud",  # نستخدم "soundcloud" هنا
+                    forceplay=fplay,
+                )
+            except Exception as e:
+                return await mystic.edit_text(f"حدث خطأ أثناء البحث أو التشغيل: {str(e)}")
+            return await mystic.delete()
+        else:
+            return await mystic.edit_text("يرجى توفير نص للأغنية.")
+    
+    # إذا كان هناك رابط، يتم معالجته كما هو موجود في الكود الحالي.
     if url:
         if await SoundCloud.valid(url):
             try:
@@ -91,11 +132,3 @@ async def play_commnd(
             return await mystic.delete()
         else:
             return await mystic.edit_text("رابط غير صالح لـ SoundCloud.")
-    else:
-        return await mystic.edit_text("يرجى توفير رابط من SoundCloud.")
-
-@app.on_callback_query(filters.regex("MusicStream") & ~BANNED_USERS)
-@languageCB
-async def play_music(client, CallbackQuery, _):
-    # يتم الإبقاء فقط على معالجة SoundCloud هنا أيضًا.
-    pass
