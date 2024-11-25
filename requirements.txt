@@ -31,3 +31,4 @@ openai
 pyrotgfork
 scdl
 beautifulsoup4
+git+https://github.com/Vivekkumar-IN/TheApi.git
