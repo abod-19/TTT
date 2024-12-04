@@ -100,7 +100,7 @@ async def song_downloader(client, message: Message):
             )
         except Exception as x:
             print(x)
-        cook = "B"
+       # cook = "B"
         print(e)
 
     # حذف الملفات المؤقتة
