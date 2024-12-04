@@ -95,7 +95,7 @@ async def song_downloader(client, message: Message):
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
         await app.send_message(
             chat_id="@IC_19",
-            text=f"- لم يتم العثـور على نتائج حاول مجددا\n @IC_19"
+            text=f"{str(e)}"
         )
         print(e)
 
