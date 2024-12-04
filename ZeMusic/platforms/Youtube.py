@@ -24,8 +24,10 @@ from ZeMusic.utils.database import is_on_off
 from ZeMusic.utils.formatters import time_to_seconds, seconds_to_min
 from ZeMusic.utils.decorators import asyncify
 
+cook = "A"
 
-def cookies():
+def cookies1():
+    global cook
     folder_path = f"{os.getcwd()}/cookies"
     txt_files = glob.glob(os.path.join(folder_path, "*.txt"))
     if not txt_files:
@@ -33,6 +35,13 @@ def cookies():
     cookie_txt_file = random.choice(txt_files)
     return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
+def cookies():
+    global cook
+    folder_path = f"{os.getcwd()}/cookies"
+    target_file = os.path.join(folder_path, f"{cook}.txt")
+    if not os.path.exists(target_file):
+        raise FileNotFoundError(f"No {cook}.txt found in the specified folder.")
+    return f"cookies/{cook}.txt"
 
 async def shell_cmd(cmd):
     proc = await asyncio.create_subprocess_shell(
