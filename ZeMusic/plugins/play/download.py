@@ -6,7 +6,7 @@ import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
-from ZeMusic.platforms.Youtube import cookies, cook, cookies2
+from ZeMusic.platforms.Youtube import cookies
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 
@@ -93,14 +93,14 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
+        await enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
                 text=f"{str(e)}"
             )
         except Exception as x:
-            print(x)
-        cook = "B"
+            print(x) 
         print(e)
 
     # حذف الملفات المؤقتة
