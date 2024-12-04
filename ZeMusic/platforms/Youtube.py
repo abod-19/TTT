@@ -34,13 +34,17 @@ def cookies1():
     cookie_txt_file = random.choice(txt_files)
     return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
-def cookies():
-    cook = iffcook()
-    folder_path = f"{os.getcwd()}/cookies"
-    target_file = os.path.join(folder_path, f"{cook}.txt")
-    if not os.path.exists(target_file):
-        raise FileNotFoundError(f"No {cook}.txt found in the specified folder.")
-    return f"cookies/{cook}.txt"
+async def cookies():
+    try:
+        cook = await iffcook()  # استدعاء الدالة باستخدام await
+        folder_path = f"{os.getcwd()}/cookies"
+        target_file = os.path.join(folder_path, f"{cook}.txt")
+        if not os.path.exists(target_file):
+            raise FileNotFoundError(f"No {cook}.txt found in the specified folder.")
+        return f"cookies/{cook}.txt"
+    except Exception as e:
+        print(f"Error in cookies(): {e}")
+        return None  # إرجاع None في حال حدوث خطأ
 
 async def shell_cmd(cmd):
     proc = await asyncio.create_subprocess_shell(
