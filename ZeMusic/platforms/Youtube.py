@@ -34,8 +34,8 @@ def cookies1():
     cookie_txt_file = random.choice(txt_files)
     return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
-def cookies():
-    cook = asyncio.run(iffcook())
+async def cookies():
+    cook = await iffcook()
     folder_path = f"{os.getcwd()}/cookies"
     target_file = os.path.join(folder_path, f"{cook}.txt")
     if not os.path.exists(target_file):
