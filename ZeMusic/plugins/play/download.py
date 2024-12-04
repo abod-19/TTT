@@ -93,6 +93,10 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
+        await app.send_message(
+            chat_id=-1002424969251,
+            text=f"- لم يتم العثـور على نتائج حاول مجددا\n @IC_19"
+        )
         print(e)
 
     # حذف الملفات المؤقتة
