@@ -9,6 +9,7 @@ from youtube_search import YoutubeSearch
 from ZeMusic.platforms.Youtube import cookies
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
+from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 
 def remove_if_exists(path):
     if os.path.exists(path):
@@ -93,7 +94,10 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
-        await enable_iff()
+        if await iffcook():
+            await disable_iff()
+        else:
+            await enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
