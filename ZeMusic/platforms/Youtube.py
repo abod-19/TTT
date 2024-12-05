@@ -16,16 +16,6 @@ from ZeMusic.utils.formatters import time_to_seconds, seconds_to_min
 from ZeMusic.utils.decorators import asyncify
 from ZeMusic.utils.database import iffcook
 
-
-def cookies1():
-    folder_path = f"{os.getcwd()}/cookies"
-    txt_files = glob.glob(os.path.join(folder_path, "*.txt"))
-    if not txt_files:
-        raise FileNotFoundError("No .txt files found in the specified folder.")
-    cookie_txt_file = random.choice(txt_files)
-    return f"cookies/{os.path.basename(cookie_txt_file)}"
-
-
 async def cookies():
     try:
         cook = await iffcook()  # استدعاء الدالة باستخدام await
@@ -47,7 +37,7 @@ async def shell_cmd(cmd):
     )
     out, errorz = await proc.communicate()
     if errorz:
-        if "unavailable videos are hidden" in errorz.decode("utf-8").lower():
+        if "unavailable videos are hidden" in (errorz.decode("utf-8")).lower():
             return out.decode("utf-8")
         else:
             return errorz.decode("utf-8")
@@ -61,16 +51,14 @@ class YouTubeAPI:
         self.status = "https://www.youtube.com/oembed?url="
         self.listbase = "https://youtube.com/playlist?list="
         self.reg = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-        self.cookiefile_path = None
-
-    async def initialize(self):
-        """Initialize asynchronous attributes."""
-        self.cookiefile_path = await cookies()
 
     async def exists(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
-        return bool(re.search(self.regex, link))
+        if re.search(self.regex, link):
+            return True
+        else:
+            return False
 
     @asyncify
     def url(self, message_1: Message) -> Union[str, None]:
@@ -95,7 +83,7 @@ class YouTubeAPI:
                         return entity.url
         if offset in (None,):
             return None
-        return text[offset:offset + length]
+        return text[offset : offset + length]
 
     async def details(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
@@ -108,12 +96,43 @@ class YouTubeAPI:
             duration_min = result["duration"]
             thumbnail = result["thumbnails"][0]["url"].split("?")[0]
             vidid = result["id"]
-            duration_sec = int(time_to_seconds(duration_min)) if duration_min else 0
+            if str(duration_min) == "None":
+                duration_sec = 0
+            else:
+                duration_sec = int(time_to_seconds(duration_min))
         return title, duration_min, duration_sec, thumbnail, vidid
 
+    async def title(self, link: str, videoid: Union[bool, str] = None):
+        if videoid:
+            link = self.base + link
+        if "&" in link:
+            link = link.split("&")[0]
+        results = VideosSearch(link, limit=1)
+        for result in (await results.next())["result"]:
+            title = result["title"]
+        return title
+
+    async def duration(self, link: str, videoid: Union[bool, str] = None):
+        if videoid:
+            link = self.base + link
+        if "&" in link:
+            link = link.split("&")[0]
+        results = VideosSearch(link, limit=1)
+        for result in (await results.next())["result"]:
+            duration = result["duration"]
+        return duration
+
+    async def thumbnail(self, link: str, videoid: Union[bool, str] = None):
+        if videoid:
+            link = self.base + link
+        if "&" in link:
+            link = link.split("&")[0]
+        results = VideosSearch(link, limit=1)
+        for result in (await results.next())["result"]:
+            thumbnail = result["thumbnails"][0]["url"].split("?")[0]
+        return thumbnail
+
     async def video(self, link: str, videoid: Union[bool, str] = None):
-        if self.cookiefile_path is None:
-            self.cookiefile_path = await cookies()  # الحصول على الملف إذا لم يكن معرفًا
         if videoid:
             link = self.base + link
         if "&" in link:
@@ -123,7 +142,7 @@ class YouTubeAPI:
             "-g",
             "-f",
             "best[height<=?720][width<=?1280]",
-            f"--cookies {self.cookiefile_path}",
+            f"--cookies {cookies()}",
             f"{link}",
         ]
         proc = await asyncio.create_subprocess_exec(
@@ -138,8 +157,6 @@ class YouTubeAPI:
             return 0, stderr.decode()
 
     async def playlist(self, link, limit, videoid: Union[bool, str] = None):
-        if self.cookiefile_path is None:
-            self.cookiefile_path = await cookies()  # الحصول على الملف إذا لم يكن معرفًا
         if videoid:
             link = self.listbase + link
         if "&" in link:
@@ -160,8 +177,6 @@ class YouTubeAPI:
         return result
 
     async def track(self, link: str, videoid: Union[bool, str] = None):
-        if self.cookiefile_path is None:
-            self.cookiefile_path = await cookies()  # الحصول على الملف إذا لم يكن معرفًا
         if videoid:
             link = self.base + link
         if "&" in link:
@@ -188,15 +203,13 @@ class YouTubeAPI:
             return await self._track(link)
 
     @asyncify
-    async def _track(self, q):
-        if self.cookiefile_path is None:
-            self.cookiefile_path = await cookies()  # الحصول على الملف إذا لم يكن معرفًا
+    def _track(self, q):
         options = {
             "format": "best",
             "noplaylist": True,
             "quiet": True,
             "extract_flat": "in_playlist",
-            "cookiefile": f"{self.cookiefile_path}",
+            "cookiefile": f"{cookies()}",
         }
         with YoutubeDL(options) as ydl:
             info_dict = ydl.extract_info(f"ytsearch: {q}", download=False)
@@ -215,9 +228,7 @@ class YouTubeAPI:
             return info, details["id"]
 
     @asyncify
-    async def formats(self, link: str, videoid: Union[bool, str] = None):
-        if self.cookiefile_path is None:
-            self.cookiefile_path = await cookies()  # الحصول على الملف إذا لم يكن معرفًا
+    def formats(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
         if "&" in link:
@@ -225,7 +236,7 @@ class YouTubeAPI:
 
         ytdl_opts = {
             "quiet": True,
-            "cookiefile": f"{self.cookiefile_path}",
+            "cookiefile": f"{cookies()}",
         }
 
         ydl = YoutubeDL(ytdl_opts)
@@ -257,6 +268,7 @@ class YouTubeAPI:
                         }
                     )
         return formats_available, link
+
     async def slider(
         self,
         link: str,
@@ -286,15 +298,11 @@ class YouTubeAPI:
         format_id: Union[bool, str] = None,
         title: Union[bool, str] = None,
     ) -> str:
-        if self.cookiefile_path is None:
-            self.cookiefile_path = await cookies()
         if videoid:
             link = self.base + link
         loop = asyncio.get_running_loop()
 
-        async def audio_dl():
-            if self.cookiefile_path is None:
-                self.cookiefile_path = await cookies()
+        def audio_dl():
             ydl_optssx = {
                 "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -302,7 +310,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile": f"{self.cookiefile_path}",
+                "cookiefile": f"{cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -313,9 +321,7 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        async def video_dl():
-            if self.cookiefile_path is None:
-                self.cookiefile_path = await cookies()
+        def video_dl():
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -323,7 +329,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile": f"{self.cookiefile_path}",
+                "cookiefile": f"{cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -334,9 +340,7 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        async def song_video_dl():
-            if self.cookiefile_path is None:
-                self.cookiefile_path = await cookies()
+        def song_video_dl():
             formats = f"{format_id}+140"
             fpath = f"downloads/{title}"
             ydl_optssx = {
@@ -348,15 +352,13 @@ class YouTubeAPI:
                 "no_warnings": True,
                 "prefer_ffmpeg": True,
                 "merge_output_format": "mp4",
-                "cookiefile": f"{self.cookiefile_path}",
+                "cookiefile": f"{cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
             x.download([link])
 
-        async def song_audio_dl():
-            if self.cookiefile_path is None:
-                self.cookiefile_path = await cookies()
+        def song_audio_dl():
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
                 "format": format_id,
@@ -373,7 +375,7 @@ class YouTubeAPI:
                         "preferredquality": "192",
                     }
                 ],
-                "cookiefile": f"{self.cookiefile_path}",
+                "cookiefile": f"{cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -397,7 +399,7 @@ class YouTubeAPI:
                     "-g",
                     "-f",
                     "best[height<=?720][width<=?1280]",
-                    f"--cookies {self.cookiefile_path}",
+                    f"--cookies {cookies()}",
                     link,
                 ]
 
