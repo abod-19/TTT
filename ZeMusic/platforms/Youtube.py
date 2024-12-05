@@ -15,6 +15,8 @@ from ZeMusic.utils.database import is_on_off
 from ZeMusic.utils.formatters import time_to_seconds, seconds_to_min
 from ZeMusic.utils.decorators import asyncify
 from ZeMusic.utils.database import iffcook
+
+
 def cookies1():
     global cook
     folder_path = f"{os.getcwd()}/cookies"
@@ -23,6 +25,7 @@ def cookies1():
         raise FileNotFoundError("No .txt files found in the specified folder.")
     cookie_txt_file = random.choice(txt_files)
     return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
+
 
 async def cookies():
     try:
@@ -35,6 +38,7 @@ async def cookies():
     except Exception as e:
         print(f"Error in cookies(): {e}")
         return None  # إرجاع None في حال حدوث خطأ
+
 
 async def shell_cmd(cmd):
     proc = await asyncio.create_subprocess_shell(
@@ -165,6 +169,7 @@ class YouTubeAPI:
             return 0, stderr.decode()
 
     async def playlist(self, link, limit, videoid: Union[bool, str] = None):
+        cookiefile_path = await cookies()
         if videoid:
             link = self.listbase + link
         if "&" in link:
@@ -173,7 +178,7 @@ class YouTubeAPI:
         cmd = (
             f"yt-dlp -i --compat-options no-youtube-unavailable-videos "
             f'--get-id --flat-playlist --playlist-end {limit} --skip-download "{link}" '
-            f"2>/dev/null"
+            f"--cookies {cookiefile_path} 2>/dev/null"
         )
 
         playlist = await shell_cmd(cmd)
@@ -185,6 +190,7 @@ class YouTubeAPI:
         return result
 
     async def track(self, link: str, videoid: Union[bool, str] = None):
+        cookiefile_path = await cookies()
         if videoid:
             link = self.base + link
         if "&" in link:
@@ -313,7 +319,6 @@ class YouTubeAPI:
         loop = asyncio.get_running_loop()
         cookiefile_path = await cookies()
         async def audio_dl():
-            cookiefile_path = await cookies()
             ydl_optssx = {
                 "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -333,7 +338,6 @@ class YouTubeAPI:
             return xyz
 
         async def video_dl():
-            cookiefile_path = await cookies()
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -352,8 +356,7 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        async def song_video_dl():
-            cookiefile_path = await cookies()
+        def song_video_dl():
             formats = f"{format_id}+140"
             fpath = f"downloads/{title}"
             ydl_optssx = {
@@ -371,8 +374,7 @@ class YouTubeAPI:
             x = YoutubeDL(ydl_optssx)
             x.download([link])
 
-        async def song_audio_dl():
-            cookiefile_path = await cookies()
+        def song_audio_dl():
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
                 "format": format_id,
@@ -408,7 +410,6 @@ class YouTubeAPI:
                 direct = True
                 downloaded_file = await loop.run_in_executor(None, video_dl)
             else:
-                cookiefile_path = await cookies()
                 command = [
                     "yt-dlp",
                     "-g",
