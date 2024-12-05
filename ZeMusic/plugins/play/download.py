@@ -99,7 +99,7 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
-        if await iffcook():
+        if iffcook():
             await disable_iff()
         else:
             await enable_iff()
