@@ -313,6 +313,7 @@ class YouTubeAPI:
         loop = asyncio.get_running_loop()
         cookiefile_path = await cookies()
         async def audio_dl():
+            cookiefile_path = await cookies()
             ydl_optssx = {
                 "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -332,6 +333,7 @@ class YouTubeAPI:
             return xyz
 
         async def video_dl():
+            cookiefile_path = await cookies()
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -350,7 +352,8 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        def song_video_dl():
+        async def song_video_dl():
+            cookiefile_path = await cookies()
             formats = f"{format_id}+140"
             fpath = f"downloads/{title}"
             ydl_optssx = {
@@ -368,7 +371,8 @@ class YouTubeAPI:
             x = YoutubeDL(ydl_optssx)
             x.download([link])
 
-        def song_audio_dl():
+        async def song_audio_dl():
+            cookiefile_path = await cookies()
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
                 "format": format_id,
@@ -404,6 +408,7 @@ class YouTubeAPI:
                 direct = True
                 downloaded_file = await loop.run_in_executor(None, video_dl)
             else:
+                cookiefile_path = await cookies()
                 command = [
                     "yt-dlp",
                     "-g",
