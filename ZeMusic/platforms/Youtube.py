@@ -18,7 +18,13 @@ from ZeMusic.utils.database import iffcook
 
 def cookies():
     try:
-        cook = asyncio.run(iffcook())  # تشغيل الدالة غير المتزامنة
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # إذا كان هناك event loop يعمل بالفعل
+            cook = asyncio.ensure_future(iffcook())  # جدولة iffcook للتشغيل
+            loop.run_until_complete(cook)
+        else:
+            cook = loop.run_until_complete(iffcook())  # تشغيل الدالة مباشرة
         folder_path = f"{os.getcwd()}/cookies"
         target_file = os.path.join(folder_path, f"{cook}.txt")
         if not os.path.exists(target_file):
