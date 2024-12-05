@@ -292,7 +292,7 @@ class YouTubeAPI:
             link = self.base + link
         loop = asyncio.get_running_loop()
 
-        def audio_dl():
+        async def audio_dl():
             if self.cookiefile_path is None:
                 self.cookiefile_path = await cookies()
             ydl_optssx = {
@@ -313,7 +313,7 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        def video_dl():
+        async def video_dl():
             if self.cookiefile_path is None:
                 self.cookiefile_path = await cookies()
             ydl_optssx = {
@@ -334,7 +334,7 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        def song_video_dl():
+        async def song_video_dl():
             if self.cookiefile_path is None:
                 self.cookiefile_path = await cookies()
             formats = f"{format_id}+140"
@@ -354,7 +354,7 @@ class YouTubeAPI:
             x = YoutubeDL(ydl_optssx)
             x.download([link])
 
-        def song_audio_dl():
+        async def song_audio_dl():
             if self.cookiefile_path is None:
                 self.cookiefile_path = await cookies()
             fpath = f"downloads/{title}.%(ext)s"
