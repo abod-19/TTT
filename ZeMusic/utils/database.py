@@ -50,10 +50,10 @@ def iffcook():
     return False
 
 def enable_iff():
-    await iffdb.update_one({"name": "search"}, {"$set": {"enabled": True}}, upsert=True)
+    iffdb.update_one({"name": "search"}, {"$set": {"enabled": True}}, upsert=True)
 
 def disable_iff():
-    await iffdb.update_one({"name": "search"}, {"$set": {"enabled": False}}, upsert=True)
+    iffdb.update_one({"name": "search"}, {"$set": {"enabled": False}}, upsert=True)
     
 
 ###############&&&&&&&&&&&&############
