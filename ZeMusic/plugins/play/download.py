@@ -65,7 +65,7 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        "cookiefile": ,  # استخدام مسار الكوكيز
+        "cookiefile": f"{await cookies()}",  # استخدام مسار الكوكيز
     }
 
     try:
@@ -99,7 +99,7 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
-        if iffcook():
+        if await iffcook():
             await disable_iff()
         else:
             await enable_iff()
