@@ -43,17 +43,17 @@ wedb = mongodb.we
 lfdb = mongodb.lf
 iffdb = mongodb.iff
 
-def iffcook():
-    settings = iffdb.find_one({"name": "search"})
+async def iffcook():
+    settings = await iffdb.find_one({"name": "search"})
     if settings:
         return settings.get("enabled", False)
     return False
 
-def enable_iff():
-    iffdb.update_one({"name": "search"}, {"$set": {"enabled": True}}, upsert=True)
+async def enable_iff():
+    await iffdb.update_one({"name": "search"}, {"$set": {"enabled": True}}, upsert=True)
 
-def disable_iff():
-    iffdb.update_one({"name": "search"}, {"$set": {"enabled": False}}, upsert=True)
+async def disable_iff():
+    await iffdb.update_one({"name": "search"}, {"$set": {"enabled": False}}, upsert=True)
     
 
 ###############&&&&&&&&&&&&############
