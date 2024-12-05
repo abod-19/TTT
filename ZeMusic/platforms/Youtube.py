@@ -16,6 +16,8 @@ from ZeMusic.utils.formatters import time_to_seconds, seconds_to_min
 from ZeMusic.utils.decorators import asyncify
 from ZeMusic.utils.database import iffcook
 
+
+
 async def cookies():
     try:
         cook = await iffcook()  # استدعاء الدالة باستخدام await
@@ -24,9 +26,13 @@ async def cookies():
         if not os.path.exists(target_file):
             raise FileNotFoundError(f"No {cook}.txt found in the specified folder.")
         return f"cookies/{cook}.txt"
+    
+    
     except Exception as e:
         print(f"Error in cookies(): {e}")
         return None
+
+
 
 async def shell_cmd(cmd):
     proc = await asyncio.create_subprocess_shell(
@@ -141,7 +147,7 @@ class YouTubeAPI:
             "-g",
             "-f",
             "best[height<=?720][width<=?1280]",
-            f"--cookies {cookies()}",
+            f"--cookies {await cookies()}",
             f"{link}",
         ]
         proc = await asyncio.create_subprocess_exec(
@@ -200,7 +206,7 @@ class YouTubeAPI:
             return track_details, vidid
         except Exception:
             return await self._track(link)
-
+"""
     @asyncify
     def _track(self, q):
         options = {
@@ -225,9 +231,9 @@ class YouTubeAPI:
                 "thumb": details["thumbnails"][0]["url"],
             }
             return info, details["id"]
-
+"""
     @asyncify
-    def formats(self, link: str, videoid: Union[bool, str] = None):
+    async def formats(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
         if "&" in link:
@@ -235,7 +241,7 @@ class YouTubeAPI:
 
         ytdl_opts = {
             "quiet": True,
-            "cookiefile": f"{cookies()}",
+            "cookiefile": f"{await cookies()}",
         }
 
         ydl = YoutubeDL(ytdl_opts)
@@ -301,7 +307,7 @@ class YouTubeAPI:
             link = self.base + link
         loop = asyncio.get_running_loop()
 
-        def audio_dl():
+        async def audio_dl():
             ydl_optssx = {
                 "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -309,7 +315,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{await cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -320,7 +326,7 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        def video_dl():
+        async def video_dl():
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -328,7 +334,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{await cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -339,7 +345,7 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        def song_video_dl():
+        async def song_video_dl():
             formats = f"{format_id}+140"
             fpath = f"downloads/{title}"
             ydl_optssx = {
@@ -351,13 +357,13 @@ class YouTubeAPI:
                 "no_warnings": True,
                 "prefer_ffmpeg": True,
                 "merge_output_format": "mp4",
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{await cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
             x.download([link])
 
-        def song_audio_dl():
+        async def song_audio_dl():
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
                 "format": format_id,
@@ -374,7 +380,7 @@ class YouTubeAPI:
                         "preferredquality": "192",
                     }
                 ],
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{await cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -398,7 +404,7 @@ class YouTubeAPI:
                     "-g",
                     "-f",
                     "best[height<=?720][width<=?1280]",
-                    f"--cookies {cookies()}",
+                    f"--cookies {await cookies()}",
                     link,
                 ]
 
