@@ -35,7 +35,7 @@ def cookies1():
 
 async def cookies():
     try:
-        cook = iffcook()  # استدعاء الدالة باستخدام await
+        cook = await iffcook()  # استدعاء الدالة باستخدام await
         folder_path = f"{os.getcwd()}/cookies"
         target_file = os.path.join(folder_path, f"{cook}.txt")
         if not os.path.exists(target_file):
@@ -61,6 +61,7 @@ async def shell_cmd(cmd):
 
 
 class YouTubeAPI:
+    cookiefile_path = await cookies()
     def __init__(self):
         self.base = "https://www.youtube.com/watch?v="
         self.regex = r"(?:youtube\.com|youtu\.be)"
@@ -158,7 +159,7 @@ class YouTubeAPI:
             "-g",
             "-f",
             "best[height<=?720][width<=?1280]",
-            f"--cookies {cookies()}",
+            f"--cookies {cookiefile_path}",
             f"{link}",
         ]
         proc = await asyncio.create_subprocess_exec(
@@ -225,7 +226,7 @@ class YouTubeAPI:
             "noplaylist": True,
             "quiet": True,
             "extract_flat": "in_playlist",
-            "cookiefile": f"{cookies()}",
+            "cookiefile": f"{cookiefile_path}",
         }
         with YoutubeDL(options) as ydl:
             info_dict = ydl.extract_info(f"ytsearch: {q}", download=False)
@@ -252,7 +253,7 @@ class YouTubeAPI:
 
         ytdl_opts = {
             "quiet": True,
-            "cookiefile": f"{cookies()}",
+            "cookiefile": f"{cookiefile_path}",
         }
 
         ydl = YoutubeDL(ytdl_opts)
@@ -326,7 +327,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{cookiefile_path}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -345,7 +346,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{cookiefile_path}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -368,7 +369,7 @@ class YouTubeAPI:
                 "no_warnings": True,
                 "prefer_ffmpeg": True,
                 "merge_output_format": "mp4",
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{cookiefile_path}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -391,7 +392,7 @@ class YouTubeAPI:
                         "preferredquality": "192",
                     }
                 ],
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{cookiefile_path}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -415,7 +416,7 @@ class YouTubeAPI:
                     "-g",
                     "-f",
                     "best[height<=?720][width<=?1280]",
-                    f"--cookies {cookies()}",
+                    f"--cookies {cookiefile_path}",
                     link,
                 ]
 
