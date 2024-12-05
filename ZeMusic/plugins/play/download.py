@@ -54,7 +54,6 @@ async def song_downloader(client, message: Message):
     
     await m.edit("<b>جاري التحميل ♪</b>")
     
-    cookiefile_path = await cookies()
     if not cookiefile_path:
         await m.edit("خطأ في ملفات الكوكيز. يرجى التحقق.")
         return
@@ -65,7 +64,7 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        "cookiefile": cookiefile_path,  # استخدام مسار الكوكيز
+        "cookiefile": cookies(),  # استخدام مسار الكوكيز
     }
 
     try:
@@ -99,10 +98,10 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
-        if await iffcook():
-            await disable_iff()
+        if iffcook():
+            disable_iff()
         else:
-            await enable_iff()
+            enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
