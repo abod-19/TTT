@@ -112,8 +112,8 @@ class YouTubeAPI:
         return title, duration_min, duration_sec, thumbnail, vidid
 
     async def video(self, link: str, videoid: Union[bool, str] = None):
-        if not self.cookiefile_path:
-            raise ValueError("Cookie file path not initialized.")
+        if self.cookiefile_path is None:
+            self.cookiefile_path = await cookies()  # الحصول على الملف إذا لم يكن معرفًا
         if videoid:
             link = self.base + link
         if "&" in link:
@@ -137,73 +137,14 @@ class YouTubeAPI:
         else:
             return 0, stderr.decode()
 
-    async def download(
-        self,
-        link: str,
-        mystic,
-        video: Union[bool, str] = None,
-        videoid: Union[bool, str] = None,
-        songaudio: Union[bool, str] = None,
-        songvideo: Union[bool, str] = None,
-        format_id: Union[bool, str] = None,
-        title: Union[bool, str] = None,
-    ) -> str:
-        if not self.cookiefile_path:
-            raise ValueError("Cookie file path not initialized.")
-        loop = asyncio.get_running_loop()
+    async def playlist(self, link, limit, videoid: Union[bool, str] = None):
+        if self.cookiefile_path is None:
+            self.cookiefile_path = await cookies()  # الحصول على الملف إذا لم يكن معرفًا
+        if videoid:
+            link = self.listbase + link
+        if "&" in link:
+            link = link.split("&")[0]
 
-        def audio_dl():
-            ydl_optssx = {
-                "format": "bestaudio/best",
-                "outtmpl": "downloads/%(id)s.%(ext)s",
-                "geo_bypass": True,
-                "nocheckcertificate": True,
-                "quiet": True,
-                "no_warnings": True,
-                "cookiefile": f"{self.cookiefile_path}",
-            }
-
-            x = YoutubeDL(ydl_optssx)
-            info = x.extract_info(link, False)
-            xyz = os.path.join("downloads", f"{info['id']}.{info['ext']}")
-            if os.path.exists(xyz):
-                return xyz
-            x.download([link])
-            return xyz
-
-        if songaudio:
-            await loop.run_in_executor(None, audio_dl)
-            fpath = f"downloads/{title}.mp3"
-            return fpath
-    async def video_dl(self, link: str):
-        loop = asyncio.get_running_loop()
-
-        def download_video():
-            ydl_optssx = {
-                "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
-                "outtmpl": "downloads/%(id)s.%(ext)s",
-                "geo_bypass": True,
-                "nocheckcertificate": True,
-                "quiet": True,
-                "no_warnings": True,
-                "cookiefile": f"{self.cookiefile_path}",
-            }
-
-            x = YoutubeDL(ydl_optssx)
-            info = x.extract_info(link, False)
-            xyz = os.path.join("downloads", f"{info['id']}.{info['ext']}")
-            if os.path.exists(xyz):
-                return xyz
-            x.download([link])
-            return xyz
-
-        return await loop.run_in_executor(None, download_video)
-
-    async def playlist(self, link: str, limit: int):
-        """جلب قائمة التشغيل (Playlist) باستخدام yt-dlp."""
-        if not self.cookiefile_path:
-            raise ValueError("Cookie file path not initialized.")
-        
         cmd = (
             f"yt-dlp -i --compat-options no-youtube-unavailable-videos "
             f'--get-id --flat-playlist --playlist-end {limit} --skip-download "{link}" '
@@ -218,25 +159,17 @@ class YouTubeAPI:
             result = []
         return result
 
-    async def details(self, link: str, videoid: Union[bool, str] = None):
-        """جلب تفاصيل الفيديو مثل العنوان والصورة المصغرة والمدّة."""
+    async def track(self, link: str, videoid: Union[bool, str] = None):
+        if self.cookiefile_path is None:
+            self.cookiefile_path = await cookies()  # الحصول على الملف إذا لم يكن معرفًا
         if videoid:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
-        results = VideosSearch(link, limit=1)
-        for result in (await results.next())["result"]:
-            title = result["title"]
-            duration_min = result["duration"]
-            thumbnail = result["thumbnails"][0]["url"].split("?")[0]
-            vidid = result["id"]
-            duration_sec = int(time_to_seconds(duration_min)) if duration_min else 0
-        return title, duration_min, duration_sec, thumbnail, vidid
-
-    async def track(self, query: str):
-        """جلب تفاصيل المسار (Track) من البحث."""
+        if link.startswith("http://") or link.startswith("https://"):
+            return await self._track(link)
         try:
-            results = VideosSearch(query, limit=1)
+            results = VideosSearch(link, limit=1)
             for result in (await results.next())["result"]:
                 title = result["title"]
                 duration_min = result["duration"]
@@ -251,15 +184,44 @@ class YouTubeAPI:
                 "thumb": thumbnail,
             }
             return track_details, vidid
-        except Exception as e:
-            print(f"Error in track(): {e}")
-            return None, None
+        except Exception:
+            return await self._track(link)
 
     @asyncify
-    def formats(self, link: str):
-        """جلب الصيغ المتاحة لفيديو معين."""
-        if not self.cookiefile_path:
-            raise ValueError("Cookie file path not initialized.")
+    async def _track(self, q):
+        if self.cookiefile_path is None:
+            self.cookiefile_path = await cookies()  # الحصول على الملف إذا لم يكن معرفًا
+        options = {
+            "format": "best",
+            "noplaylist": True,
+            "quiet": True,
+            "extract_flat": "in_playlist",
+            "cookiefile": f"{self.cookiefile_path}",
+        }
+        with YoutubeDL(options) as ydl:
+            info_dict = ydl.extract_info(f"ytsearch: {q}", download=False)
+            details = info_dict.get("entries")[0]
+            info = {
+                "title": details["title"],
+                "link": details["url"],
+                "vidid": details["id"],
+                "duration_min": (
+                    seconds_to_min(details["duration"])
+                    if details["duration"] != 0
+                    else None
+                ),
+                "thumb": details["thumbnails"][0]["url"],
+            }
+            return info, details["id"]
+
+    @asyncify
+    async def formats(self, link: str, videoid: Union[bool, str] = None):
+        if self.cookiefile_path is None:
+            self.cookiefile_path = await cookies()  # الحصول على الملف إذا لم يكن معرفًا
+        if videoid:
+            link = self.base + link
+        if "&" in link:
+            link = link.split("&")[0]
 
         ytdl_opts = {
             "quiet": True,
@@ -294,19 +256,110 @@ class YouTubeAPI:
                             "yturl": link,
                         }
                     )
-        return formats_available
+        return formats_available, link
+    async def slider(
+        self,
+        link: str,
+        query_type: int,
+        videoid: Union[bool, str] = None,
+    ):
+        if videoid:
+            link = self.base + link
+        if "&" in link:
+            link = link.split("&")[0]
+        a = VideosSearch(link, limit=10)
+        result = (await a.next()).get("result")
+        title = result[query_type]["title"]
+        duration_min = result[query_type]["duration"]
+        vidid = result[query_type]["id"]
+        thumbnail = result[query_type]["thumbnails"][0]["url"].split("?")[0]
+        return title, duration_min, thumbnail, vidid
 
-    async def download_audio(self, link: str, title: str):
-        """تنزيل الصوت فقط."""
-        if not self.cookiefile_path:
-            raise ValueError("Cookie file path not initialized.")
-        
+    async def download(
+        self,
+        link: str,
+        mystic,
+        video: Union[bool, str] = None,
+        videoid: Union[bool, str] = None,
+        songaudio: Union[bool, str] = None,
+        songvideo: Union[bool, str] = None,
+        format_id: Union[bool, str] = None,
+        title: Union[bool, str] = None,
+    ) -> str:
+        if self.cookiefile_path is None:
+            self.cookiefile_path = await cookies()
+        if videoid:
+            link = self.base + link
         loop = asyncio.get_running_loop()
 
-        def download_audio():
-            fpath = f"downloads/{title}.%(ext)s"
-            ydl_opts = {
+        def audio_dl():
+            if self.cookiefile_path is None:
+                self.cookiefile_path = await cookies()
+            ydl_optssx = {
                 "format": "bestaudio/best",
+                "outtmpl": "downloads/%(id)s.%(ext)s",
+                "geo_bypass": True,
+                "nocheckcertificate": True,
+                "quiet": True,
+                "no_warnings": True,
+                "cookiefile": f"{self.cookiefile_path}",
+            }
+
+            x = YoutubeDL(ydl_optssx)
+            info = x.extract_info(link, False)
+            xyz = os.path.join("downloads", f"{info['id']}.{info['ext']}")
+            if os.path.exists(xyz):
+                return xyz
+            x.download([link])
+            return xyz
+
+        def video_dl():
+            if self.cookiefile_path is None:
+                self.cookiefile_path = await cookies()
+            ydl_optssx = {
+                "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
+                "outtmpl": "downloads/%(id)s.%(ext)s",
+                "geo_bypass": True,
+                "nocheckcertificate": True,
+                "quiet": True,
+                "no_warnings": True,
+                "cookiefile": f"{self.cookiefile_path}",
+            }
+
+            x = YoutubeDL(ydl_optssx)
+            info = x.extract_info(link, False)
+            xyz = os.path.join("downloads", f"{info['id']}.{info['ext']}")
+            if os.path.exists(xyz):
+                return xyz
+            x.download([link])
+            return xyz
+
+        def song_video_dl():
+            if self.cookiefile_path is None:
+                self.cookiefile_path = await cookies()
+            formats = f"{format_id}+140"
+            fpath = f"downloads/{title}"
+            ydl_optssx = {
+                "format": formats,
+                "outtmpl": fpath,
+                "geo_bypass": True,
+                "nocheckcertificate": True,
+                "quiet": True,
+                "no_warnings": True,
+                "prefer_ffmpeg": True,
+                "merge_output_format": "mp4",
+                "cookiefile": f"{self.cookiefile_path}",
+            }
+
+            x = YoutubeDL(ydl_optssx)
+            x.download([link])
+
+        def song_audio_dl():
+            if self.cookiefile_path is None:
+                self.cookiefile_path = await cookies()
+            fpath = f"downloads/{title}.%(ext)s"
+            ydl_optssx = {
+                "format": format_id,
                 "outtmpl": fpath,
                 "geo_bypass": True,
                 "nocheckcertificate": True,
@@ -323,102 +376,45 @@ class YouTubeAPI:
                 "cookiefile": f"{self.cookiefile_path}",
             }
 
-            x = YoutubeDL(ydl_opts)
+            x = YoutubeDL(ydl_optssx)
             x.download([link])
+
+        if songvideo:
+            await loop.run_in_executor(None, song_video_dl)
+            fpath = f"downloads/{title}.mp4"
             return fpath
-
-        return await loop.run_in_executor(None, download_audio)
-
-    async def slider(
-        self,
-        link: str,
-        query_type: int,
-        videoid: Union[bool, str] = None,
-    ):
-        """جلب تفاصيل متعددة من نتائج البحث."""
-        if videoid:
-            link = self.base + link
-        if "&" in link:
-            link = link.split("&")[0]
-        results = VideosSearch(link, limit=10)
-        result = (await results.next()).get("result")
-        title = result[query_type]["title"]
-        duration_min = result[query_type]["duration"]
-        vidid = result[query_type]["id"]
-        thumbnail = result[query_type]["thumbnails"][0]["url"].split("?")[0]
-        return title, duration_min, thumbnail, vidid
-
-    async def download(
-        self,
-        link: str,
-        video: Union[bool, str] = None,
-        videoid: Union[bool, str] = None,
-        songaudio: Union[bool, str] = None,
-        songvideo: Union[bool, str] = None,
-        format_id: Union[bool, str] = None,
-        title: Union[bool, str] = None,
-    ) -> str:
-        """تنزيل فيديو أو صوت بناءً على الخيارات."""
-        if not self.cookiefile_path:
-            raise ValueError("Cookie file path not initialized.")
-        
-        loop = asyncio.get_running_loop()
-
-        def download_audio():
-            ydl_opts = {
-                "format": "bestaudio/best",
-                "outtmpl": f"downloads/{title}.%(ext)s",
-                "geo_bypass": True,
-                "nocheckcertificate": True,
-                "quiet": True,
-                "no_warnings": True,
-                "cookiefile": f"{self.cookiefile_path}",
-                "postprocessors": [
-                    {
-                        "key": "FFmpegExtractAudio",
-                        "preferredcodec": "mp3",
-                        "preferredquality": "192",
-                    }
-                ],
-            }
-            x = YoutubeDL(ydl_opts)
-            x.download([link])
-            return f"downloads/{title}.mp3"
-
-        def download_video():
-            ydl_opts = {
-                "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
-                "outtmpl": f"downloads/{title}.%(ext)s",
-                "geo_bypass": True,
-                "nocheckcertificate": True,
-                "quiet": True,
-                "no_warnings": True,
-                "cookiefile": f"{self.cookiefile_path}",
-            }
-            x = YoutubeDL(ydl_opts)
-            x.download([link])
-            return f"downloads/{title}.mp4"
-
-        if songaudio:
-            return await loop.run_in_executor(None, download_audio)
-        elif songvideo:
-            return await loop.run_in_executor(None, download_video)
+        elif songaudio:
+            await loop.run_in_executor(None, song_audio_dl)
+            fpath = f"downloads/{title}.mp3"
+            return fpath
         elif video:
-            return await loop.run_in_executor(None, download_video)
+            if await is_on_off(config.YTDOWNLOADER):
+                direct = True
+                downloaded_file = await loop.run_in_executor(None, video_dl)
+            else:
+                command = [
+                    "yt-dlp",
+                    "-g",
+                    "-f",
+                    "best[height<=?720][width<=?1280]",
+                    f"--cookies {self.cookiefile_path}",
+                    link,
+                ]
+
+                proc = await asyncio.create_subprocess_exec(
+                    *command,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
+                stdout, stderr = await proc.communicate()
+
+                if stdout:
+                    downloaded_file = stdout.decode().split("\n")[0]
+                    direct = None
+                else:
+                    return
         else:
-            raise ValueError("Invalid download option selected.")
+            direct = True
+            downloaded_file = await loop.run_in_executor(None, audio_dl)
 
-    async def fetch_playlist(self, link: str, limit: int = 50):
-        """جلب قائمة تشغيل مع حد معين."""
-        playlist = await self.playlist(link, limit)
-        if not playlist:
-            raise ValueError("No videos found in the playlist.")
-        return playlist
-
-    async def fetch_details(self, link: str):
-        """جلب التفاصيل الخاصة بفيديو معين."""
-        return await self.details(link)
-
-    async def fetch_formats(self, link: str):
-        """جلب الصيغ المتاحة لفيديو."""
-        return await self.formats(link)
+        return downloaded_file, direct
