@@ -54,7 +54,7 @@ async def song_downloader(client, message: Message):
     
     await m.edit("<b>جاري التحميل ♪</b>")
     
-    cookiefile_path = cookies()
+    #cookiefile_path = cookies()
     #if not cookiefile_path:
         #await m.edit("خطأ في ملفات الكوكيز. يرجى التحقق.")
         #return
@@ -65,7 +65,7 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        "cookiefile": cookiefile_path,  # استخدام مسار الكوكيز
+        "cookiefile": ,  # استخدام مسار الكوكيز
     }
 
     try:
