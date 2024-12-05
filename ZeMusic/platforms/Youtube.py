@@ -18,13 +18,7 @@ from ZeMusic.utils.database import iffcook
 
 def cookies():
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # إذا كان هناك event loop يعمل بالفعل
-            cook = asyncio.ensure_future(iffcook())  # جدولة iffcook للتشغيل
-            loop.run_until_complete(cook)
-        else:
-            cook = loop.run_until_complete(iffcook())  # تشغيل الدالة مباشرة
+        cook = iffcook()  # استدعاء الدالة باستخدام await
         folder_path = f"{os.getcwd()}/cookies"
         target_file = os.path.join(folder_path, f"{cook}.txt")
         if not os.path.exists(target_file):
@@ -33,7 +27,6 @@ def cookies():
     except Exception as e:
         print(f"Error in cookies(): {e}")
         return None
-
 
 async def shell_cmd(cmd):
     proc = await asyncio.create_subprocess_shell(
