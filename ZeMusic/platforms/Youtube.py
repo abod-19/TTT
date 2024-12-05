@@ -137,12 +137,13 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
+        cookies_path = asyncio.run(cookies())
         cmd = [
             "yt-dlp",
             "-g",
             "-f",
             "best[height<=?720][width<=?1280]",
-            f"--cookies {cookies()}",
+            f"--cookies {cookies_path}",
             f"{link}",
         ]
         proc = await asyncio.create_subprocess_exec(
@@ -204,12 +205,13 @@ class YouTubeAPI:
 
     @asyncify
     def _track(self, q):
+        cookies_path = asyncio.run(cookies())
         options = {
             "format": "best",
             "noplaylist": True,
             "quiet": True,
             "extract_flat": "in_playlist",
-            "cookiefile": f"{cookies()}",
+            "cookiefile": f"{cookies_path}",
         }
         with YoutubeDL(options) as ydl:
             info_dict = ydl.extract_info(f"ytsearch: {q}", download=False)
@@ -234,9 +236,10 @@ class YouTubeAPI:
         if "&" in link:
             link = link.split("&")[0]
 
+        cookies_path = asyncio.run(cookies())
         ytdl_opts = {
             "quiet": True,
-            "cookiefile": f"{cookies()}",
+            "cookiefile": f"{cookies_path}",
         }
 
         ydl = YoutubeDL(ytdl_opts)
@@ -303,6 +306,7 @@ class YouTubeAPI:
         loop = asyncio.get_running_loop()
 
         def audio_dl():
+            cookies_path = asyncio.run(cookies())
             ydl_optssx = {
                 "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -310,7 +314,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{cookies_path}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -322,6 +326,7 @@ class YouTubeAPI:
             return xyz
 
         def video_dl():
+            cookies_path = asyncio.run(cookies())
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -329,7 +334,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{cookies_path}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -343,6 +348,7 @@ class YouTubeAPI:
         def song_video_dl():
             formats = f"{format_id}+140"
             fpath = f"downloads/{title}"
+            cookies_path = asyncio.run(cookies())
             ydl_optssx = {
                 "format": formats,
                 "outtmpl": fpath,
@@ -352,7 +358,7 @@ class YouTubeAPI:
                 "no_warnings": True,
                 "prefer_ffmpeg": True,
                 "merge_output_format": "mp4",
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{cookies_path}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -360,6 +366,7 @@ class YouTubeAPI:
 
         def song_audio_dl():
             fpath = f"downloads/{title}.%(ext)s"
+            cookies_path = asyncio.run(cookies())
             ydl_optssx = {
                 "format": format_id,
                 "outtmpl": fpath,
@@ -375,7 +382,7 @@ class YouTubeAPI:
                         "preferredquality": "192",
                     }
                 ],
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{cookies_path}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -394,12 +401,13 @@ class YouTubeAPI:
                 direct = True
                 downloaded_file = await loop.run_in_executor(None, video_dl)
             else:
+                cookies_path = asyncio.run(cookies())
                 command = [
                     "yt-dlp",
                     "-g",
                     "-f",
                     "best[height<=?720][width<=?1280]",
-                    f"--cookies {cookies()}",
+                    f"--cookies {cookies_path}",
                     link,
                 ]
 
