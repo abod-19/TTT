@@ -54,10 +54,10 @@ async def song_downloader(client, message: Message):
     
     await m.edit("<b>جاري التحميل ♪</b>")
     
-    cookiefile_path = await cookies()
-    if not cookiefile_path:
-        await m.edit("خطأ في ملفات الكوكيز. يرجى التحقق.")
-        return
+    cookiefile_path = cookies()
+    #if not cookiefile_path:
+        #await m.edit("خطأ في ملفات الكوكيز. يرجى التحقق.")
+        #return
 
     ydl_opts = {
         "format": "bestaudio[ext=m4a]",  # تحديد صيغة M4A
