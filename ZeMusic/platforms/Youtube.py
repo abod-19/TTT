@@ -207,7 +207,30 @@ class YouTubeAPI:
         except Exception:
             return await self._track(link)
 
-    #######
+    @asyncify
+    def _track(self, q):
+        options = {
+            "format": "best",
+            "noplaylist": True,
+            "quiet": True,
+            "extract_flat": "in_playlist",
+            "cookiefile": f"{cookies()}",
+        }
+        with YoutubeDL(options) as ydl:
+            info_dict = ydl.extract_info(f"ytsearch: {q}", download=False)
+            details = info_dict.get("entries")[0]
+            info = {
+                "title": details["title"],
+                "link": details["url"],
+                "vidid": details["id"],
+                "duration_min": (
+                    seconds_to_min(details["duration"])
+                    if details["duration"] != 0
+                    else None
+                ),
+                "thumb": details["thumbnails"][0]["url"],
+            }
+            return info, details["id"]
 
     @asyncify
     async def formats(self, link: str, videoid: Union[bool, str] = None):
@@ -364,17 +387,17 @@ class YouTubeAPI:
             x.download([link])
 
         if songvideo:
-            await loop.run_in_executor(None, song_video_dl)
+            await song_video_dl()
             fpath = f"downloads/{title}.mp4"
             return fpath
         elif songaudio:
-            await loop.run_in_executor(None, song_audio_dl)
+            await song_audio_dl()
             fpath = f"downloads/{title}.mp3"
             return fpath
         elif video:
             if await is_on_off(config.YTDOWNLOADER):
                 direct = True
-                downloaded_file = await loop.run_in_executor(None, video_dl)
+                downloaded_file = await video_dl()
             else:
                 command = [
                     "yt-dlp",
@@ -399,6 +422,6 @@ class YouTubeAPI:
                     return
         else:
             direct = True
-            downloaded_file = await loop.run_in_executor(None, audio_dl)
+            downloaded_file = await audio_dl()
 
         return downloaded_file, direct
