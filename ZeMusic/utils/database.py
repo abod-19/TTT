@@ -43,8 +43,8 @@ wedb = mongodb.we
 lfdb = mongodb.lf
 iffdb = mongodb.iff
 
-async def iffcook():
-    settings = await iffdb.find_one({"name": "search"})
+def iffcook():
+    settings = iffdb.find_one({"name": "search"})
     if settings:
         return settings.get("enabled", False)
     return False
