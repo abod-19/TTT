@@ -1,12 +1,3 @@
-#
-# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
-#
-# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
-# and is released under the MIT License.
-# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
-#
-# All rights reserved.
-#
 import asyncio
 import glob
 import os
@@ -61,7 +52,6 @@ async def shell_cmd(cmd):
 
 
 class YouTubeAPI:
-    cookiefile_path = await cookies()
     def __init__(self):
         self.base = "https://www.youtube.com/watch?v="
         self.regex = r"(?:youtube\.com|youtu\.be)"
@@ -150,6 +140,7 @@ class YouTubeAPI:
         return thumbnail
 
     async def video(self, link: str, videoid: Union[bool, str] = None):
+        cookiefile_path = await cookies()
         if videoid:
             link = self.base + link
         if "&" in link:
@@ -220,7 +211,8 @@ class YouTubeAPI:
             return await self._track(link)
 
     @asyncify
-    def _track(self, q):
+    async def _track(self, q):
+        cookiefile_path = await cookies()
         options = {
             "format": "best",
             "noplaylist": True,
@@ -245,7 +237,8 @@ class YouTubeAPI:
             return info, details["id"]
 
     @asyncify
-    def formats(self, link: str, videoid: Union[bool, str] = None):
+    async def formats(self, link: str, videoid: Union[bool, str] = None):
+        cookiefile_path = await cookies()
         if videoid:
             link = self.base + link
         if "&" in link:
@@ -318,8 +311,8 @@ class YouTubeAPI:
         if videoid:
             link = self.base + link
         loop = asyncio.get_running_loop()
-
-        def audio_dl():
+        cookiefile_path = await cookies()
+        async def audio_dl():
             ydl_optssx = {
                 "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -338,7 +331,7 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        def video_dl():
+        async def video_dl():
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
