@@ -1,38 +1,37 @@
-#
-# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
-#
-# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
-# and is released under the MIT License.
-# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
-#
-# All rights reserved.
-#
-import os
-import re
-import glob
-import random
 import asyncio
+import glob
+import os
+import random
+import re
 from typing import Union
 
-from yt_dlp import YoutubeDL
 from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from youtubesearchpython.__future__ import VideosSearch
+from yt_dlp import YoutubeDL
 
 import config
 from ZeMusic.utils.database import is_on_off
+from ZeMusic.utils.formatters import time_to_seconds, seconds_to_min
 from ZeMusic.utils.decorators import asyncify
-from ZeMusic.utils.formatters import seconds_to_min, time_to_seconds
+from ZeMusic.utils.database import iffcook
 
-USE_COOKIES_ONLY = False
 
-def cookies():
-    folder_path = f"{os.getcwd()}/cookies"
-    txt_files = glob.glob(os.path.join(folder_path, "*.txt"))
-    if not txt_files:
-        raise FileNotFoundError("No .txt files found in the specified folder.")
-    cookie_txt_file = random.choice(txt_files)
-    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
+
+async def cookies():
+    try:
+        cook = await iffcook()  # استدعاء الدالة باستخدام await
+        folder_path = f"{os.getcwd()}/cookies"
+        target_file = os.path.join(folder_path, f"{cook}.txt")
+        if not os.path.exists(target_file):
+            raise FileNotFoundError(f"No {cook}.txt found in the specified folder.")
+        return f"cookies/{cook}.txt"
+    
+    
+    except Exception as e:
+        print(f"Error in cookies(): {e}")
+        return None
+
 
 
 async def shell_cmd(cmd):
@@ -148,7 +147,7 @@ class YouTubeAPI:
             "-g",
             "-f",
             "best[height<=?720][width<=?1280]",
-            f"--cookies {cookies()}",
+            f"--cookies {await cookies()}",
             f"{link}",
         ]
         proc = await asyncio.create_subprocess_exec(
@@ -178,7 +177,7 @@ class YouTubeAPI:
 
         try:
             result = [key for key in playlist.split("\n") if key]
-        except Exception:
+        except:
             result = []
         return result
 
@@ -208,33 +207,33 @@ class YouTubeAPI:
         except Exception:
             return await self._track(link)
 
-    @asyncify
-    def _track(self, q):
-        options = {
-            "format": "best",
-            "noplaylist": True,
-            "quiet": True,
-            "extract_flat": "in_playlist",
-            "cookiefile": f"{cookies()}",
-        }
-        with YoutubeDL(options) as ydl:
-            info_dict = ydl.extract_info(f"ytsearch: {q}", download=False)
-            details = info_dict.get("entries")[0]
-            info = {
-                "title": details["title"],
-                "link": details["url"],
-                "vidid": details["id"],
-                "duration_min": (
-                    seconds_to_min(details["duration"])
-                    if details["duration"] != 0
-                    else None
-                ),
-                "thumb": details["thumbnails"][0]["url"],
-            }
-            return info, details["id"]
+    #
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    #
 
     @asyncify
-    def formats(self, link: str, videoid: Union[bool, str] = None):
+    async def formats(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
         if "&" in link:
@@ -242,7 +241,7 @@ class YouTubeAPI:
 
         ytdl_opts = {
             "quiet": True,
-            "cookiefile": f"{cookies()}",
+            "cookiefile": f"{await cookies()}",
         }
 
         ydl = YoutubeDL(ytdl_opts)
@@ -305,25 +304,18 @@ class YouTubeAPI:
         title: Union[bool, str] = None,
     ) -> str:
         if videoid:
-            vidid = link
             link = self.base + link
-        else:
-            pattern = r"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|live_stream\?stream_id=|(?:\/|\?|&)v=)?([^&\n]+)"
-            match = re.search(pattern, link)
-            vidid = match.group(1)
+        loop = asyncio.get_running_loop()
 
-        @asyncify
-        def audio_dl():
+        async def audio_dl():
             ydl_optssx = {
                 "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
                 "geo_bypass": True,
-                "noplaylist": True,
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile": f"{cookies()}",
-                "prefer_ffmpeg": True,
+                "cookiefile": f"{await cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -334,18 +326,15 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        @asyncify
-        def video_dl():
+        async def video_dl():
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
                 "geo_bypass": True,
-                "noplaylist": True,
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "prefer_ffmpeg": True,
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{await cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -356,36 +345,30 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        @asyncify
-        def song_video_dl():
+        async def song_video_dl():
             formats = f"{format_id}+140"
             fpath = f"downloads/{title}"
             ydl_optssx = {
                 "format": formats,
                 "outtmpl": fpath,
                 "geo_bypass": True,
-                "noplaylist": True,
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
                 "prefer_ffmpeg": True,
                 "merge_output_format": "mp4",
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{await cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
-            info = x.extract_info(link)
-            file_path = x.prepare_filename(info)
-            return file_path
+            x.download([link])
 
-        @asyncify
-        def song_audio_dl():
+        async def song_audio_dl():
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
                 "format": format_id,
                 "outtmpl": fpath,
                 "geo_bypass": True,
-                "noplaylist": True,
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
@@ -397,46 +380,20 @@ class YouTubeAPI:
                         "preferredquality": "192",
                     }
                 ],
-                "cookiefile": f"{cookies()}",
+                "cookiefile": f"{await cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
-            info = x.extract_info(link)
-            file_path = x.prepare_filename(info)
-            return file_path
-
-        @asyncify
-        def download_with_api():
-            ydl_optssx = {
-                "outtmpl": "downloads/%(id)s.%(ext)s",
-                "nocheckcertificate": True,
-                "quiet": True,
-                "no_warnings": True,
-                "nooverwrites": False,
-                "continuedl": True,
-            }
-
-            url = f"https://sapi.okflix.top/tube/stream/{vidid}.mp3"
-            
-            try:
-                with YoutubeDL(ydl_optssx) as ydl:
-                    info = ydl.extract_info(url)
-                    file_path = ydl.prepare_filename(info)
-                    return file_path
-            except Exception:
-                return None
+            x.download([link])
 
         if songvideo:
-            return await song_video_dl()
-
-        elif songaudio:
-            if USE_COOKIES_ONLY:
-                return await song_audio_dl()
-            fpath = await download_with_api()
-            if not fpath:
-                fpath = await song_audio_dl()
+            await song_video_dl()
+            fpath = f"downloads/{title}.mp4"
             return fpath
-
+        elif songaudio:
+            await song_audio_dl()
+            fpath = f"downloads/{title}.mp3"
+            return fpath
         elif video:
             if await is_on_off(config.YTDOWNLOADER):
                 direct = True
@@ -446,8 +403,8 @@ class YouTubeAPI:
                     "yt-dlp",
                     "-g",
                     "-f",
-                    "best",
-                    f"--cookies {cookies()}",
+                    "best[height<=?720][width<=?1280]",
+                    f"--cookies {await cookies()}",
                     link,
                 ]
 
@@ -466,11 +423,6 @@ class YouTubeAPI:
                     direct = True
         else:
             direct = True
-            if USE_COOKIES_ONLY:
-                downloaded_file = await audio_dl()
-            else:
-                downloaded_file = await download_with_api()
-                if not downloaded_file:
-                    downloaded_file = await audio_dl()
+            downloaded_file = await audio_dl()
 
         return downloaded_file, direct
