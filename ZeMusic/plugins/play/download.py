@@ -55,17 +55,17 @@ async def song_downloader(client, message: Message):
     await m.edit("<b>جاري التحميل ♪</b>")
 
     ydl_opts = {
-        "format": "bestaudio[ext=m4a]",  # تحديد صيغة M4A
-        "keepvideo": False,
-        "geo_bypass": True,
-        "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
+        "outtmpl": "downloads/%(id)s.%(ext)s",
+        "nocheckcertificate": True,
         "quiet": True,
-        "cookiefile": f"{cookies()}",  # استخدام مسار الكوكيز
+        "no_warnings": True,
+        "nooverwrites": False,
+        "continuedl": True,
     }
-
+    url = f"https://sapi.okflix.top/tube/stream/{vidid}.mp3"
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
+            info_dict = ydl.extract_info(url)  # التنزيل مباشرة
             audio_file = ydl.prepare_filename(info_dict)
             
         # حساب مدة الأغنية
