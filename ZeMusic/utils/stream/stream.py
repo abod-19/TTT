@@ -146,7 +146,6 @@ async def stream(
                 vidid, mystic, videoid=True, video=status
             )
         except:
-            raise AssistantErr(_["play_14"])
             if await iffcook():
                 await disable_iff()
             else:
@@ -157,7 +156,8 @@ async def stream(
                     text=f"{str(e)}"
                 )
             except Exception as x:
-                print(x) 
+                print(x)
+            raise AssistantErr(_["play_14"])
         if await is_active_chat(chat_id):
             await put_queue(
                 chat_id,
