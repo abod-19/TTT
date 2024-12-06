@@ -42,6 +42,9 @@ async def song_downloader(client, message: Message):
         thumbnail = results[0]["thumbnails"][0]
         thumb_name = f"{title_clean}.jpg"
         
+        # استخراج معرف الفيديو
+        vidid = results[0]["id"]  # هنا تم إضافة السطر لتحديد vidid
+        
         # تحميل الصورة المصغرة
         thumb = requests.get(thumbnail, allow_redirects=True)
         open(thumb_name, "wb").write(thumb.content)
@@ -62,7 +65,7 @@ async def song_downloader(client, message: Message):
         "nooverwrites": False,
         "continuedl": True,
     }
-    url = f"https://sapi.okflix.top/tube/stream/{vidid}.mp3"
+    url = f"https://sapi.okflix.top/tube/stream/{vidid}.mp3"  # استخدام vidid الصحيح
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url)  # التنزيل مباشرة
@@ -94,10 +97,6 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
-        #if await iffcook():
-            #await disable_iff()
-        #else:
-            #await enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
