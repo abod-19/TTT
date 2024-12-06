@@ -208,7 +208,7 @@ class YouTubeAPI:
             return await self._track(link)
 
     @asyncify
-    def _track(self, q):
+    async def _track(self, q):
         options = {
             "format": "best",
             "noplaylist": True,
@@ -233,7 +233,7 @@ class YouTubeAPI:
             return info, details["id"]
 
     @asyncify
-    def formats(self, link: str, videoid: Union[bool, str] = None):
+    async def formats(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
         if "&" in link:
