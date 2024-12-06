@@ -18,7 +18,7 @@ from ZeMusic.utils.inline import aq_markup, close_markup, stream_markup
 from ZeMusic.utils.pastebin import ModyBin
 from ZeMusic.utils.stream.queue import put_queue, put_queue_index
 from ZeMusic.utils.thumbnails import get_thumb
-
+from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 
 async def stream(
     _,
@@ -83,6 +83,17 @@ async def stream(
                     )
                 except:
                     raise AssistantErr(_["play_14"])
+                    if await iffcook():
+                        await disable_iff()
+                    else:
+                        await enable_iff()
+                    try:
+                        await app.send_message(
+                            chat_id="@IC_19",
+                            text=f"{str(e)}"
+                        )
+                    except Exception as x:
+                        print(x) 
                 await Mody.join_call(
                     chat_id,
                     original_chat_id,
