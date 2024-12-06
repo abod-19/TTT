@@ -42,9 +42,6 @@ async def song_downloader(client, message: Message):
         thumbnail = results[0]["thumbnails"][0]
         thumb_name = f"{title_clean}.jpg"
         
-        # استخراج معرف الفيديو
-        vidid = results[0]["id"]  # هنا تم إضافة السطر لتحديد vidid
-        
         # تحميل الصورة المصغرة
         thumb = requests.get(thumbnail, allow_redirects=True)
         open(thumb_name, "wb").write(thumb.content)
@@ -58,17 +55,17 @@ async def song_downloader(client, message: Message):
     await m.edit("<b>جاري التحميل ♪</b>")
 
     ydl_opts = {
-        "outtmpl": "downloads/%(id)s.%(ext)s",
-        "nocheckcertificate": True,
+        "format": "bestaudio[ext=m4a]",  # تحديد صيغة M4A
+        "keepvideo": False,
+        "geo_bypass": True,
+        "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        "no_warnings": True,
-        "nooverwrites": False,
-        "continuedl": True,
+        "cookiefile": f"{await cookies()}",  # استخدام مسار الكوكيز
     }
-    url = f"https://sapi.okflix.top/tube/stream/{vidid}.mp3"  # استخدام vidid الصحيح
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url)  # التنزيل مباشرة
+            info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
             audio_file = ydl.prepare_filename(info_dict)
             
         # حساب مدة الأغنية
@@ -97,6 +94,10 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
+        if await iffcook():
+            await disable_iff()
+        else:
+            await enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
