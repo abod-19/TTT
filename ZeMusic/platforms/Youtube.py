@@ -22,13 +22,12 @@ from ZeMusic.utils.database import iffcook
 
 
 async def cookies():
-    try:
-        cook = await iffcook()  # استدعاء الدالة باستخدام await
-        folder_path = f"{os.getcwd()}/cookies"
-        target_file = os.path.join(folder_path, f"{cook}.txt")
-        if not os.path.exists(target_file):
-            raise FileNotFoundError(f"No {cook}.txt found in the specified folder.")
-        return f"cookies/{cook}.txt"
+    cook = await iffcook()  # استدعاء الدالة باستخدام await
+    folder_path = f"{os.getcwd()}/cookies"
+    target_file = os.path.join(folder_path, f"{cook}.txt")
+    if not os.path.exists(target_file):
+        raise FileNotFoundError(f"No {cook}.txt found in the specified folder.")
+    return f"cookies/{cook}.txt"
 
 
 def cookie_txt_file():
