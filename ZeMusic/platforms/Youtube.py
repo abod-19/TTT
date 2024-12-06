@@ -387,13 +387,13 @@ class YouTubeAPI:
             x.download([link])
 
         if songvideo:
-            await song_video_dl()
-            fpath = f"downloads/{title}.mp4"
-            return fpath
+            return await song_video_dl()
+            #fpath = f"downloads/{title}.mp4"
+            #return fpath
         elif songaudio:
-            await song_audio_dl()
-            fpath = f"downloads/{title}.mp3"
-            return fpath
+            return await song_audio_dl()
+            #fpath = f"downloads/{title}.mp3"
+            #return fpath
         elif video:
             if await is_on_off(config.YTDOWNLOADER):
                 direct = True
