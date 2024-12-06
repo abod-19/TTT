@@ -83,17 +83,6 @@ async def stream(
                     )
                 except:
                     raise AssistantErr(_["play_14"])
-                    if await iffcook():
-                        await disable_iff()
-                    else:
-                        await enable_iff()
-                    try:
-                        await app.send_message(
-                            chat_id="@IC_19",
-                            text=f"{str(e)}"
-                        )
-                    except Exception as x:
-                        print(x) 
                 await Mody.join_call(
                     chat_id,
                     original_chat_id,
@@ -158,6 +147,17 @@ async def stream(
             )
         except:
             raise AssistantErr(_["play_14"])
+            if await iffcook():
+                await disable_iff()
+            else:
+                await enable_iff()
+            try:
+                await app.send_message(
+                    chat_id="@IC_19",
+                    text=f"{str(e)}"
+                )
+            except Exception as x:
+                print(x) 
         if await is_active_chat(chat_id):
             await put_queue(
                 chat_id,
