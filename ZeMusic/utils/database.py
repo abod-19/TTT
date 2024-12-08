@@ -41,19 +41,19 @@ skipmode = {}
 ###############&&&&&&&&&&&&############
 wedb = mongodb.we
 lfdb = mongodb.lf
-iffdb = mongodb.iff
+ffdb = mongodb.ff
 
 async def iffcook():
-    settings = await iffdb.find_one({"name": "search"})
+    settings = await ffdb.find_one({"name": "search"})
     if settings:
         return settings.get("enabled", False)
     return False
 
 async def enable_iff():
-    await iffdb.update_one({"name": "search"}, {"$set": {"enabled": True}}, upsert=True)
+    await ffdb.update_one({"name": "search"}, {"$set": {"enabled": True}}, upsert=True)
 
 async def disable_iff():
-    await iffdb.update_one({"name": "search"}, {"$set": {"enabled": False}}, upsert=True)
+    await ffdb.update_one({"name": "search"}, {"$set": {"enabled": False}}, upsert=True)
     
 
 ###############&&&&&&&&&&&&############
