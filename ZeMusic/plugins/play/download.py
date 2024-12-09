@@ -1,22 +1,20 @@
-import config
 import os
 import re
 import requests
+import config
 import yt_dlp
-from youtube_search import YoutubeSearch
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from youtube_search import YoutubeSearch
 from ZeMusic.platforms.Youtube import cookies
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 
-# وظيفة لحذف الملفات المؤقتة
 def remove_if_exists(path):
     if os.path.exists(path):
         os.remove(path)
 
-# رابط القناة والبحث
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
 Nam = f"{config.BOT_NAME} بحث"
@@ -56,9 +54,8 @@ async def song_downloader(client, message: Message):
     
     await m.edit("<b>جاري التحميل ♪</b>")
 
-    # إعدادات yt_dlp
     ydl_opts = {
-        "format": "best",  # استخدام أفضل صيغة متاحة
+        "format": "bestaudio/best",  # تحديد صيغة M4A
         "keepvideo": False,
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
@@ -67,9 +64,8 @@ async def song_downloader(client, message: Message):
     }
 
     try:
-        # محاولة تنزيل الفيديو
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=True)
+            info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
             audio_file = ydl.prepare_filename(info_dict)
             
         # حساب مدة الأغنية
@@ -96,17 +92,20 @@ async def song_downloader(client, message: Message):
         )
         await m.delete()
 
-    except yt_dlp.utils.DownloadError as e:
-        # إذا فشلت الصيغة، جرب صيغة أخرى
-        await m.edit(f"- الصيغة المطلوبة غير متاحة. جاري تجربة صيغة بديلة...")
-        ydl_opts["format"] = "bestaudio/best"  # تغيير الصيغة إلى خيار آخر
+    except Exception as e:
+        await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
+        if await iffcook():
+            await disable_iff()
+        else:
+            await enable_iff()
         try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info_dict = ydl.extract_info(link, download=True)
-                audio_file = ydl.prepare_filename(info_dict)
-        except Exception as e:
-            await m.edit(f"- لم يتم العثور على نتائج: {str(e)}")
-            return
+            await app.send_message(
+                chat_id="@IC_19",
+                text=f"{str(e)}"
+            )
+        except Exception as x:
+            print(x) 
+        print(e)
 
     # حذف الملفات المؤقتة
     try:
