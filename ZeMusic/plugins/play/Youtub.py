@@ -4,7 +4,7 @@ import asyncio
 import os
 import time
 from urllib.parse import urlparse
-
+from ZeMusic.platforms.Youtube import cookies
 import wget
 from pyrogram import filters
 from pyrogram.types import Message
@@ -71,6 +71,7 @@ async def ytmusic(client, message: Message):
         "outtmpl": "%(id)s.mp4",
         "logtostderr": False,
         "quiet": True,
+        "cookiefile": f"{await cookies()}",
     }
     try:
         with YoutubeDL(opts) as ytdl:
