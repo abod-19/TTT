@@ -1,3 +1,4 @@
+import config
 import os
 import re
 import requests
@@ -57,7 +58,7 @@ async def song_downloader(client, message: Message):
 
     # إعدادات yt_dlp
     ydl_opts = {
-        "format": "bestaudio",  # استخدام أفضل صيغة متاحة
+        "format": "best",  # استخدام أفضل صيغة متاحة
         "keepvideo": False,
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
