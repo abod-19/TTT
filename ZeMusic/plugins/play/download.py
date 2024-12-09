@@ -6,7 +6,7 @@ import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
-from ZeMusic.platforms.Youtube import cookies
+#from ZeMusic.platforms.Youtube import cookies
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
@@ -14,6 +14,15 @@ from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 def remove_if_exists(path):
     if os.path.exists(path):
         os.remove(path)
+
+def cookies():
+    folder_path = f"{os.getcwd()}/cookies"
+    txt_files = glob.glob(os.path.join(folder_path, "*.txt"))
+    if not txt_files:
+        raise FileNotFoundError("No .txt files found in the specified folder.")
+    cookie_txt_file = random.choice(txt_files)
+    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
+
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
@@ -60,7 +69,7 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        "cookiefile": f"{await cookies()}",  # استخدام مسار الكوكيز
+        "cookiefile": f"{cookies()}",  # استخدام مسار الكوكيز
     }
 
     try:
@@ -94,10 +103,10 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
-        if await iffcook():
-            await disable_iff()
-        else:
-            await enable_iff()
+        #if await iffcook():
+            #await disable_iff()
+        #else:
+            #await enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
