@@ -62,7 +62,8 @@ async def song_downloader(client, message: Message):
     
     await m.edit("<b>جاري التحميل ♪</b>")
 
-    formats_to_try = ["bestaudio/best", "m4a", "mp3"]
+    # تجربة عدة صيغ
+    formats_to_try = ["bestaudio/best", "140", "m4a", "mp3"]
     success = False
 
     for fmt in formats_to_try:
@@ -83,7 +84,7 @@ async def song_downloader(client, message: Message):
                 break
         except Exception as e:
             print(f"Format {fmt} failed: {e}")
-    
+
     if not success:
         await m.edit("- لم يتم العثور على صيغة متوافقة للتنزيل.")
         return
