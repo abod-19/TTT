@@ -8,10 +8,8 @@ import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
-#from ZeMusic.platforms.Youtube import cookies
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
-from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 
 def remove_if_exists(path):
     if os.path.exists(path):
@@ -24,7 +22,6 @@ def cookies():
         raise FileNotFoundError("No .txt files found in the specified folder.")
     cookie_txt_file = random.choice(txt_files)
     return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
-
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
@@ -65,20 +62,33 @@ async def song_downloader(client, message: Message):
     
     await m.edit("<b>جاري التحميل ♪</b>")
 
-    ydl_opts = {
-        "format": "bestaudio/best",  # تحديد صيغة M4A
-        "keepvideo": False,
-        "geo_bypass": True,
-        "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
-        "quiet": True,
-        "cookiefile": f"{cookies()}",  # استخدام مسار الكوكيز
-    }
+    formats_to_try = ["bestaudio/best", "m4a", "mp3"]
+    success = False
+
+    for fmt in formats_to_try:
+        ydl_opts = {
+            "format": fmt,
+            "keepvideo": False,
+            "geo_bypass": True,
+            "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
+            "quiet": True,
+            "cookiefile": f"{cookies()}",  # استخدام مسار الكوكيز
+        }
+
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
+                audio_file = ydl.prepare_filename(info_dict)
+                success = True
+                break
+        except Exception as e:
+            print(f"Format {fmt} failed: {e}")
+    
+    if not success:
+        await m.edit("- لم يتم العثور على صيغة متوافقة للتنزيل.")
+        return
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
-            audio_file = ydl.prepare_filename(info_dict)
-            
         # حساب مدة الأغنية
         secmul, dur, dur_arr = 1, 0, duration.split(":")
         for i in range(len(dur_arr) - 1, -1, -1):
@@ -104,18 +114,7 @@ async def song_downloader(client, message: Message):
         await m.delete()
 
     except Exception as e:
-        await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
-        #if await iffcook():
-            #await disable_iff()
-        #else:
-            #await enable_iff()
-        try:
-            await app.send_message(
-                chat_id="@IC_19",
-                text=f"{str(e)}"
-            )
-        except Exception as x:
-            print(x) 
+        await m.edit(f"- حدث خطأ أثناء إرسال الملف: {str(e)}")
         print(e)
 
     # حذف الملفات المؤقتة
