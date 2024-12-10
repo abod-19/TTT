@@ -62,7 +62,22 @@ async def song_downloader(client, message: Message):
     
     await m.edit("<b>جاري التحميل ♪</b>")
 
-    # تجربة عدة صيغ
+    # عرض الصيغ المتاحة
+    try:
+        ydl_opts = {"listformats": True}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(link, download=False)
+            formats = info_dict["formats"]
+            available_formats = "\n".join(
+                [f"{f['format_id']}: {f['ext']} - {f['format_note']}" for f in formats]
+            )
+            print("Available formats:\n", available_formats)
+    except Exception as e:
+        await m.edit(f"- حدث خطأ أثناء الحصول على الصيغ المتاحة: {str(e)}")
+        print(e)
+        return
+
+    # تجربة صيغة مناسبة
     formats_to_try = ["bestaudio/best", "140", "m4a", "mp3"]
     success = False
 
@@ -86,7 +101,7 @@ async def song_downloader(client, message: Message):
             print(f"Format {fmt} failed: {e}")
 
     if not success:
-        await m.edit("- لم يتم العثور على صيغة متوافقة للتنزيل.")
+        await m.edit("- لم يتم العثور على صيغة متوافقة للتنزيل. يرجى مراجعة الصيغ المتاحة.")
         return
 
     try:
