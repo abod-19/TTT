@@ -36,7 +36,7 @@ async def song_downloader(client, message: Message):
     else:
         query = " ".join(message.command[1:])
         
-    m = await message.reply_text("<b>جـارِ البحث ♪</b>")
+    m = await message.reply_text("<b>⇜ جـارِ البحث ..</b>")
     
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
@@ -49,10 +49,15 @@ async def song_downloader(client, message: Message):
         title_clean = re.sub(r'[\\/*?:"<>|]', "", title)  # تنظيف اسم الملف
         thumbnail = results[0]["thumbnails"][0]
         thumb_name = f"{title_clean}.jpg"
-        
+
         # تحميل الصورة المصغرة
-        thumb = requests.get(thumbnail, allow_redirects=True)
-        open(thumb_name, "wb").write(thumb.content)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(thumbnail) as resp:
+                if resp.status == 200:
+                    f = await aiofiles.open(thumb_name, mode='wb')
+                    await f.write(await resp.read())
+                    await f.close()
+
         duration = results[0]["duration"]
 
     except Exception as e:
@@ -61,50 +66,21 @@ async def song_downloader(client, message: Message):
         return
     
     await m.edit("<b>جاري التحميل ♪</b>")
+    
+    ydl_opts = {
+        "format": "bestaudio[ext=m4a]",  # تحديد صيغة M4A
+        "keepvideo": False,
+        "geo_bypass": True,
+        "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
+        "quiet": True,
+        "cookiefile": f"{cookies()}",
+    }
 
-    # عرض الصيغ المتاحة
     try:
-        ydl_opts = {"listformats": True}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=False)
-            formats = info_dict["formats"]
-            available_formats = "\n".join(
-                [f"{f['format_id']}: {f['ext']} - {f['format_note']}" for f in formats]
-            )
-            print("Available formats:\n", available_formats)
-    except Exception as e:
-        await m.edit(f"- حدث خطأ أثناء الحصول على الصيغ المتاحة: {str(e)}")
-        print(e)
-        return
+            info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
+            audio_file = ydl.prepare_filename(info_dict)
 
-    # تجربة صيغة مناسبة
-    formats_to_try = ["bestaudio/best", "140", "m4a", "mp3"]
-    success = False
-
-    for fmt in formats_to_try:
-        ydl_opts = {
-            "format": fmt,
-            "keepvideo": False,
-            "geo_bypass": True,
-            "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
-            "quiet": True,
-            "cookiefile": f"{cookies()}",  # استخدام مسار الكوكيز
-        }
-
-        try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
-                audio_file = ydl.prepare_filename(info_dict)
-                success = True
-                break
-        except Exception as e:
-            print(f"Format {fmt} failed: {e}")
-
-    if not success:
-        await m.edit("- لم يتم العثور على صيغة متوافقة للتنزيل. يرجى مراجعة الصيغ المتاحة.")
-        return
-
-    try:
         # حساب مدة الأغنية
         secmul, dur, dur_arr = 1, 0, duration.split(":")
         for i in range(len(dur_arr) - 1, -1, -1):
@@ -130,7 +106,7 @@ async def song_downloader(client, message: Message):
         await m.delete()
 
     except Exception as e:
-        await m.edit(f"- حدث خطأ أثناء إرسال الملف: {str(e)}")
+        await m.edit(f"error, wait for bot owner to fix\n\nError: {str(e)}")
         print(e)
 
     # حذف الملفات المؤقتة
