@@ -17,7 +17,7 @@ from ZeMusic.utils.decorators import asyncify
 
 k = 1
 
-async def cookies():
+def cookies():
     try:
         global k
         cook = k  # استدعاء الدالة باستخدام await
