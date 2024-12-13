@@ -14,8 +14,8 @@ from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 def remove_if_exists(path):
     if os.path.exists(path):
         os.remove(path)
-W = [0]
-k = [1]
+W = 0
+#k = [1]
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
@@ -98,14 +98,13 @@ async def song_downloader(client, message: Message):
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
         global W
         if "ERROR: [youtube]" in str(e):
-            W[0] += 1
-            if W[0] >= 3:
-                W = [0]
-                
-                #if await iffcook():
-                    #await disable_iff()
-                #else:
-                    #await enable_iff()
+            W += 1
+            if W >= 3:
+                W = 0
+                if await iffcook():
+                    await disable_iff()
+                else:
+                    await enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
