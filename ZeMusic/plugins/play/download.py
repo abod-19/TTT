@@ -97,17 +97,15 @@ async def song_downloader(client, message: Message):
         global W
         if "ERROR: [youtube]" in str(e):
             W[0] += 1
-            if w[0] >= 4:
+            if W[0] >= 4:
                 if await iffcook():
-                    cook = await iffcook()
                     await disable_iff()
                 else:
-                    cook = await iffcook()
                     await enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
-                text=f"<p>{cook}\t{W}</p>\n{str(e)}"
+                text=f"<p>{await iffcook()}\t{W}</p>\n{str(e)}"
             )
         except Exception as x:
             print(x) 
