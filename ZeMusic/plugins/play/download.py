@@ -101,10 +101,10 @@ async def song_downloader(client, message: Message):
             W += 1
             if W >= 3:
                 W = 0
-                if k == 1:
-                    k = 2
+                if k == "a":
+                    k = "b"
                 else:
-                    k = 1
+                    k = "a"
                 #if await iffcook():
                     #await disable_iff()
                 #else:
