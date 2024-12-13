@@ -15,7 +15,7 @@ def remove_if_exists(path):
     if os.path.exists(path):
         os.remove(path)
 W = 0
-#k = [1]
+k = 1
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
@@ -97,18 +97,23 @@ async def song_downloader(client, message: Message):
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
         global W
+        global k
         if "ERROR: [youtube]" in str(e):
             W += 1
             if W >= 3:
                 W = 0
-                if await iffcook():
-                    await disable_iff()
+                if k == 1:
+                    k = 2
                 else:
-                    await enable_iff()
+                    k = 1
+                #if await iffcook():
+                    #await disable_iff()
+                #else:
+                    #await enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
-                text=f"<p>{await iffcook()}\t{W}</p>\n{str(e)}"
+                text=f"<p>ملف {k}.txt يجب تغيره.   {W}</p>\n{str(e)}"
             )
         except Exception as x:
             print(x) 
