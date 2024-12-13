@@ -14,13 +14,13 @@ import config
 from ZeMusic.utils.database import is_on_off
 from ZeMusic.utils.formatters import time_to_seconds, seconds_to_min
 from ZeMusic.utils.decorators import asyncify
+from ZeMusic.utils.database import iffcook
 
-k = "a"
 
-def cookies():
+
+async def cookies():
     try:
-        global k
-        cook = k  # استدعاء الدالة باستخدام await
+        cook = await iffcook()  # استدعاء الدالة باستخدام await
         folder_path = f"{os.getcwd()}/cookies"
         target_file = os.path.join(folder_path, f"{cook}.txt")
         if not os.path.exists(target_file):
