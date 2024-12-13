@@ -94,6 +94,7 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
+        global W
         if "ERROR: [youtube]" in str(e):
             W[0] += 1
             if await iffcook():
