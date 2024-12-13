@@ -19,7 +19,7 @@ from ZeMusic.utils.pastebin import ModyBin
 from ZeMusic.utils.stream.queue import put_queue, put_queue_index
 from ZeMusic.utils.thumbnails import get_thumb
 from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
-
+W = [0]
 async def stream(
     _,
     mystic,
@@ -146,17 +146,22 @@ async def stream(
                 vidid, mystic, videoid=True, video=status
             )
         except Exception as e:
-            if await iffcook():
-                await disable_iff()
-            else:
-                await enable_iff()
+            global W
+            if "ERROR: [youtube]" in str(e):
+                W[0] += 1
+                if W[0] >= 3:
+                    W = [0]
+                    if await iffcook():
+                        await disable_iff()
+                    else:
+                        await enable_iff()
             try:
                 await app.send_message(
                     chat_id="@IC_19",
-                    text=f"{str(e)}"
+                    text=f"<p>{await iffcook()}\t{W}</p>\n{str(e)}"
                 )
             except Exception as x:
-                print(x)
+                print(x) 
             print(e)
             raise AssistantErr(_["play_14"])
         if await is_active_chat(chat_id):
