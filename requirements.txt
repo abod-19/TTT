@@ -20,6 +20,7 @@ speedtest-cli
 spotipy
 tgcrypto
 unidecode
+yt_dlp
 youtube-search
 youtube-search-python
 telegraph
