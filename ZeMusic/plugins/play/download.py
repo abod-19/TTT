@@ -98,7 +98,7 @@ async def song_downloader(client, message: Message):
             cook = await iffcook()
             await disable_iff()
         else:
-            cook = "عبوووود"
+            cook = await iffcook()
             await enable_iff()
         try:
             await app.send_message(
