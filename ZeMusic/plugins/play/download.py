@@ -14,7 +14,7 @@ from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 def remove_if_exists(path):
     if os.path.exists(path):
         os.remove(path)
-W[0]
+W = [0]
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
 Nam = f"{config.BOT_NAME} بحث"
