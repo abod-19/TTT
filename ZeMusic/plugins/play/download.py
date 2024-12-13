@@ -97,7 +97,7 @@ async def song_downloader(client, message: Message):
         global W
         if "ERROR: [youtube]" in str(e):
             W[0] += 1
-            if W[0] >= 4:
+            if W[0] >= 3:
                 if await iffcook():
                     await disable_iff()
                 else:
