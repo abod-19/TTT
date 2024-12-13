@@ -6,7 +6,7 @@ import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
-from ZeMusic.platforms.Youtube import cookies, k
+from ZeMusic.platforms.Youtube import cookies
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
@@ -14,8 +14,7 @@ from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 def remove_if_exists(path):
     if os.path.exists(path):
         os.remove(path)
-W = 0
-
+W = [0]
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
 Nam = f"{config.BOT_NAME} بحث"
@@ -61,7 +60,7 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        "cookiefile": f"{cookies()}",  # استخدام مسار الكوكيز
+        "cookiefile": f"{await cookies()}",  # استخدام مسار الكوكيز
     }
 
     try:
@@ -96,23 +95,18 @@ async def song_downloader(client, message: Message):
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
         global W
-        global k
         if "ERROR: [youtube]" in str(e):
-            W += 1
-            if W >= 3:
-                W = 0
-                if k == "a":
-                    k = "b"
+            W[0] += 1
+            if W[0] >= 3:
+                W = [0]
+                if await iffcook():
+                    await disable_iff()
                 else:
-                    k = "a"
-                #if await iffcook():
-                    #await disable_iff()
-                #else:
-                    #await enable_iff()
+                    await enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
-                text=f"<p>ملف {k}.txt يجب تغيره.   {W}</p>\n{str(e)}"
+                text=f"<p>{await iffcook()}\t{W}</p>\n{str(e)}"
             )
         except Exception as x:
             print(x) 
