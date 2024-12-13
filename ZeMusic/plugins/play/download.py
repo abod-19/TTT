@@ -15,6 +15,8 @@ def remove_if_exists(path):
     if os.path.exists(path):
         os.remove(path)
 W = [0]
+k = [1]
+
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
 Nam = f"{config.BOT_NAME} بحث"
@@ -99,10 +101,11 @@ async def song_downloader(client, message: Message):
             W[0] += 1
             if W[0] >= 3:
                 W = [0]
-                if await iffcook():
-                    await disable_iff()
-                else:
-                    await enable_iff()
+                
+                #if await iffcook():
+                    #await disable_iff()
+                #else:
+                    #await enable_iff()
         try:
             await app.send_message(
                 chat_id="@IC_19",
