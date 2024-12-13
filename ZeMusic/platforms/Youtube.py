@@ -15,7 +15,7 @@ from ZeMusic.utils.database import is_on_off
 from ZeMusic.utils.formatters import time_to_seconds, seconds_to_min
 from ZeMusic.utils.decorators import asyncify
 
-k = 1
+k = "a"
 
 def cookies():
     try:
