@@ -27,3 +27,4 @@ telegraph
 pytz
 numpy
 wget
+BadAPI
