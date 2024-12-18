@@ -5,7 +5,7 @@ from pyrogram.enums import ChatAction
 from ZeMusic import shizuchat
 from ZeMusic import shizuchat as app
 
-@@app.on_message(
+@app.on_message(
     filters.command(["رون"],"")
 async def gemini_handler(client, message):
     await app.send_chat_action(message.chat.id, ChatAction.TYPING)
