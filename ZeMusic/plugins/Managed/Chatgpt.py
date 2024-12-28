@@ -5,10 +5,13 @@ from pyrogram.enums import ChatAction
 from ZeMusic import app
 
 @app.on_message(
-    filters.command(["رون"],"")
+    filters.command(["رون"], "")
 )
 async def gemini_handler(client, message):
+    # عرض مؤشر الكتابة
     await app.send_chat_action(message.chat.id, ChatAction.TYPING)
+
+    # استخراج المدخلات من المستخدم
     if (
         message.text.startswith(f"/gemini@{app.username}")
         and len(message.text.split(" ", 1)) > 1
@@ -20,16 +23,28 @@ async def gemini_handler(client, message):
         if len(message.command) > 1:
             user_input = " ".join(message.command[1:])
         else:
-            await message.reply_text("كيف يمكنني مساعدتك اليوم ؟")
+            await message.reply_text("كيف يمكنني مساعدتك اليوم؟")
             return
 
+    # محاولة معالجة المدخلات والحصول على النتائج
     try:
         response = api.gemini(user_input)
         await app.send_chat_action(message.chat.id, ChatAction.TYPING)
-        x = response["results"]
-        if x:
-            await message.reply_text(x, quote=True)
+
+        # التحقق من صحة الاستجابة
+        if response and isinstance(response, dict) and "results" in response:
+            x = response["results"]
+            if x:
+                await message.reply_text(x, quote=True)
+            else:
+                await message.reply_text("حدث خطأ: النتائج فارغة.")
         else:
-            await message.reply_text("حدث خطأ")
+            await message.reply_text("حدث خطأ: الاستجابة غير صحيحة.")
+    
+    # معالجة أخطاء الطلب
     except requests.exceptions.RequestException as e:
-        pass
+        await message.reply_text(f"حدث خطأ في الطلب: {e}")
+    
+    # معالجة أي أخطاء غير متوقعة
+    except Exception as e:
+        await message.reply_text(f"خطأ غير متوقع: {e}")
