@@ -2,8 +2,7 @@ import requests
 from BadAPI import api
 from pyrogram import filters
 from pyrogram.enums import ChatAction
-from ZeMusic import shizuchat
-from ZeMusic import shizuchat as app
+from ZeMusic import app
 
 @app.on_message(
     filters.command(["رون"],"")
