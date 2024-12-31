@@ -28,4 +28,4 @@ pytz
 numpy
 wget
 yt-dlp
-git+https://github.com/Vivekkumar-IN/TheApi@main
+TheApix==1.2.5
