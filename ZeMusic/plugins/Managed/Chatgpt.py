@@ -5,7 +5,7 @@ from TheApi import api
 from ZeMusic import app
 
 
-@app.on_message(filters.command(["chatgpt", "ai", "ask"]) & ~BANNED_USERS)
+@app.on_message(filters.command(["رون", "/ai", "/ask"],"") & ~BANNED_USERS)
 async def chatgpt_chat(bot, message):
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply_text(
