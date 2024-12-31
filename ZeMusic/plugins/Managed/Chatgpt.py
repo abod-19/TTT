@@ -1,50 +1,30 @@
-import requests
-from BadAPI import api
+from config import BANNED_USERS
 from pyrogram import filters
 from pyrogram.enums import ChatAction
+from TheApi import api
 from ZeMusic import app
 
-@app.on_message(
-    filters.command(["رون"], "")
-)
-async def gemini_handler(client, message):
-    # عرض مؤشر الكتابة
-    await app.send_chat_action(message.chat.id, ChatAction.TYPING)
 
-    # استخراج المدخلات من المستخدم
-    if (
-        message.text.startswith(f"/gemini@{app.username}")
-        and len(message.text.split(" ", 1)) > 1
-    ):
-        user_input = message.text.split(" ", 1)[1]
-    elif message.reply_to_message and message.reply_to_message.text:
+@app.on_message(filters.command(["chatgpt", "ai", "ask"]) & ~BANNED_USERS)
+async def chatgpt_chat(bot, message):
+    if len(message.command) < 2 and not message.reply_to_message:
+        await message.reply_text(
+            "Example:\n\n`/ai write simple website code using html css, js?`"
+        )
+        return
+
+    if message.reply_to_message and message.reply_to_message.text:
         user_input = message.reply_to_message.text
     else:
-        if len(message.command) > 1:
-            user_input = " ".join(message.command[1:])
-        else:
-            await message.reply_text("كيف يمكنني مساعدتك اليوم؟")
-            return
+        user_input = " ".join(message.command[1:])
 
-    # محاولة معالجة المدخلات والحصول على النتائج
-    try:
-        response = api.gemini(user_input)
-        await app.send_chat_action(message.chat.id, ChatAction.TYPING)
+    await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
+    results = await api.chatgpt(user_input)
+    await message.reply_text(results)
 
-        # التحقق من صحة الاستجابة
-        if response and isinstance(response, dict) and "results" in response:
-            x = response["results"]
-            if x:
-                await message.reply_text(x, quote=True)
-            else:
-                await message.reply_text("حدث خطأ: النتائج فارغة.")
-        else:
-            await message.reply_text("حدث خطأ: الاستجابة غير صحيحة.")
-    
-    # معالجة أخطاء الطلب
-    except requests.exceptions.RequestException as e:
-        await message.reply_text(f"حدث خطأ في الطلب: {e}")
-    
-    # معالجة أي أخطاء غير متوقعة
-    except Exception as e:
-        await message.reply_text(f"خطأ غير متوقع: {e}")
+
+__MODULE__ = "CʜᴀᴛGᴘᴛ"
+__HELP__ = """
+/advice - ɢᴇᴛ ʀᴀɴᴅᴏᴍ ᴀᴅᴠɪᴄᴇ ʙʏ ʙᴏᴛ
+/ai [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ᴄʜᴀᴛɢᴘᴛ's ᴀɪ
+/gemini [ǫᴜᴇʀʏ] - ᴀsᴋ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ ᴡɪᴛʜ ɢᴏᴏɢʟᴇ's ɢᴇᴍɪɴɪ ᴀɪ"""
