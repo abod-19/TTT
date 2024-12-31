@@ -28,4 +28,4 @@ pytz
 numpy
 wget
 yt-dlp
-git+https://github.com/badmunda98/BadAPI
+TheApi
