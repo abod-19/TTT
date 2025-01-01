@@ -4,12 +4,12 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
 from ZeMusic import app
+from ZeMusic.core.userbot import Userbot
 
-def remove_if_exists(path):
-    if os.path.exists(path):
-        os.remove(path)
+# حساب المساعد
+userbot = Userbot()
+userbot.one.start()
 
-W = [0]
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
 Nam = f"{config.BOT_NAME} بحث"
@@ -33,13 +33,13 @@ async def song_downloader(client, message: Message):
             await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
             return
         
-        # البحث في القناة
+        # البحث في القناة باستخدام الحساب المساعد
         channel_id = "IC_l9"  # استبدل هذا بمعرف القناة الخاص بك
         search_text = results[0]['id']
         
-        async for msg in client.search_messages(chat_id=channel_id, query=search_text):
+        async for msg in userbot.one.search_messages(chat_id=channel_id, query=search_text):
             if msg.voice:  # تحقق إذا كانت الرسالة تحتوي على مقطع صوتي
-                # إرسال المقطع الصوتي إلى المستخدم
+                # إعادة إرسال المقطع الصوتي باستخدام البوت
                 await client.send_voice(
                     chat_id=message.chat.id,
                     voice=msg.voice.file_id,
@@ -49,7 +49,7 @@ async def song_downloader(client, message: Message):
                         [
                             [
                                 InlineKeyboardButton(
-                                    text=config.CHANNEL_NAME, url=lnk
+                                    text=config.CHANNEL_NAME, url=f"https://t.me/{config.CHANNEL_LINK}/{msg.message_id}"
                                 )
                             ],
                         ]
@@ -58,8 +58,8 @@ async def song_downloader(client, message: Message):
                 return  # إنهاء الوظيفة بعد إرسال الصوت
 
         # إذا لم يتم العثور على مقطع صوتي
-        await m.edit("لم يتم العثور على أي مقاطع صوتية تحتوي على النص المطلوب.")
+        await m.edit("❌ لم يتم العثور على أي مقاطع صوتية تحتوي على النص المطلوب.")
     
     except Exception as e:
         # التعامل مع الأخطاء
-        await m.edit(f"حدث خطأ أثناء البحث: {e}")
+        await m.edit(f"❌ حدث خطأ أثناء البحث: {e}")
