@@ -8,7 +8,6 @@ from ZeMusic.core.userbot import Userbot
 
 # حساب المساعد
 userbot = Userbot()
-userbot.one.start()
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
@@ -27,12 +26,15 @@ async def song_downloader(client, message: Message):
     m = await message.reply_text("<b>جـارِ البحث ♪</b>")
     
     try:
+        # التأكد من تشغيل المساعد
+        await userbot.start()
+
         # البحث عن الفيديو في YouTube
         results = YoutubeSearch(query, max_results=1).to_dict()
         if not results:
-            await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
+            await m.edit("- لم يتم العثور على نتائج، حاول مجددًا.")
             return
-        
+
         # البحث في القناة باستخدام الحساب المساعد
         channel_id = "IC_l9"  # استبدل هذا بمعرف القناة الخاص بك
         search_text = results[0]['id']
