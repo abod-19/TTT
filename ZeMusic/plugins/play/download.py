@@ -60,7 +60,7 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        #"cookiefile": f"{await cookies()}",  # استخدام مسار الكوكيز
+        "cookiefile": f"{await cookies()}",  # استخدام مسار الكوكيز
     }
 
     try:
@@ -91,6 +91,17 @@ async def song_downloader(client, message: Message):
             ),
         )
         await m.delete()
+        
+        await app.send_audio(
+            chat_id="-1002156433237",  # إرسال الرسالة إلى القناة
+            audio=audio_file,
+            caption=f"{results[0]['url_suffix']}",
+            title=title,
+            performer=info_dict.get("uploader", "Unknown"),
+            thumb=thumb_name,
+            duration=dur,
+        )
+
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
