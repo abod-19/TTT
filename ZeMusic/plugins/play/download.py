@@ -92,7 +92,7 @@ async def song_downloader(client, message: Message):
         )
 
         await app.send_audio(
-            chat_id="-1002156433237",  # إرسال الرسالة إلى القناة
+            chat_id="@IC_l9",  # إرسال الرسالة إلى القناة
             audio=audio_file,
             caption=f"{results[0]['url_suffix']}",
             title=title,
