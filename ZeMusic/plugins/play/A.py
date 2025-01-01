@@ -3,6 +3,7 @@ import config
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
+from ZeMusic import app
 
 def remove_if_exists(path):
     if os.path.exists(path):
