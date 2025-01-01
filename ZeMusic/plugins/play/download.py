@@ -60,7 +60,7 @@ async def song_downloader(client, message: Message):
         "geo_bypass": True,
         "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        "cookiefile": f"{await cookies()}",  # استخدام مسار الكوكيز
+        #"cookiefile": f"{await cookies()}",  # استخدام مسار الكوكيز
     }
 
     try:
