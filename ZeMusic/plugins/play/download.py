@@ -35,6 +35,27 @@ async def song_downloader(client, message: Message):
         if not results:
             await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
             return
+        channel_id = "IC_l9"  # استبدل هذا بمعرف القناة الخاص بك
+        search_text = results[0]['id']
+        async for msg in client.search_messages(chat_id=channel_id, query=search_text):
+            if msg.voice:  # تحقق إذا كانت الرسالة تحتوي على مقطع صوتي
+                # إرسال المقطع الصوتي إلى نفس الدردشة
+                await client.send_voice(
+                    chat_id=message.chat.id,  # إرسال المقطع الصوتي إلى دردشة المستخدم
+                    voice=msg.voice.file_id,  # الملف الصوتي الموجود في الرسالة
+                    caption="🤍",  # تعليق مع المقطع الصوتي
+                    reply_to_message_id=message.id,  # الرد على الرسالة الأصلية
+                    reply_markup=InlineKeyboardMarkup(
+                        [
+                            [
+                                InlineKeyboardButton(
+                                    text=config.CHANNEL_NAME, url=lnk
+                                )
+                            ],
+                        ]
+                    )
+                )
+            return  # إنهاء العملية بعد العثور على المقطع الصوتي
 
         link = f"https://youtube.com{results[0]['url_suffix']}"
         title = results[0]["title"][:40]
