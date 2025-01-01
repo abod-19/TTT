@@ -19,7 +19,7 @@ lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
 Nam = f"{config.BOT_NAME} بحث"
 
-@app.on_message(command(["song", "/song", "بحث", Nem, Nam]))
+@app.on_message(command(["song", "يوت", "يو", Nem, Nam]))
 async def song_downloader(client, message: Message):
     if message.text in ["song", "/song", "بحث", Nem, Nam]:
         return
