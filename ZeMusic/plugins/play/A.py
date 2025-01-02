@@ -6,16 +6,15 @@ from youtube_search import YoutubeSearch
 from ZeMusic import app
 from ZeMusic.core.userbot import Userbot
 
-# تهيئة الحساب المساعد
+# حساب المساعد
 userbot = Userbot()
-userbot_client = userbot.self.one  # استخدام الحساب المساعد الأول
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
 Nam = f"{config.BOT_NAME} بحث"
 
-@app.on_message(filters.command(["song", "يوت", "يو", Nem, Nam]))
-async def song_downloader(client: Client, message: Message):
+@app.on_message(filters.command(["song", "يوت", "يو", Nem, Nam],""))
+async def song_downloader(client, message: Message):
     if message.text in ["song", "/song", "بحث", Nem, Nam]:
         return
     
@@ -27,6 +26,9 @@ async def song_downloader(client: Client, message: Message):
     m = await message.reply_text("<b>جـارِ البحث ♪</b>")
     
     try:
+        # التأكد من تشغيل المساعد
+        await userbot.start()
+
         # البحث عن الفيديو في YouTube
         results = YoutubeSearch(query, max_results=1).to_dict()
         if not results:
@@ -37,7 +39,7 @@ async def song_downloader(client: Client, message: Message):
         channel_id = "IC_l9"  # استبدل هذا بمعرف القناة الخاص بك
         search_text = results[0]['id']
         
-        async for msg in userbot_client.search_messages(chat_id=channel_id, query=search_text):
+        async for msg in userbot.one.search_messages(chat_id=channel_id, query=search_text):
             if msg.voice:  # تحقق إذا كانت الرسالة تحتوي على مقطع صوتي
                 # إعادة إرسال المقطع الصوتي باستخدام البوت
                 await client.send_voice(
