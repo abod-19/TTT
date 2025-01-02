@@ -46,6 +46,3 @@ async def song_downloader(client: Client, message: Message):
     except Exception as e:
         # التعامل مع الأخطاء
         await m.edit(f"❌ حدث خطأ أثناء البحث: {e}")
-
-# تشغيل البوت
-app.run()
