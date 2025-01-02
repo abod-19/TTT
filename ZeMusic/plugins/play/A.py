@@ -30,9 +30,11 @@ async def song_downloader(client, message: Message):
     m = await message.reply_text("<b>جـارِ البحث ♪</b>")
     
     try:
-        # التأكد من تشغيل المساعد
-        if not userbot.is_connected:
+        # محاولة تشغيل الحساب المساعد
+        try:
             await userbot.start()
+        except Exception as e:
+            logging.info("الحساب المساعد قيد التشغيل بالفعل.")
 
         # البحث عن الفيديو في YouTube
         results = YoutubeSearch(query, max_results=1).to_dict()
