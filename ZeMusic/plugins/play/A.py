@@ -4,72 +4,48 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
 from ZeMusic import app
-from ZeMusic.core.userbot import Userbot
-import logging
 
-# إعداد تسجيل الأخطاء
-logging.basicConfig(level=logging.ERROR, filename="bot_errors.log")
 
-# حساب المساعد
-userbot = Userbot()
+GROUP_ID = -1002138912008
 
-lnk = "https://t.me/" + config.CHANNEL_LINK
-Nem = f"{config.BOT_NAME} ابحث"
-Nam = f"{config.BOT_NAME} بحث"
-
-@app.on_message(filters.command(["song", "يوت", "يو", Nem, Nam], ""))
-async def song_downloader(client, message: Message):
-    if message.text in ["song", "/song", "بحث", Nem, Nam]:
+@app.on_message(filters.command(["song", "بحث", "تحميل"]))
+async def song_downloader(client: Client, message: Message):
+    # استخراج استعلام البحث
+    query = " ".join(message.command[1:])
+    if not query:
+        await message.reply_text("❌ الرجاء إدخال اسم الأغنية للبحث.")
         return
-    
-    if message.command[0] in config.BOT_NAME:
-        query = " ".join(message.command[2:])
-    else:
-        query = " ".join(message.command[1:])
-    
-    m = await message.reply_text("<b>جـارِ البحث ♪</b>")
-    
-    try:
-        # محاولة تشغيل الحساب المساعد
-        try:
-            await userbot.start()
-        except Exception as e:
-            logging.info("الحساب المساعد قيد التشغيل بالفعل.")
 
+    # إرسال رسالة انتظار
+    m = await message.reply_text("<b>جـارِ البحث ♪</b>")
+
+    try:
         # البحث عن الفيديو في YouTube
         results = YoutubeSearch(query, max_results=1).to_dict()
         if not results:
-            await m.edit("- لم يتم العثور على نتائج، حاول مجددًا.")
+            await m.edit("❌ لم يتم العثور على نتائج في YouTube.")
             return
 
-        # البحث في القناة باستخدام الحساب المساعد
-        channel_id = "@IC_l9"  # استبدل هذا بمعرف القناة الخاص بك
-        search_text = results[0]['id']
-        
-        async for msg in userbot.one.search_messages(chat_id=channel_id, query=search_text):
-            if msg.voice:  # تحقق إذا كانت الرسالة تحتوي على مقطع صوتي
-                # إعادة إرسال المقطع الصوتي باستخدام البوت
+        video_id = results[0]['id']
+
+        # البحث في المجموعة عن الرسائل التي تحتوي على مقطع صوتي
+        async for msg in client.search_messages(chat_id=GROUP_ID, query=video_id):
+            if msg.audio or msg.voice:  # تحقق من وجود ملف صوتي أو رسالة صوتية
                 await client.send_voice(
                     chat_id=message.chat.id,
-                    voice=msg.voice.file_id,
-                    caption="🤍",
-                    reply_to_message_id=message.id,
-                    reply_markup=InlineKeyboardMarkup(
-                        [
-                            [
-                                InlineKeyboardButton(
-                                    text=config.CHANNEL_NAME, url=f"https://t.me/{config.CHANNEL_LINK}/{msg.message_id}"
-                                )
-                            ],
-                        ]
-                    )
+                    voice=msg.audio.file_id if msg.audio else msg.voice.file_id,
+                    caption="🤍 تم العثور على الأغنية!",
+                    reply_to_message_id=message.id
                 )
-                return  # إنهاء الوظيفة بعد إرسال الصوت
+                await m.delete()
+                return
 
         # إذا لم يتم العثور على مقطع صوتي
         await m.edit("❌ لم يتم العثور على أي مقاطع صوتية تحتوي على النص المطلوب.")
     
     except Exception as e:
-        # تسجيل الخطأ ومعالجته
-        logging.error(f"Error: {e}")
-        await m.edit(f"❌ حدث خطأ أثناء البحث: {str(e)}")
+        # التعامل مع الأخطاء
+        await m.edit(f"❌ حدث خطأ أثناء البحث: {e}")
+
+# تشغيل البوت
+app.run()
