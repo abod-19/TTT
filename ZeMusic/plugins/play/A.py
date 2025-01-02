@@ -1,16 +1,24 @@
 import os
 import config
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message
 from youtube_search import YoutubeSearch
-from ZeMusic import app
 
+# إعداد عميل Pyrogram
+a = Client(
+    name="ZeAss1",
+    api_id=config.API_ID,
+    api_hash=config.API_HASH,
+    session_string=str(config.STRING1),
+    no_updates=True,
+)
 
-GROUP_ID = -1002138912008
+GROUP_ID = -1002138912008  # معرف المجموعة
 
-@app.on_message(filters.command(["song", "بحث", "تحميل"]))
+# تعريف دالة البحث عن الأغاني
+@a.on_message(filters.command(["song", "بحث", "تحميل"]))
 async def song_downloader(client: Client, message: Message):
-    # استخراج استعلام البحث
+    # استخراج استعلام البحث من الأمر
     query = " ".join(message.command[1:])
     if not query:
         await message.reply_text("❌ الرجاء إدخال اسم الأغنية للبحث.")
@@ -29,9 +37,9 @@ async def song_downloader(client: Client, message: Message):
         video_id = results[0]['id']
 
         # البحث في المجموعة عن الرسائل التي تحتوي على مقطع صوتي
-        async for msg in client.search_messages(chat_id=GROUP_ID, query=video_id):
+        async for msg in a.search_messages(chat_id=GROUP_ID, query=video_id):
             if msg.audio or msg.voice:  # تحقق من وجود ملف صوتي أو رسالة صوتية
-                await client.send_voice(
+                await a.send_voice(
                     chat_id=message.chat.id,
                     voice=msg.audio.file_id if msg.audio else msg.voice.file_id,
                     caption="🤍 تم العثور على الأغنية!",
@@ -46,3 +54,6 @@ async def song_downloader(client: Client, message: Message):
     except Exception as e:
         # التعامل مع الأخطاء
         await m.edit(f"❌ حدث خطأ أثناء البحث: {e}")
+
+# تشغيل العميل
+a.run()
