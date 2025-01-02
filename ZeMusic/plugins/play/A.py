@@ -4,17 +4,13 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
 from ZeMusic import app
-from ZeMusic.core.userbot import Userbot
-
-# حساب المساعد
-userbot = Userbot()
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
 Nam = f"{config.BOT_NAME} بحث"
 
 @app.on_message(filters.command(["song", "يوت", "يو", Nem, Nam]))
-async def song_downloader(client, message: Message):
+async def song_downloader(client: Client, message: Message):
     if message.text in ["song", "/song", "بحث", Nem, Nam]:
         return
     
@@ -26,20 +22,17 @@ async def song_downloader(client, message: Message):
     m = await message.reply_text("<b>جـارِ البحث ♪</b>")
     
     try:
-        # التأكد من تشغيل المساعد
-        await userbot.start()
-
         # البحث عن الفيديو في YouTube
         results = YoutubeSearch(query, max_results=1).to_dict()
         if not results:
             await m.edit("- لم يتم العثور على نتائج، حاول مجددًا.")
             return
 
-        # البحث في القناة باستخدام الحساب المساعد
+        # البحث في القناة باستخدام البوت
         channel_id = "IC_l9"  # استبدل هذا بمعرف القناة الخاص بك
         search_text = results[0]['id']
         
-        async for msg in userbot.one.search_messages(chat_id=channel_id, query=search_text):
+        async for msg in client.search_messages(chat_id=channel_id, query=search_text):
             if msg.voice:  # تحقق إذا كانت الرسالة تحتوي على مقطع صوتي
                 # إعادة إرسال المقطع الصوتي باستخدام البوت
                 await client.send_voice(
