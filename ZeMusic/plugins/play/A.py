@@ -5,6 +5,10 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from youtube_search import YoutubeSearch
 from ZeMusic import app
 from ZeMusic.core.userbot import Userbot
+import logging
+
+# إعداد تسجيل الأخطاء
+logging.basicConfig(level=logging.ERROR, filename="bot_errors.log")
 
 # حساب المساعد
 userbot = Userbot()
@@ -13,7 +17,7 @@ lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
 Nam = f"{config.BOT_NAME} بحث"
 
-@app.on_message(filters.command(["song", "يوت", "يو", Nem, Nam],""))
+@app.on_message(filters.command(["song", "يوت", "يو", Nem, Nam], ""))
 async def song_downloader(client, message: Message):
     if message.text in ["song", "/song", "بحث", Nem, Nam]:
         return
@@ -27,7 +31,8 @@ async def song_downloader(client, message: Message):
     
     try:
         # التأكد من تشغيل المساعد
-        await userbot.start()
+        #if not userbot.is_connected:
+            #await userbot.start()
 
         # البحث عن الفيديو في YouTube
         results = YoutubeSearch(query, max_results=1).to_dict()
@@ -36,7 +41,7 @@ async def song_downloader(client, message: Message):
             return
 
         # البحث في القناة باستخدام الحساب المساعد
-        channel_id = "IC_l9"  # استبدل هذا بمعرف القناة الخاص بك
+        channel_id = "@IC_l9"  # استبدل هذا بمعرف القناة الخاص بك
         search_text = results[0]['id']
         
         async for msg in userbot.one.search_messages(chat_id=channel_id, query=search_text):
@@ -63,5 +68,6 @@ async def song_downloader(client, message: Message):
         await m.edit("❌ لم يتم العثور على أي مقاطع صوتية تحتوي على النص المطلوب.")
     
     except Exception as e:
-        # التعامل مع الأخطاء
-        await m.edit(f"❌ حدث خطأ أثناء البحث: {e}")
+        # تسجيل الخطأ ومعالجته
+        logging.error(f"Error: {e}")
+        await m.edit(f"❌ حدث خطأ أثناء البحث: {str(e)}")
