@@ -12,6 +12,9 @@ from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 
+
+lnk= "https://t.me/" +config.CHANNEL_LINK
+
 # إنشاء أو فتح قاعدة بيانات SQLite
 db_path = "songs.db"
 conn = sqlite3.connect(db_path)
@@ -50,7 +53,22 @@ async def song_downloader(client, message: Message):
         if row:
             # إذا كان المقطع موجوداً، قم بإرجاع الرابط من قاعدة البيانات
             channel_link = row[0]
-            await m.edit(f"- المقطع موجود بالفعل في القناة: {channel_link}")
+            url = f"https://t.me/BE_19/{channel_link}"
+            await client.send_voice(
+                chat_id=message.chat.id,
+                voice=url,
+                caption="⟡ {app.mention}",
+                reply_to_message_id=message.id,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton(
+                                text=config.CHANNEL_NAME, url=lnk
+                            )
+                        ],
+                    ]
+                )
+            )
             return
         
         # إذا لم يكن موجوداً، أكمل العملية
