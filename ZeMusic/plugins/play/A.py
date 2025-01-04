@@ -53,7 +53,7 @@ async def song_downloader(client, message: Message):
         if row:
             # إذا كان المقطع موجوداً، قم بإرجاع الرابط من قاعدة البيانات
             channel_link = row[0]
-            url = f"https://t.me/BE_19/{channel_link}"
+            url = f"{channel_link}"
             await client.send_voice(
                 chat_id=message.chat.id,
                 voice=url,
