@@ -15,8 +15,11 @@ from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 
 lnk= "https://t.me/" +config.CHANNEL_LINK
 
+# تحديد مسار ثابت لقاعدة البيانات
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(BASE_DIR, "songs.db")
+
 # إنشاء أو فتح قاعدة بيانات SQLite
-db_path = "songs.db"
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
