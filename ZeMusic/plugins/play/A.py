@@ -57,7 +57,7 @@ async def song_downloader(client, message: Message):
             await client.send_voice(
                 chat_id=message.chat.id,
                 voice=url,
-                caption="⟡ {app.mention}",
+                caption=f"⟡ {app.mention}",
                 reply_to_message_id=message.id,
                 reply_markup=InlineKeyboardMarkup(
                     [
@@ -69,6 +69,7 @@ async def song_downloader(client, message: Message):
                     ]
                 )
             )
+            await m.delete()
             return
         
         # إذا لم يكن موجوداً، أكمل العملية
