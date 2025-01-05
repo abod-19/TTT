@@ -12,8 +12,7 @@ from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 
-
-lnk= "https://t.me/" +config.CHANNEL_LINK
+lnk = "https://t.me/" + config.CHANNEL_LINK
 
 songdb = mongodb.song
 
@@ -100,13 +99,13 @@ async def song_downloader(client, message: Message):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton(text=config.CHANNEL_NAME, url=channel_link),
+                        InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk),
                     ],
                 ]
             ),
         )
         
-        # إرسال الصوت
+        # إرسال الصوت إلى القناة
         message_to_channel = await app.send_audio(
             chat_id="@IC_l9",  # إرسال الرسالة إلى القناة
             audio=audio_file,
@@ -117,7 +116,7 @@ async def song_downloader(client, message: Message):
             duration=dur,
         )
         
-        # حفظ الرابط في قاعدة البيانات
+        # تأكد من أن المتغير channel_link يتم تعيينه بعد إرسال الصوت
         channel_link = message_to_channel.link
         await songdb.insert_one({"video_id": video_id, "channel_link": channel_link})
         
