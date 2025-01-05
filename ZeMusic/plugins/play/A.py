@@ -41,7 +41,8 @@ async def song_downloader(client, message: Message):
     query = " ".join(message.command[1:])
         
     m = await message.reply_text("<b>جـارِ البحث ♪</b>")
-    
+    print(f"Database path: {db_path}")
+
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
         if not results:
