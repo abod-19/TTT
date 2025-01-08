@@ -33,23 +33,24 @@ async def song_downloader(client, message: Message):
             return
 
         video_id = results[0]['id']
-        
-        # تحقق من وجود المقطع في قاعدة البيانات
-        existing_entry = await songdb.find_one({"video_id": video_id})
-        if existing_entry:
-            channel_link = existing_entry["channel_link"]
-            await client.send_voice(
-                chat_id=message.chat.id,
-                voice=channel_link,
-                caption=f"⟡ {app.mention}",
-                reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk)]]
-                ),
-                reply_to_message_id=message.id,
-            )
-            await m.delete()
-            return
-        
+        try:
+            # تحقق من وجود المقطع في قاعدة البيانات
+            existing_entry = await songdb.find_one({"video_id": video_id})
+            if existing_entry:
+                channel_link = existing_entry["channel_link"]
+                await client.send_voice(
+                    chat_id=message.chat.id,
+                    voice=channel_link,
+                    caption=f"⟡ {app.mention}",
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk)]]
+                    ),
+                    reply_to_message_id=message.id,
+                )
+                await m.delete()
+                return
+        except Exception as e:
+            print(str(e))
         # إذا لم يكن موجوداً، أكمل العملية
         link = f"https://youtube.com{results[0]['url_suffix']}"
         title = results[0]["title"][:40]
