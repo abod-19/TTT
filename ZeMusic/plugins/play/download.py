@@ -102,7 +102,7 @@ async def song_downloader(client, message: Message):
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
-            duration=dur,
+            duration=results[0]['duration'],
             #reply_markup=InlineKeyboardMarkup(
                 #[
                     #[
