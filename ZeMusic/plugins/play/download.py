@@ -47,7 +47,7 @@ async def song_downloader(client, message: Message):
                 await client.send_voice(
                     chat_id=message.chat.id,
                     voice=channel_link,
-                    caption=f"⟡ {app.mention}",
+                    caption=f"{results[0]['duration']}",
                     reply_markup=InlineKeyboardMarkup(
                         [[InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk)]]
                     ),
@@ -98,18 +98,18 @@ async def song_downloader(client, message: Message):
 
         await message.reply_audio(
             audio=audio_file,
-            caption=f"⟡ {app.mention}",
+            caption=f"{results[0]['duration']}",
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
             duration=dur,
-            reply_markup=InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk),
-                    ],
-                ]
-            ),
+            #reply_markup=InlineKeyboardMarkup(
+                #[
+                    #[
+                        #InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk),
+                    #],
+                #]
+            #),
         )
         
         # إرسال الصوت إلى القناة
