@@ -63,18 +63,21 @@ async def song_downloader(client, message: Message):
             audio_file = ydl.prepare_filename(info_dict)
             
         # حساب مدة الأغنية
-        secmul, dur, dur_arr = 1, 0, duration.split(":")
-        for i in range(len(dur_arr) - 1, -1, -1):
-            dur += int(float(dur_arr[i])) * secmul
-            secmul *= 60
+        #secmul, dur, dur_arr = 1, 0, duration.split(":")
+        #for i in range(len(dur_arr) - 1, -1, -1):
+            #dur += int(float(dur_arr[i])) * secmul
+            #secmul *= 60
 
+        duration = results[0].get("duration", "0:00")
+        duration_in_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(duration.split(":"))))
+        
         await message.reply_audio(
             audio=audio_file,
             caption=f"⟡ {app.mention}",
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
-            duration=results[0]['duration'],
+            duration=duration_in_seconds,
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
