@@ -47,9 +47,8 @@ async def song_downloader(client, message: Message):
                 await client.send_voice(
                     chat_id=message.chat.id,
                     voice=channel_link,
-                    caption=f"{app.name} ⇒ {str(results[0]['duration'])}\nㅤ",  # إزالة الوسم <a> لجعل النص يظهر كنص عادي
+                    caption=f" ⇒ <a href='{lnk}'>{app.name}</a>\nㅤ",
                     reply_to_message_id=message.id,
-                    parse_mode="Markdown"
                 )
                 await m.delete()
                 return
@@ -94,7 +93,7 @@ async def song_downloader(client, message: Message):
         await m.delete()
         await message.reply_audio(
             audio=audio_file,
-            caption=f" <a href='{lnk}'>{app.name}</a> ⇒ {str(results[0]['duration'])}\nㅤ",
+            caption=f" ⇒ <a href='{lnk}'>{app.name}</a>\nㅤ",
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
