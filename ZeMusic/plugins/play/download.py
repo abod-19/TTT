@@ -39,7 +39,6 @@ async def song_downloader(client, message: Message):
             return
 
         video_id = results[0]['id']
-        ttt = str(results[0]["duration"])
         try:
             # تحقق من وجود المقطع في قاعدة البيانات
             existing_entry = await songdb.find_one({"video_id": video_id})
@@ -48,7 +47,7 @@ async def song_downloader(client, message: Message):
                 await client.send_voice(
                     chat_id=message.chat.id,
                     voice=channel_link,
-                    caption=f" <a href='{lnk}'>{app.name}</a> ⇒ {ttt}\nㅤ",
+                    caption=f"{app.name} ⇒ {str(results[0]['duration'])}\nㅤ",  # إزالة الوسم <a> لجعل النص يظهر كنص عادي
                     reply_to_message_id=message.id,
                 )
                 await m.delete()
