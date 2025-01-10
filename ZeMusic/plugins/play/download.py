@@ -10,11 +10,13 @@ from ZeMusic.platforms.Youtube import cookies
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
+from ZeMusic.core.mongo import mongodb
 
 def remove_if_exists(path):
     if os.path.exists(path):
         os.remove(path)
 W = [0]
+songdb = mongodb.song
 lnk = "https://t.me/" + config.CHANNEL_LINK
 Nem = f"{config.BOT_NAME} ابحث"
 Nam = f"{config.BOT_NAME} بحث"
@@ -35,6 +37,26 @@ async def song_downloader(client, message: Message):
         if not results:
             await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
             return
+
+        video_id = results[0]['id']
+        try:
+            # تحقق من وجود المقطع في قاعدة البيانات
+            existing_entry = await songdb.find_one({"video_id": video_id})
+            if existing_entry:
+                channel_link = existing_entry["channel_link"]
+                await client.send_voice(
+                    chat_id=message.chat.id,
+                    voice=channel_link,
+                    caption=f"⟡ {app.mention}",
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk)]]
+                    ),
+                    reply_to_message_id=message.id,
+                )
+                await m.delete()
+                return
+        except Exception as e:
+            print(str(e))
         
         link = f"https://youtube.com{results[0]['url_suffix']}"
         title = results[0]["title"][:40]
@@ -74,7 +96,6 @@ async def song_downloader(client, message: Message):
             dur += int(float(dur_arr[i])) * secmul
             secmul *= 60
 
-        # إرسال الصوت
         await message.reply_audio(
             audio=audio_file,
             caption=f"⟡ {app.mention}",
@@ -90,6 +111,22 @@ async def song_downloader(client, message: Message):
                 ]
             ),
         )
+        
+        # إرسال الصوت إلى القناة
+        message_to_channel = await app.send_audio(
+            chat_id="@IC_l9",  # إرسال الرسالة إلى القناة
+            audio=audio_file,
+            caption=f"{results[0]['id']}",
+            title=title,
+            performer=info_dict.get("uploader", "Unknown"),
+            thumb=thumb_name,
+            duration=dur,
+        )
+        
+        # تأكد من أن المتغير channel_link يتم تعيينه بعد إرسال الصوت
+        channel_link = message_to_channel.link
+        await songdb.insert_one({"video_id": video_id, "channel_link": channel_link})
+        
         await m.delete()
 
     except Exception as e:
