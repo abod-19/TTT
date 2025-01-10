@@ -47,7 +47,7 @@ async def song_downloader(client, message: Message):
                 await client.send_voice(
                     chat_id=message.chat.id,
                     voice=channel_link,
-                    caption=f" <a href='{lnk}'>{app.name}</a> ⇒ {str(results[0]['duration'])}",
+                    caption=f" <a href='{lnk}'>{app.name}</a> ⇒ {str(results[0]['duration'])}\nㅤ",
                     reply_to_message_id=message.id,
                 )
                 await m.delete()
