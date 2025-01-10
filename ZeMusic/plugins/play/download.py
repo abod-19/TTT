@@ -87,7 +87,6 @@ async def song_downloader(client, message: Message):
             info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
             audio_file = ydl.prepare_filename(info_dict)
             
-        # حساب مدة الأغنية# تحقق من المدة وحولها إلى ثوانٍ
         duration = results[0].get("duration", "0:00")
         duration_in_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(duration.split(":"))))
         await m.delete()
@@ -100,23 +99,7 @@ async def song_downloader(client, message: Message):
             duration=duration_in_seconds,
         )
         
-        # إرسال الصوت إلى القناة
-        message_to_channel = await app.send_audio(
-            chat_id="@IC_l9",  # إرسال الرسالة إلى القناة
-            audio=audio_file,
-            caption=f"{results[0]['id']}",
-            title=title,
-            performer=info_dict.get("uploader", "Unknown"),
-            thumb=thumb_name,
-            duration=duration_in_seconds,
-        )
         
-        # تأكد من أن المتغير channel_link يتم تعيينه بعد إرسال الصوت
-        channel_link = message_to_channel.link
-        await songdb.insert_one({"video_id": video_id, "channel_link": channel_link})
-        
-        #await m.delete()
-
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
         global W
