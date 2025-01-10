@@ -69,8 +69,8 @@ async def song_downloader(client, message: Message):
             #dur += int(float(dur_arr[i])) * secmul
             #secmul *= 60
 
-        duration = results[0].get("duration", "0:00")
-        duration_in_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(duration.split(":"))))
+        #duration = results[0].get("duration", "0:00")
+        #duration_in_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(duration.split(":"))))
         
         await message.reply_audio(
             audio=audio_file,
@@ -78,7 +78,7 @@ async def song_downloader(client, message: Message):
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
-            duration=duration_in_seconds,
+            #duration=duration_in_seconds,
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
