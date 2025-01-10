@@ -90,17 +90,6 @@ async def song_downloader(client, message: Message):
                 ]
             ),
         )
-
-        await app.send_audio(
-            chat_id="@IC_l9",  # إرسال الرسالة إلى القناة
-            audio=audio_file,
-            caption=f"{results[0]['id']}",
-            title=title,
-            performer=info_dict.get("uploader", "Unknown"),
-            thumb=thumb_name,
-            duration=dur,
-        )
-        
         await m.delete()
 
     except Exception as e:
