@@ -47,10 +47,7 @@ async def song_downloader(client, message: Message):
                 await client.send_voice(
                     chat_id=message.chat.id,
                     voice=channel_link,
-                    caption=f"{results[0]['duration']}",
-                    reply_markup=InlineKeyboardMarkup(
-                        [[InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk)]]
-                    ),
+                    caption=f" <a href='{lnk}'>{app.name}</a> ⇒ {str(results[0]['duration'])}",
                     reply_to_message_id=message.id,
                 )
                 await m.delete()
@@ -90,26 +87,17 @@ async def song_downloader(client, message: Message):
             info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
             audio_file = ydl.prepare_filename(info_dict)
             
-        # حساب مدة الأغنية
-        secmul, dur, dur_arr = 1, 0, duration.split(":")
-        for i in range(len(dur_arr) - 1, -1, -1):
-            dur += int(float(dur_arr[i])) * secmul
-            secmul *= 60
+        # حساب مدة الأغنية# تحقق من المدة وحولها إلى ثوانٍ
+        duration = results[0].get("duration", "0:00")
+        duration_in_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(duration.split(":"))))
 
         await message.reply_audio(
             audio=audio_file,
-            caption=f"{results[0]['duration']}",
+            caption=f" <a href='{lnk}'>{app.name}</a> ⇒ {str(results[0]['duration'])}",
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
-            duration=dur,
-            #reply_markup=InlineKeyboardMarkup(
-                #[
-                    #[
-                        #InlineKeyboardButton(text=config.CHANNEL_NAME, url=lnk),
-                    #],
-                #]
-            #),
+            duration=duration_in_seconds,
         )
         
         # إرسال الصوت إلى القناة
@@ -120,7 +108,7 @@ async def song_downloader(client, message: Message):
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
-            duration=dur,
+            duration=duration_in_seconds,
         )
         
         # تأكد من أن المتغير channel_link يتم تعيينه بعد إرسال الصوت
