@@ -90,10 +90,10 @@ async def song_downloader(client, message: Message):
         # حساب مدة الأغنية# تحقق من المدة وحولها إلى ثوانٍ
         duration = results[0].get("duration", "0:00")
         duration_in_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(duration.split(":"))))
-
+        await m.delete()
         await message.reply_audio(
             audio=audio_file,
-            caption=f" <a href='{lnk}'>{app.name}</a> ⇒ {str(results[0]['duration'])}",
+            caption=f" <a href='{lnk}'>{app.name}</a> ⇒ {str(results[0]['duration'])}\nㅤ",
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
@@ -115,7 +115,7 @@ async def song_downloader(client, message: Message):
         channel_link = message_to_channel.link
         await songdb.insert_one({"video_id": video_id, "channel_link": channel_link})
         
-        await m.delete()
+        #await m.delete()
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
