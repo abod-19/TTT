@@ -93,7 +93,7 @@ async def song_downloader(client, message: Message):
         await m.delete()
         await message.reply_audio(
             audio=audio_file,
-            caption=f" <a href='{lnk}'>{app.name}</a> ⇒ {str(results[0]['duration'])}\nㅤ",
+            caption=f' <a href="{lnk}">{app.name}</a> ⇒ {str(results[0]["duration"])}\nㅤ',
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
