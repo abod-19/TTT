@@ -49,6 +49,7 @@ async def song_downloader(client, message: Message):
                     voice=channel_link,
                     caption=f"{app.name} ⇒ {str(results[0]['duration'])}\nㅤ",  # إزالة الوسم <a> لجعل النص يظهر كنص عادي
                     reply_to_message_id=message.id,
+                    parse_mode="Markdown"
                 )
                 await m.delete()
                 return
