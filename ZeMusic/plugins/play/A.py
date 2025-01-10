@@ -11,6 +11,7 @@ from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
 
+
 lnk = "https://t.me/" + config.CHANNEL_LINK
 
 
