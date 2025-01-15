@@ -4,7 +4,7 @@ import asyncio
 import os
 import time
 from urllib.parse import urlparse
-from ZeMusic.platforms.Youtube import cookies
+#from ZeMusic.platforms.Youtube import cookies
 import wget
 from pyrogram import filters
 from pyrogram.types import Message
