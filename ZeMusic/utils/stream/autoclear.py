@@ -1,6 +1,6 @@
 import os
 from config import autoclean
-from YukkiMusic.utils.decorators import asyncify
+from ZeMusic.utils.decorators import asyncify
 
 
 @asyncify
