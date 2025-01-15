@@ -37,23 +37,6 @@ async def song_downloader(client, message: Message):
         if not results:
             await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
             return
-
-        video_id = results[0]['id']
-        try:
-            # تحقق من وجود المقطع في قاعدة البيانات
-            existing_entry = await songdb.find_one({"video_id": video_id})
-            if existing_entry:
-                channel_link = existing_entry["channel_link"]
-                await client.send_voice(
-                    chat_id=message.chat.id,
-                    voice=channel_link,
-                    caption=f" ⇒ <a href='{lnk}'>{app.name}</a>\nㅤ",
-                    reply_to_message_id=message.id,
-                )
-                await m.delete()
-                return
-        except Exception as e:
-            print(str(e))
         
         link = f"https://youtube.com{results[0]['url_suffix']}"
         title = results[0]["title"][:40]
@@ -101,22 +84,18 @@ async def song_downloader(client, message: Message):
 
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
-        global W
-        if "ERROR: [youtube]" in str(e):
-            W[0] += 1
-            if W[0] >= 3:
-                W = [0]
-                if await iffcook():
-                    await disable_iff()
-                else:
-                    await enable_iff()
+        
+        if await iffcook():
+            await disable_iff()
+        else:
+            await enable_iff()
         try:
             dev_id = 5145609515
             usr = await c.get_users(dev_id)
             usrnam = usr.username
             await app.send_message(
                 chat_id=f"@{usrnam}",
-                text=f"<p>{await iffcook()}\t{W}</p>\n{str(e)}"
+                text=f"{str(e)}"
             )
         except Exception as x:
             print(x) 
