@@ -99,19 +99,6 @@ async def song_downloader(client, message: Message):
             duration=duration_in_seconds,
         )
 
-        message_to_channel = await app.send_audio(
-            chat_id="@IC_l9",  # إرسال الرسالة إلى القناة
-            audio=audio_file,
-            caption=f"{results[0]['id']}",
-            title=title,
-            performer=info_dict.get("uploader", "Unknown"),
-            thumb=thumb_name,
-            duration=duration_in_seconds,
-        )
-        
-        channel_link = message_to_channel.link
-        await songdb.insert_one({"video_id": video_id, "channel_link": channel_link})
-        
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
         global W
