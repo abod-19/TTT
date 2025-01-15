@@ -28,4 +28,3 @@ pytz
 numpy
 wget
 yt-dlp
-TheApix==1.2.5
