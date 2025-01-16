@@ -9,7 +9,7 @@ from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from youtubesearchpython.__future__ import VideosSearch
 from yt_dlp import YoutubeDL
-
+from async_lru import alru_cache
 import config
 from ZeMusic.utils.database import is_on_off
 from ZeMusic.utils.formatters import time_to_seconds, seconds_to_min
@@ -90,6 +90,7 @@ class YouTubeAPI:
             return None
         return text[offset : offset + length]
 
+    @alru_cache(maxsize=None)
     async def details(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
@@ -107,6 +108,7 @@ class YouTubeAPI:
                 duration_sec = int(time_to_seconds(duration_min))
         return title, duration_min, duration_sec, thumbnail, vidid
 
+    @alru_cache(maxsize=None)
     async def title(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
@@ -117,6 +119,7 @@ class YouTubeAPI:
             title = result["title"]
         return title
 
+    @alru_cache(maxsize=None)
     async def duration(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
@@ -127,6 +130,7 @@ class YouTubeAPI:
             duration = result["duration"]
         return duration
 
+    @alru_cache(maxsize=None)
     async def thumbnail(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
@@ -161,6 +165,7 @@ class YouTubeAPI:
         else:
             return 0, stderr.decode()
 
+    @alru_cache(maxsize=None)
     async def playlist(self, link, limit, videoid: Union[bool, str] = None):
         if videoid:
             link = self.listbase + link
@@ -181,6 +186,7 @@ class YouTubeAPI:
             result = []
         return result
 
+    @alru_cache(maxsize=None)
     async def track(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
@@ -233,6 +239,7 @@ class YouTubeAPI:
             return info, details["id"]
 
     #@asyncify
+    @alru_cache(maxsize=None)
     async def formats(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
@@ -274,6 +281,7 @@ class YouTubeAPI:
                     )
         return formats_available, link
 
+    @alru_cache(maxsize=None)
     async def slider(
         self,
         link: str,
