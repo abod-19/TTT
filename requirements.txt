@@ -29,3 +29,4 @@ numpy
 wget
 yt-dlp
 kurigram==2.1.36
+async-lru
