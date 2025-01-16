@@ -28,3 +28,4 @@ pytz
 numpy
 wget
 yt-dlp
+kurigram==2.1.36
