@@ -1,82 +1,51 @@
 import os
 import re
 import yt_dlp
-from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram import Client
 from ZeMusic import app
 from ZeMusic.platforms.Youtube import cookies
 from ZeMusic.plugins.play.filters import command
 
-def remove_if_exists(path):
-    if path and os.path.exists(path):
-        os.remove(path)
-
 @app.on_message(command(["song", "/song", "بحث"]))
-async def song_downloader(client, message: Message):
+async def song_downloader(client, message):
     query = " ".join(message.command[1:])
     m = await message.reply_text("<b>جـارِ البحث ♪</b>")
 
     ydl_opts = {
-        "format": "bestaudio/best",
-        "postprocessors": [{
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
-        }],
-        "keepvideo": False,
-        "geo_bypass": True,
+        "format": "bestaudio[ext=m4a]",
         "quiet": True,
+        "geo_bypass": True,
         "cookiefile": f"{await cookies()}",
     }
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        try:
-            # Search and download the audio
-            info = ydl.extract_info(f"ytsearch:{query}", download=True)
+    try:
+        # البحث وتنزيل الصوت
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(f"ytsearch1:{query}", download=True)
             if not info or 'entries' not in info or not info['entries']:
                 await m.edit("لم يتم العثور على نتائج.")
                 return
             
-            # Get the first result
             first_entry = info['entries'][0]
             title = first_entry.get("title", "Unknown Title")
-            lnk = first_entry.get("webpage_url", "Unknown Link")
-            thumb_url = first_entry.get("thumbnail", None)
-            duration_in_seconds = first_entry.get("duration", 0)
+            duration = first_entry.get("duration", 0)
 
-            # Clean title and prepare file name
-            title_clean = re.sub(r"[^\w\s]", "", title)
+            # تنظيف اسم الملف وإعداد مسار الصوت
             audio_file = ydl.prepare_filename(first_entry).replace('.webm', '.mp3')
-
-            # Download thumbnail if available
-            thumb_name = None
-            if thumb_url:
-                try:
-                    response = requests.get(thumb_url)
-                    thumb_name = "temp_thumb.jpg"
-                    with open(thumb_name, "wb") as f:
-                        f.write(response.content)
-                except Exception as e:
-                    print(f"Error downloading thumbnail: {e}")
-                    thumb_name = None
-
-            await m.delete()  # حذف الرسالة المؤقتة
+            
+            # إرسال الملف الصوتي
+            await m.edit("<b>جـارِ الإرسال ♪</b>")
             await message.reply_audio(
                 audio=audio_file,
-                caption=f" ⇒ <a href='{lnk}'>{title}</a>\n",
+                caption=f"<b>{title}</b>",
                 title=title,
                 performer=first_entry.get("uploader", "Unknown"),
-                thumb=thumb_name,
-                duration=duration_in_seconds,
+                duration=duration,
             )
 
-        except Exception as e:
-            await message.reply_text(f"- لم يتم العثور على نتائج حاول مجددًا\n{str(e)}")
-            print(e)
-
-    # Clean up temporary files
-    try:
-        remove_if_exists(audio_file)
-        remove_if_exists(thumb_name)
     except Exception as e:
-        print(e)
+        await m.edit(f"حدث خطأ: {e}")
+    finally:
+        # حذف الملف الصوتي المؤقت بعد الإرسال
+        if os.path.exists(audio_file):
+            os.remove(audio_file)
