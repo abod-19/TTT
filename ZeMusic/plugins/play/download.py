@@ -4,6 +4,7 @@ import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from ZeMusic import app
+from ZeMusic.platforms.Youtube import cookies
 from ZeMusic.plugins.play.filters import command
 
 def remove_if_exists(path):
@@ -25,6 +26,7 @@ async def song_downloader(client, message: Message):
         "keepvideo": False,
         "geo_bypass": True,
         "quiet": True,
+        "cookiefile": f"{await cookies()}",
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
