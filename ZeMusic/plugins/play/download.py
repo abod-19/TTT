@@ -41,14 +41,26 @@ async def song_downloader(client, message: Message):
             first_entry = info['entries'][0]
             title = first_entry.get("title", "Unknown Title")
             lnk = first_entry.get("webpage_url", "Unknown Link")
-            thumb_name = first_entry.get("thumbnail", None)
+            thumb_url = first_entry.get("thumbnail", None)
             duration_in_seconds = first_entry.get("duration", 0)
-            
+
             # Clean title and prepare file name
             title_clean = re.sub(r"[^\w\s]", "", title)
             audio_file = ydl.prepare_filename(first_entry).replace('.webm', '.mp3')
 
-            await m.delete()
+            # Download thumbnail if available
+            thumb_name = None
+            if thumb_url:
+                try:
+                    response = requests.get(thumb_url)
+                    thumb_name = "temp_thumb.jpg"
+                    with open(thumb_name, "wb") as f:
+                        f.write(response.content)
+                except Exception as e:
+                    print(f"Error downloading thumbnail: {e}")
+                    thumb_name = None
+
+            await m.delete()  # حذف الرسالة المؤقتة
             await message.reply_audio(
                 audio=audio_file,
                 caption=f" ⇒ <a href='{lnk}'>{title}</a>\n",
@@ -59,7 +71,7 @@ async def song_downloader(client, message: Message):
             )
 
         except Exception as e:
-            await m.edit(f"- لم يتم العثور على نتائج حاول مجددًا\n{str(e)}")
+            await message.reply_text(f"- لم يتم العثور على نتائج حاول مجددًا\n{str(e)}")
             print(e)
 
     # Clean up temporary files
