@@ -1,107 +1,66 @@
 import os
 import re
-import requests
-import config
 import yt_dlp
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from youtube_search import YoutubeSearch
-from ZeMusic.platforms.Youtube import cookies
+from pyrogram.types import Message
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
-from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
-from ZeMusic.core.mongo import mongodb
 
 def remove_if_exists(path):
-    if os.path.exists(path):
+    if path and os.path.exists(path):
         os.remove(path)
-W = [0]
-songdb = mongodb.song
-lnk = "https://t.me/" + config.CHANNEL_LINK
-Nem = f"{config.BOT_NAME} ابحث"
-Nam = f"{config.BOT_NAME} بحث"
 
-@app.on_message(command(["song", "/song", "بحث", Nem, Nam]))
+@app.on_message(command(["song", "/song", "بحث"]))
 async def song_downloader(client, message: Message):
-    if message.text in ["song", "/song", "بحث", Nem, Nam]:
-        return
-    elif message.command[0] in config.BOT_NAME:
-        query = " ".join(message.command[2:])
-    else:
-        query = " ".join(message.command[1:])
-        
+    query = " ".join(message.command[1:])
     m = await message.reply_text("<b>جـارِ البحث ♪</b>")
-    
-    try:
-        results = YoutubeSearch(query, max_results=1).to_dict()
-        if not results:
-            await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
-            return
-        
-        link = f"https://youtube.com{results[0]['url_suffix']}"
-        title = results[0]["title"][:40]
-        title_clean = re.sub(r'[\\/*?:"<>|]', "", title)  # تنظيف اسم الملف
-        thumbnail = results[0]["thumbnails"][0]
-        thumb_name = f"{title_clean}.jpg"
-        
-        # تحميل الصورة المصغرة
-        thumb = requests.get(thumbnail, allow_redirects=True)
-        open(thumb_name, "wb").write(thumb.content)
-        duration = results[0]["duration"]
-
-    except Exception as e:
-        await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
-        print(str(e))
-        return
-    
-    await m.edit("<b>جاري التحميل ♪</b>")
 
     ydl_opts = {
-        "format": "bestaudio/best",  # تحديد صيغة M4A
+        "format": "bestaudio/best",
+        "postprocessors": [{
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": "192",
+        }],
         "keepvideo": False,
         "geo_bypass": True,
-        "outtmpl": f"{title_clean}.%(ext)s",  # استخدام اسم نظيف للملف
         "quiet": True,
-        "cookiefile": f"{await cookies()}",  # استخدام مسار الكوكيز
     }
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=True)  # التنزيل مباشرة
-            audio_file = ydl.prepare_filename(info_dict)
-            
-        duration = results[0].get("duration", "0:00")
-        duration_in_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(duration.split(":"))))
-        await m.delete()
-        await message.reply_audio(
-            audio=audio_file,
-            caption=f" ⇒ <a href='{lnk}'>{app.name}</a>\nㅤ",
-            title=title,
-            performer=info_dict.get("uploader", "Unknown"),
-            thumb=thumb_name,
-            duration=duration_in_seconds,
-        )
-
-    except Exception as e:
-        await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
-        
-        if await iffcook():
-            await disable_iff()
-        else:
-            await enable_iff()
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
-            dev_id = 5145609515
-            usr = await c.get_users(dev_id)
-            usrnam = usr.username
-            await app.send_message(
-                chat_id=f"@{usrnam}",
-                text=f"{str(e)}"
-            )
-        except Exception as x:
-            print(x) 
-        print(e)
+            # Search and download the audio
+            info = ydl.extract_info(f"ytsearch:{query}", download=True)
+            if not info or 'entries' not in info or not info['entries']:
+                await m.edit("لم يتم العثور على نتائج.")
+                return
+            
+            # Get the first result
+            first_entry = info['entries'][0]
+            title = first_entry.get("title", "Unknown Title")
+            lnk = first_entry.get("webpage_url", "Unknown Link")
+            thumb_name = first_entry.get("thumbnail", None)
+            duration_in_seconds = first_entry.get("duration", 0)
+            
+            # Clean title and prepare file name
+            title_clean = re.sub(r"[^\w\s]", "", title)
+            audio_file = ydl.prepare_filename(first_entry).replace('.webm', '.mp3')
 
-    # حذف الملفات المؤقتة
+            await m.delete()
+            await message.reply_audio(
+                audio=audio_file,
+                caption=f" ⇒ <a href='{lnk}'>{title}</a>\n",
+                title=title,
+                performer=first_entry.get("uploader", "Unknown"),
+                thumb=thumb_name,
+                duration=duration_in_seconds,
+            )
+
+        except Exception as e:
+            await m.edit(f"- لم يتم العثور على نتائج حاول مجددًا\n{str(e)}")
+            print(e)
+
+    # Clean up temporary files
     try:
         remove_if_exists(audio_file)
         remove_if_exists(thumb_name)
