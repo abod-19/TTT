@@ -7,7 +7,8 @@ from config import BOT_NAME
 from pyrogram.enums import ParseMode
 
 italy = [
-         "> لبيه سم."
+         "> لبيه سم.",
+         "<blockquote>النص المقتبس</blockquote>"
          ]
 
 @app.on_message(filters.regex(r"^(بوت)$"))
