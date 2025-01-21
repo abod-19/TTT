@@ -13,7 +13,7 @@ async def chat_gpt(bot, message):
         if len(message.command) < 2:
             await message.reply_text(f"♪  اكتب <p>رون</p> واي شي تريد تسالة راح يجاوبك.")
         else:
-            query = message.text.split(   , 1)[1]
+            query = message.text.split(' ', 1)[1]
             response = api.blackbox(query)["results"]
             await message.reply_text(f"{response}", parse_mode=ParseMode.MARKDOWN)
     except Exception as e:
