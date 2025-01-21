@@ -14,7 +14,7 @@ async def chat_gpt(bot, message):
             await message.reply_text(f"♪  اكتب <p>رون</p> واي شي تريد تسالة راح يجاوبك.")
         else:
             query = message.text.split(   , 1)[1]
-            response = api.chatbot(query)["results"]
+            response = api.blackbox(query)["results"]
             await message.reply_text(f"{response}", parse_mode=ParseMode.MARKDOWN)
     except Exception as e:
         await message.reply_text(f"Error: {e}")
