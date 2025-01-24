@@ -1,8 +1,8 @@
 import random
 import string
-import os, requests
+
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Message
+from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message
 from pytgcalls.exceptions import NoActiveGroupCall
 
 import config
@@ -65,8 +65,8 @@ async def play_commnd(
     slider = None
     plist_type = None
     spotify = None
-    user_id =  1121532100
-    user_name =  message.chat.title
+    user_id = message.from_user.id if message.from_user else "1121532100"
+    user_name = message.from_user.first_name if message.from_user else "None"
     audio_telegram = (
         (message.reply_to_message.audio or message.reply_to_message.voice)
         if message.reply_to_message
@@ -121,11 +121,11 @@ async def play_commnd(
                 ext = video_telegram.file_name.split(".")[-1]
                 if ext.lower() not in formats:
                     return await mystic.edit_text(
-                        _["play_7"].format(f"{' | '.join(formats)}")
+                        _["play_7"].format(f"{  |  .join(formats)}")
                     )
             except:
                 return await mystic.edit_text(
-                    _["play_7"].format(f"{' | '.join(formats)}")
+                    _["play_7"].format(f"{  |  .join(formats)}")
                 )
         if video_telegram.file_size > config.TG_VIDEO_FILESIZE_LIMIT:
             return await mystic.edit_text(_["play_8"])
@@ -293,7 +293,7 @@ async def play_commnd(
             return await mystic.delete()
         else:
             try:
-                await Mody.stream_call(url)
+                await mody.stream_call(url)
             except NoActiveGroupCall:
                 await mystic.edit_text(_["black_9"])
                 return await app.send_message(
