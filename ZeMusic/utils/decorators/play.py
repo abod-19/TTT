@@ -31,7 +31,6 @@ def PlayWrapper(command):
     async def wrapper(client, message):
         language = await get_lang(message.chat.id)
         _ = get_string(language)
-
         if await is_maintenance() is False:
             if message.from_user.id not in SUDOERS:
                 return await message.reply_text(
@@ -87,7 +86,7 @@ def PlayWrapper(command):
                 else:
                     if message.from_user.id not in admins:
                         return await message.reply_text(_["play_4"])
-        if message.command[0][0] == "v" or message.command[0][0] == "ف":
+        if message.command[0][0] == "v":
             video = True
         else:
             if "-v" in message.text:
@@ -114,7 +113,7 @@ def PlayWrapper(command):
                 ):
                     return await message.reply_text(
                         _["call_2"].format(
-                            app.mention, userbot.name, userbot.username
+                            app.mention, userbot.id, userbot.name, userbot.username
                         )
                     )
             except UserNotParticipant:
@@ -134,14 +133,14 @@ def PlayWrapper(command):
                             return await message.reply_text(_["call_1"])
                         except Exception as e:
                             return await message.reply_text(
-                                _["call_3"].format(app.mention)
+                                _["call_3"].format(app.mention, type(e).__name__)
                             )
 
                 if invitelink.startswith("https://t.me/+"):
                     invitelink = invitelink.replace(
                         "https://t.me/+", "https://t.me/joinchat/"
                     )
-                
+                myu = await message.reply_text(_["call_4"].format(app.mention))
                 try:
                     await asyncio.sleep(1)
                     await userbot.join_chat(invitelink)
@@ -150,7 +149,7 @@ def PlayWrapper(command):
                         await app.approve_chat_join_request(chat_id, userbot.id)
                     except Exception as e:
                         return await message.reply_text(
-                            _["call_3"].format(app.mention)
+                            _["call_3"].format(app.mention, type(e).__name__)
                         )
                     await asyncio.sleep(3)
                     await myu.edit(_["call_5"].format(app.mention))
@@ -158,7 +157,7 @@ def PlayWrapper(command):
                     pass
                 except Exception as e:
                     return await message.reply_text(
-                        _["call_3"].format(app.mention)
+                        _["call_3"].format(app.mention, type(e).__name__)
                     )
 
                 links[chat_id] = invitelink
