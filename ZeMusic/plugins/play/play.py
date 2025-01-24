@@ -43,6 +43,7 @@ Nem = config.BOT_NAME + " شغل"
             "cvplayforce",
         ],""
     )
+    & filters.group
     & ~BANNED_USERS
 )
 @PlayWrapper
