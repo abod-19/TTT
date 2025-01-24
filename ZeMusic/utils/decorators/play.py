@@ -31,7 +31,7 @@ def PlayWrapper(command):
     async def wrapper(client, message):
         language = await get_lang(message.chat.id)
         _ = get_string(language)
-
+        
         if await is_maintenance() is False:
             if message.from_user.id not in SUDOERS:
                 return await message.reply_text(
@@ -140,8 +140,7 @@ def PlayWrapper(command):
                 if invitelink.startswith("https://t.me/+"):
                     invitelink = invitelink.replace(
                         "https://t.me/+", "https://t.me/joinchat/"
-                    )
-                
+                    ) 
                 try:
                     await asyncio.sleep(1)
                     await userbot.join_chat(invitelink)
@@ -153,7 +152,6 @@ def PlayWrapper(command):
                             _["call_3"].format(app.mention)
                         )
                     await asyncio.sleep(3)
-                    await myu.edit(_["call_5"].format(app.mention))
                 except UserAlreadyParticipant:
                     pass
                 except Exception as e:
