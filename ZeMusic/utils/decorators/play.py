@@ -140,7 +140,7 @@ def PlayWrapper(command):
                 if invitelink.startswith("https://t.me/+"):
                     invitelink = invitelink.replace(
                         "https://t.me/+", "https://t.me/joinchat/"
-                    )
+                    ) 
                 
                 try:
                     await asyncio.sleep(1)
@@ -153,7 +153,6 @@ def PlayWrapper(command):
                             _["call_3"].format(app.mention)
                         )
                     await asyncio.sleep(3)
-                    await myu.edit(_["call_5"].format(app.mention))
                 except UserAlreadyParticipant:
                     pass
                 except Exception as e:
