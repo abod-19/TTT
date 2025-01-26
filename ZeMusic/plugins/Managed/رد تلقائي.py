@@ -1,10 +1,10 @@
 from pyrogram import Client, filters
 import config
 
-class Call(Client):
+class Call:
     def __init__(self):
         self.one = Client(
-            name="ZeAss1",
+            name="abod",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING1),
@@ -24,3 +24,7 @@ class Call(Client):
 
         print("الرد التلقائي مفعل.")
         await self.one.idle()
+
+    async def stop(self):
+        await self.one.stop()
+        print("تم إيقاف الجلسة.")
