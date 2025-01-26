@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 import config
 
-class Call:
+class Coll:
     def __init__(self):
         self.one = Client(
             name="abod",
