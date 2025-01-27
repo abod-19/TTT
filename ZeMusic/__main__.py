@@ -38,6 +38,7 @@ async def init():
         importlib.import_module("ZeMusic.plugins" + all_module)
     LOGGER("ZeMusic.plugins").info("تنزيل معلومات السورس...")
     await userbot.start()
+    await rd.start()
     await Mody.start()
     try:
         await Mody.stream_call("https://te.legra.ph/file/29f784eb49d230ab62e9e.mp4")
@@ -52,7 +53,6 @@ async def init():
     LOGGER("ZeMusic").info(
         "جاري تشغيل البوت\nتم التنصيب على سورس الملك بنجاح\nقناة السورس https://t.me/EF_19"
     )
-    await rd.start()
     await idle()
     await app.stop()
     await userbot.stop()
