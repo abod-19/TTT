@@ -52,11 +52,11 @@ async def init():
     LOGGER("ZeMusic").info(
         "جاري تشغيل البوت\nتم التنصيب على سورس الملك بنجاح\nقناة السورس https://t.me/EF_19"
     )
+    await rd.start()
     await idle()
     await app.stop()
     await userbot.stop()
     await azkar()
-    await rd.start()
     LOGGER("ZeMusic").info("Stopping Ze Music Bot...")
 
 
