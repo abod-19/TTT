@@ -3,7 +3,7 @@ from ZeMusic.core.dir import dirr
 from ZeMusic.core.git import git
 from ZeMusic.core.userbot import Userbot
 from ZeMusic.misc import dbb, heroku
-from ZeMusic.core.rd import Rd
+from ZeMusic.plugins.play.rd import Rd
 from .logging import LOGGER
 
 dirr()
