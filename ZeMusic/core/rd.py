@@ -23,7 +23,7 @@ class Rd:
             await message.reply_text(reply_text)
 
         print("الرد التلقائي مفعل.")
-        await self.one.idle()
+        await asyncio.Event().wait()
 
     async def stop(self):
         await self.one.stop()
