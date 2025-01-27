@@ -23,7 +23,7 @@ class Rd:
             await message.reply_text(reply_text)
 
         print("الرد التلقائي مفعل.")
-        await self.one.idle()
+        #await self.one.idle()
 
     async def stop(self):
         await self.one.stop()
