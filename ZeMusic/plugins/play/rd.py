@@ -1,17 +1,14 @@
-import os
-from porn_detector import NSFWDetector
-from pyrogram import Client, filters
 from ZeMusic import app
+import os
+from nsfw_model import classify
+from pyrogram import Client, filters
+from PIL import Image
 
-# تحميل نموذج الكشف عن الصور الإباحية
-detector = NSFWDetector()
-
-# دالة تحليل الصور
 def is_explicit_image(image_path):
-    result = detector.is_nsfw(image_path)
-    return result  # إذا كانت الصورة غير لائقة، تُرجع True
+    img = Image.open(image_path)
+    result = classify(img)
+    return result.get("porn", 0) > 0.7
 
-# استقبال الصور وفحصها
 @app.on_message(filters.photo & filters.group)
 async def filter_explicit_images(client, message):
     photo = message.photo[-1]
