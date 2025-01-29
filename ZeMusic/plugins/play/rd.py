@@ -1,14 +1,13 @@
 from ZeMusic import app
+from pyrogram import filters  # أضفنا استيراد الفلاتر من Pyrogram
 import os
 import logging
 from nudenet import NudeDetector
 
-# تهيئة كاشف المحتوى غير اللائق
+# التهيئة والإعدادات
 detector = NudeDetector()
-
-# إعدادات البوت
-ALLOWED_GROUPS = []  # أضف أيدي المجموعات المسموح بها (مثال: [-100123456, -100789012])
-THRESHOLD = 0.7  # عتبة الثقة للكشف
+ALLOWED_GROUPS = []  
+THRESHOLD = 0.7  
 
 # تكوين نظام التسجيل
 logging.basicConfig(
@@ -17,7 +16,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-@app.on_message(filters.group & filters.photo)
+@app.on_message(filters.group & filters.photo)  # أصبحت الفلاتر معروفة الآن
 async def check_image(client, message):
     try:
         # التحقق من المجموعات المسموح بها
@@ -32,6 +31,7 @@ async def check_image(client, message):
         results = detector.detect(file_path)
         
         # التحقق من النتائج
+        inappropriate_detected = False
         for obj in results:
             if obj['class'] in [
                 'FEMALE_GENITALIA_COVERED', 
@@ -39,17 +39,18 @@ async def check_image(client, message):
                 'FEMALE_BREAST_EXPOSED', 
                 'MALE_GENITALIA_EXPOSED'
             ] and obj['score'] >= THRESHOLD:
-                
-                # حذف الرسالة إذا تم اكتشاف محتوى غير لائق
-                await message.delete()
-                logger.info(f"تم حذف رسالة غير لائقة في المجموعة {message.chat.id}")
+                inappropriate_detected = True
                 break
         
-        # تنظيف الملفات المؤقتة
+        if inappropriate_detected:
+            await message.delete()
+            logger.info(f"تم حذف رسالة غير لائقة في {message.chat.id}")
+        
+        # تنظيف الملفات
         if os.path.exists(file_path):
             os.remove(file_path)
             
     except Exception as e:
-        logger.error(f"خطأ في معالجة الصورة: {e}")
+        logger.error(f"خطأ: {str(e)}")
         if 'file_path' in locals() and os.path.exists(file_path):
             os.remove(file_path)
