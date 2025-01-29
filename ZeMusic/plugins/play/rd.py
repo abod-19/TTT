@@ -1,5 +1,5 @@
 import os
-from porn-detector import NSFWDetector
+from porn_detector import NSFWDetector
 from pyrogram import Client, filters
 from ZeMusic import app
 
