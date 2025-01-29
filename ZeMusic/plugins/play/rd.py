@@ -17,8 +17,8 @@ def is_explicit_image(image_path):
 # استقبال الصور وفحصها
 @app.on_message(filters.photo & filters.group)
 async def filter_explicit_images(client, message):
-    photo = message.photo[-1]
-    file_path = await client.download_media(photo.file_id)
+    photo = message.photo.file_id  # تصحيح الخطأ هنا
+    file_path = await client.download_media(photo)
 
     if is_explicit_image(file_path):
         await message.delete()
