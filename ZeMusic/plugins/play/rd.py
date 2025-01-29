@@ -1,14 +1,20 @@
 from ZeMusic import app
 import os
-from nsfw_model import classify
+from nudenet import NudeClassifier
 from pyrogram import Client, filters
-from PIL import Image
 
+# تحميل نموذج NudeNet
+classifier = NudeClassifier()
+
+# دالة تحليل الصور
 def is_explicit_image(image_path):
-    img = Image.open(image_path)
-    result = classify(img)
-    return result.get("porn", 0) > 0.7
+    result = classifier.classify(image_path)
+    for _, data in result.items():
+        if data["unsafe"] > 0.7:  # إذا كانت نسبة الإباحية أكثر من 70%
+            return True
+    return False
 
+# استقبال الصور وفحصها
 @app.on_message(filters.photo & filters.group)
 async def filter_explicit_images(client, message):
     photo = message.photo[-1]
