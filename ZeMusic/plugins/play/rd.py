@@ -1,16 +1,16 @@
 from ZeMusic import app
 import os
-from nudenet import NudeClassifier
+from nudenet import NudeDetector
 from pyrogram import Client, filters
 
 # تحميل نموذج NudeNet
-classifier = NudeClassifier()
+detector = NudeDetector()
 
 # دالة تحليل الصور
 def is_explicit_image(image_path):
-    result = classifier.classify(image_path)
-    for _, data in result.items():
-        if data["unsafe"] > 0.7:  # إذا كانت نسبة الإباحية أكثر من 70%
+    result = detector.detect(image_path)
+    for item in result:
+        if item["score"] > 0.7:  # إذا كانت نسبة الإباحية أكثر من 70%
             return True
     return False
 
