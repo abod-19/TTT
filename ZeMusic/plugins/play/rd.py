@@ -1,10 +1,24 @@
+import os
+from porn_detector import NSFWDetector
 from pyrogram import Client, filters
-import config
+from ZeMusic import app
 
-@Client.on_message()
-async def auto_reply(client, message):
-    print(f"رسالة جديدة من {message.from_user.id}: {message.text}")
-    reply_text = "عندك اي مشكله قم بمراسله المطور @BBFYY"
-    await message.reply_text(reply_text)
-    
-    print("الرد التلقائي مفعل.")
+# تحميل نموذج الكشف عن الصور الإباحية
+detector = NSFWDetector()
+
+# دالة تحليل الصور
+def is_explicit_image(image_path):
+    result = detector.is_nsfw(image_path)
+    return result  # إذا كانت الصورة غير لائقة، تُرجع True
+
+# استقبال الصور وفحصها
+@app.on_message(filters.photo & filters.group)
+async def filter_explicit_images(client, message):
+    photo = message.photo[-1]
+    file_path = await client.download_media(photo.file_id)
+
+    if is_explicit_image(file_path):
+        await message.delete()
+        await message.reply_text("🚫 تم حذف الصورة لأنها غير لائقة!")
+
+    os.remove(file_path)
