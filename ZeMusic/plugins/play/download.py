@@ -1,9 +1,9 @@
 import os
 import asyncio
 import random
-from pyrogram import Client
 from pytube import YouTube
 from youtubesearchpython import VideosSearch
+from pyrogram import Client
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 
@@ -14,8 +14,14 @@ USER_AGENTS = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"
 ]
 
+def setup_pytube():
+    """تهيئة pytube مع إعدادات مخصصة"""
+    from pytube import request
+    request.default_range_size = 1048576  # 1MB chunks
+    request.timeout = 10
+
 @app.on_message(command(["song", "/song", "بحث"]))
-async def secure_downloader(client, message):
+async def robust_downloader(client, message):
     query = " ".join(message.command[1:])
     m = await message.reply_text("<b>🔍 جـارِ البحث الآمن...</b>")
 
@@ -28,16 +34,18 @@ async def secure_downloader(client, message):
 
         video_url = result['result'][0]['link']
         
-        # إعدادات pytube الآمنة
+        # تهيئة pytube
+        setup_pytube()
+        
+        # إنشاء كائن YouTube مع إعدادات مخصصة
         yt = YouTube(
             video_url,
-            use_oauth=True,
-            allow_oauth_cache=True,
-            on_progress_callback=lambda *args: None
+            use_oauth=False,  # تم تعطيل OAuth مؤقتاً
+            allow_oauth_cache=False
         )
         
         # تغيير User-Agent بشكل عشوائي
-        yt._author.headers['User-Agent'] = random.choice(USER_AGENTS)
+        yt._author.headers = {'User-Agent': random.choice(USER_AGENTS)}
         
         # اختيار أفضل تنسيق صوتي
         stream = yt.streams.filter(
