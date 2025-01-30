@@ -3,14 +3,15 @@ from pyrogram import filters
 import os
 import logging
 import asyncio
+import aiofiles
 from nudenet import NudeDetector
 
 # تهيئة كاشف المحتوى غير اللائق
 detector = NudeDetector()
 
 # إعدادات البوت
-ALLOWED_GROUPS = []  # أضف أيدي المجموعات المسموح بها (مثال: [-100123456, -100789012])
-THRESHOLD = 0.45  # تم تخفيض عتبة الثقة
+ALLOWED_GROUPS = []  # أضف أيدي المجموعات المسموح بها
+THRESHOLD = 0.45  # تم تخفيض العتبة
 
 # تكوين نظام التسجيل
 logging.basicConfig(
@@ -19,22 +20,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-@app.on_message(filters.group & filters.photo)
-async def check_image(client, message):
+@app.on_message(filters.group & (filters.photo | filters.video))
+async def check_media(client, message):
     try:
         # التحقق من المجموعات المسموح بها
         if ALLOWED_GROUPS and message.chat.id not in ALLOWED_GROUPS:
             return
 
-        # تنزيل الصورة
-        photo = message.photo.file_id
-        file_path = await client.download_media(
-            photo, 
-            file_name=f"temp_{message.id}.jpg",
-            in_memory=False
-        )
+        # تنزيل الملف
+        if message.photo:
+            media = message.photo.file_id
+            file_path = f"temp_{message.id}.jpg"
+        elif message.video:
+            media = message.video.file_id
+            file_path = f"temp_{message.id}.mp4"
         
-        # تحليل الصورة
+        async with aiofiles.open(file_path, mode='wb') as f:
+            await f.write(await client.download_media(media))
+        
+        # تحليل الملف
         results = detector.detect(file_path)
         logger.info(f"نتائج التحليل: {results}")
         
@@ -55,7 +59,8 @@ async def check_image(client, message):
                 break
         
         if inappropriate_detected:
-            await asyncio.sleep(1)  # تأخير بسيط قبل الحذف
+            await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم حذف الصورة خلال 10 ثوانٍ.")
+            await asyncio.sleep(10)  # تأخير 10 ثوانٍ
             await message.delete()
             logger.info(f"تم حذف رسالة غير لائقة في {message.chat.id}")
         
@@ -64,6 +69,6 @@ async def check_image(client, message):
             os.remove(file_path)
             
     except Exception as e:
-        logger.error(f"خطأ في معالجة الصورة: {str(e)}")
+        logger.error(f"خطأ في معالجة الملف: {str(e)}")
         if 'file_path' in locals() and os.path.exists(file_path):
             os.remove(file_path)
