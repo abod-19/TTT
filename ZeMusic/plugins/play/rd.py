@@ -10,7 +10,7 @@ detector = NudeDetector()
 
 # إعدادات البوت
 ALLOWED_GROUPS = []  # أضف أيدي المجموعات المسموح بها (مثال: [-100123456, -100789012])
-THRESHOLD = 0.5  # تم تخفيض عتبة الثقة
+THRESHOLD = 0.45  # تم تخفيض عتبة الثقة
 
 # تكوين نظام التسجيل
 logging.basicConfig(
