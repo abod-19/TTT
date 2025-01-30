@@ -56,7 +56,7 @@ async def check_media(client, message):
         if message.photo:
             # تحليل الصورة
             results = detector.detect(file_path)
-            logger.info(f"نتائج تحليل الصورة: {results}")
+            #logger.info(f"نتائج تحليل الصورة: {results}")
 
             for obj in results:
                 if obj['class'] in [
@@ -80,7 +80,7 @@ async def check_media(client, message):
 
                 # تحليل الإطار
                 results = detector.detect(frame_path)
-                logger.info(f"نتائج تحليل إطار الفيديو (الوقت: {t:.2f} ثانية): {results}")
+                #logger.info(f"نتائج تحليل إطار الفيديو (الوقت: {t:.2f} ثانية): {results}")
 
                 for obj in results:
                     if obj['class'] in [
