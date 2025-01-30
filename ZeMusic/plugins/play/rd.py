@@ -5,6 +5,7 @@ import logging
 import asyncio
 import aiofiles
 from nudenet import NudeDetector
+from moviepy.video.io.VideoFileClip import VideoFileClip
 
 # تهيئة كاشف المحتوى غير اللائق
 detector = NudeDetector()
@@ -12,6 +13,7 @@ detector = NudeDetector()
 # إعدادات البوت
 ALLOWED_GROUPS = []  # أضف أيدي المجموعات المسموح بها
 THRESHOLD = 0.45  # تم تخفيض العتبة
+FRAME_INTERVAL = 1  # تحليل إطار كل ثانية
 
 # تكوين نظام التسجيل
 logging.basicConfig(
@@ -46,27 +48,62 @@ async def check_media(client, message):
             await f.write(media_data)
         
         # تحليل الملف
-        results = detector.detect(file_path)
-        logger.info(f"نتائج التحليل: {results}")
-        
-        # التحقق من النتائج
         inappropriate_detected = False
-        for obj in results:
-            if obj['class'] in [
-                'EXPOSED_ANUS',
-                'COVERED_GENITALIA',
-                'EXPOSED_GENITALIA',
-                'FEMALE_GENITALIA_COVERED', 
-                'BUTTOCKS_EXPOSED',
-                'FEMALE_BREAST_EXPOSED', 
-                'MALE_GENITALIA_EXPOSED'
-            ] and obj['score'] >= THRESHOLD:
-                inappropriate_detected = True
-                logger.info(f"تم الكشف عن: {obj['class']} بثقة {obj['score']}")
-                break
+        if message.photo:
+            # تحليل الصورة
+            results = detector.detect(file_path)
+            logger.info(f"نتائج تحليل الصورة: {results}")
+            
+            for obj in results:
+                if obj['class'] in [
+                    'EXPOSED_ANUS',
+                    'COVERED_GENITALIA',
+                    'EXPOSED_GENITALIA',
+                    'FEMALE_GENITALIA_COVERED', 
+                    'BUTTOCKS_EXPOSED',
+                    'FEMALE_BREAST_EXPOSED', 
+                    'MALE_GENITALIA_EXPOSED'
+                ] and obj['score'] >= THRESHOLD:
+                    inappropriate_detected = True
+                    logger.info(f"تم الكشف عن: {obj['class']} بثقة {obj['score']}")
+                    break
+        
+        elif message.video:
+            # تحليل الفيديو (استخراج عدة إطارات)
+            clip = VideoFileClip(file_path)
+            duration = int(clip.duration)  # مدة الفيديو بالثواني
+            
+            for t in range(0, duration, FRAME_INTERVAL):  # تحليل إطار كل ثانية
+                frame_path = f"temp_frame_{message.id}_{t}.jpg"
+                clip.save_frame(frame_path, t=t)  # حفظ الإطار كصورة
+                
+                # تحليل الإطار
+                results = detector.detect(frame_path)
+                logger.info(f"نتائج تحليل إطار الفيديو (الوقت: {t} ثانية): {results}")
+                
+                for obj in results:
+                    if obj['class'] in [
+                        'EXPOSED_ANUS',
+                        'COVERED_GENITALIA',
+                        'EXPOSED_GENITALIA',
+                        'FEMALE_GENITALIA_COVERED', 
+                        'BUTTOCKS_EXPOSED',
+                        'FEMALE_BREAST_EXPOSED', 
+                        'MALE_GENITALIA_EXPOSED'
+                    ] and obj['score'] >= THRESHOLD:
+                        inappropriate_detected = True
+                        logger.info(f"تم الكشف عن: {obj['class']} بثقة {obj['score']} في الإطار (الوقت: {t} ثانية)")
+                        break
+                
+                # تنظيف الإطار المؤقت
+                if os.path.exists(frame_path):
+                    os.remove(frame_path)
+                
+                if inappropriate_detected:
+                    break  # إيقاف التحليل إذا تم اكتشاف محتوى غير لائق
         
         if inappropriate_detected:
-            await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم حذف الصورة خلال 10 ثوانٍ.")
+            await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم حذف الملف خلال 10 ثوانٍ.")
             await asyncio.sleep(10)  # تأخير 10 ثوانٍ
             await message.delete()
             logger.info(f"تم حذف رسالة غير لائقة في {message.chat.id}")
