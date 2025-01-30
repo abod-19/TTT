@@ -12,9 +12,9 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 detector = NudeDetector()
 
 # إعدادات البوت
-ALLOWED_GROUPS = []  # أضف أيدي المجموعات المسموح بها
-THRESHOLD = 0.35  # تم تخفيض العتبة
-FRAME_INTERVAL = 0.5  # تحليل إطار كل 0.5 ثانية
+ALLOWED_GROUPS = []  # أضف أيدي المجموعات المسموح بها هنا
+THRESHOLD = 0.35  # عتبة اكتشاف المحتوى غير اللائق
+FRAME_INTERVAL = 0.5  # تحليل إطار كل 0.5 ثانية في الفيديو
 
 # تكوين نظام التسجيل
 logging.basicConfig(
@@ -31,6 +31,7 @@ async def check_media(client, message):
             return
 
         # تحديد نوع الملف
+        file_path = None
         if message.photo:
             media = message.photo.file_id
             file_path = f"temp_{message.id}.jpg"
@@ -39,33 +40,24 @@ async def check_media(client, message):
             file_path = f"temp_{message.id}.mp4"
         elif message.sticker:
             media = message.sticker.file_id
-            file_path = f"temp_{message.id}.webp"  # الملصقات تكون بصيغة webp
-        elif message.animation:  # GIFs
+            file_path = f"temp_{message.id}.webp"
+        elif message.animation:  # الملصقات المتحركة (GIFs)
             media = message.animation.file_id
-            file_path = f"temp_{message.id}.mp4"  # GIFs يتم تحميلها كفيديو
+            file_path = f"temp_{message.id}.mp4"
         else:
             return
 
-        # تنزيل الملف ككائن BytesIO
+        # تنزيل الملف
         media_bytes_io = await client.download_media(media, in_memory=True)
 
-        # تحقق من نجاح التنزيل
-        if not media_bytes_io:
-            logger.error("فشل تنزيل الملف: media_bytes_io هو None")
+        if not media_bytes_io or not media_bytes_io.getvalue():
+            logger.error("فشل تنزيل الملف أو الملف فارغ!")
             return
 
-        media_data = media_bytes_io.getvalue()
-
-        # تحقق مما إذا كانت البيانات فارغة
-        if not media_data:
-            logger.error("الملف الذي تم تنزيله فارغ!")
-            return
-
-        # كتابة البيانات في ملف
+        # حفظ الملف محليًا
         async with aiofiles.open(file_path, mode='wb') as f:
-            await f.write(media_data)
+            await f.write(media_bytes_io.getvalue())
 
-        # تأكد من أن الملف تم إنشاؤه
         if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
             logger.error(f"فشل في حفظ الملف: {file_path} غير موجود أو فارغ")
             return
@@ -74,13 +66,7 @@ async def check_media(client, message):
         inappropriate_detected = False
 
         if message.photo or message.sticker or message.animation:
-            # تحليل الصور والملصقات والصور المتحركة
-            if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
-                results = detector.detect(file_path)
-            else:
-                logger.error(f"الملف {file_path} غير موجود أو فارغ، لا يمكن تحليله")
-                return
-
+            results = detector.detect(file_path) if os.path.exists(file_path) else []
             for obj in results:
                 if obj['class'] in [
                     'EXPOSED_ANUS', 'COVERED_GENITALIA', 'EXPOSED_GENITALIA',
@@ -89,19 +75,18 @@ async def check_media(client, message):
                     'FEMALE_GENITALIA_EXPOSED'
                 ] and obj['score'] >= THRESHOLD:
                     inappropriate_detected = True
-                    logger.info(f"تم الكشف عن: {obj['class']} بثقة {obj['score']}")
+                    logger.info(f"تم الكشف عن محتوى غير لائق: {obj['class']} بثقة {obj['score']}")
                     break
 
         elif message.video:
-            # تحليل الفيديو (استخراج عدة إطارات)
             try:
                 clip = VideoFileClip(file_path)
-                duration = clip.duration  # مدة الفيديو بالثواني
+                duration = clip.duration  
             except Exception as e:
                 logger.error(f"فشل فتح الفيديو {file_path}: {str(e)}")
                 return
 
-            for t in np.arange(0, duration, FRAME_INTERVAL):  # تحليل إطار كل FRAME_INTERVAL ثانية
+            for t in np.arange(0, duration, FRAME_INTERVAL):
                 frame_path = f"temp_frame_{message.id}_{int(t)}.jpg"
 
                 try:
@@ -110,45 +95,39 @@ async def check_media(client, message):
                     logger.error(f"فشل استخراج الإطار عند {t} ثانية: {str(e)}")
                     continue
 
-                if not os.path.exists(frame_path) or os.path.getsize(frame_path) == 0:
-                    logger.warning(f"الإطار عند {t} ثانية غير صالح.")
-                    continue
+                if os.path.exists(frame_path) and os.path.getsize(frame_path) > 0:
+                    results = detector.detect(frame_path)
+                    for obj in results:
+                        if obj['class'] in [
+                            'EXPOSED_ANUS', 'COVERED_GENITALIA', 'EXPOSED_GENITALIA',
+                            'FEMALE_GENITALIA_COVERED', 'BUTTOCKS_EXPOSED',
+                            'FEMALE_BREAST_EXPOSED', 'MALE_GENITALIA_EXPOSED',
+                            'FEMALE_GENITALIA_EXPOSED'
+                        ] and obj['score'] >= THRESHOLD:
+                            inappropriate_detected = True
+                            logger.info(f"تم الكشف عن محتوى غير لائق في الإطار عند {t:.2f} ثانية")
+                            break
 
-                results = detector.detect(frame_path)
-
-                for obj in results:
-                    if obj['class'] in [
-                        'EXPOSED_ANUS', 'COVERED_GENITALIA', 'EXPOSED_GENITALIA',
-                        'FEMALE_GENITALIA_COVERED', 'BUTTOCKS_EXPOSED',
-                        'FEMALE_BREAST_EXPOSED', 'MALE_GENITALIA_EXPOSED',
-                        'FEMALE_GENITALIA_EXPOSED'
-                    ] and obj['score'] >= THRESHOLD:
-                        inappropriate_detected = True
-                        logger.info(f"تم الكشف عن: {obj['class']} بثقة {obj['score']} في الإطار (الوقت: {t:.2f} ثانية)")
-                        break
-
-                # تنظيف الإطار المؤقت
-                if os.path.exists(frame_path):
-                    os.remove(frame_path)
+                os.remove(frame_path) if os.path.exists(frame_path) else None
 
                 if inappropriate_detected:
-                    break  # إيقاف التحليل إذا تم اكتشاف محتوى غير لائق
+                    break
 
-            clip.close()  # إغلاق الفيديو لتحرير الموارد
+            clip.close()  
 
         if inappropriate_detected:
-            await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم حذف الملف خلال 5 ثوانٍ.")
-            await asyncio.sleep(5)  # تأخير 5 ثوانٍ
+            await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم حذفه خلال 5 ثوانٍ.")
+            await asyncio.sleep(5)
             await message.delete()
             logger.info(f"تم حذف رسالة غير لائقة في {message.chat.id}")
 
-        # تنظيف الملفات المؤقتة
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        # حذف الملفات المؤقتة
+        os.remove(file_path) if os.path.exists(file_path) else None
 
     except Exception as e:
-        logger.error(f"خطأ في معالجة الملف: {str(e)}")
+        logger.error(f"خطأ أثناء معالجة الملف: {str(e)}")
+
     finally:
-        # التأكد من حذف الملفات المؤقتة حتى في حالة حدوث خطأ
-        if 'file_path' in locals() and os.path.exists(file_path):
+        # التأكد من تنظيف الملفات المؤقتة حتى في حالة حدوث خطأ
+        if file_path and os.path.exists(file_path):
             os.remove(file_path)
