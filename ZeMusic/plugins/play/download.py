@@ -20,8 +20,23 @@ def setup_pytube():
     request.default_range_size = 1048576  # 1MB chunks
     request.timeout = 10
 
+def get_yt_object(video_url):
+    """إنشاء كائن YouTube بشكل آمن"""
+    yt = YouTube(
+        video_url,
+        use_oauth=False,
+        allow_oauth_cache=False
+    )
+    
+    # إضافة headers إذا لم تكن موجودة
+    if not hasattr(yt, '_author') or not hasattr(yt._author, 'headers'):
+        yt._author = type('obj', (object,), {'headers': {}})()
+        yt._author.headers = {'User-Agent': random.choice(USER_AGENTS)}
+    
+    return yt
+
 @app.on_message(command(["song", "/song", "بحث"]))
-async def robust_downloader(client, message):
+async def ultimate_downloader(client, message):
     query = " ".join(message.command[1:])
     m = await message.reply_text("<b>🔍 جـارِ البحث الآمن...</b>")
 
@@ -37,15 +52,8 @@ async def robust_downloader(client, message):
         # تهيئة pytube
         setup_pytube()
         
-        # إنشاء كائن YouTube مع إعدادات مخصصة
-        yt = YouTube(
-            video_url,
-            use_oauth=False,  # تم تعطيل OAuth مؤقتاً
-            allow_oauth_cache=False
-        )
-        
-        # تغيير User-Agent بشكل عشوائي
-        yt._author.headers = {'User-Agent': random.choice(USER_AGENTS)}
+        # إنشاء كائن YouTube بشكل آمن
+        yt = get_yt_object(video_url)
         
         # اختيار أفضل تنسيق صوتي
         stream = yt.streams.filter(
