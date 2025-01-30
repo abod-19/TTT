@@ -35,8 +35,11 @@ async def check_media(client, message):
             media = message.video.file_id
             file_path = f"temp_{message.id}.mp4"
         
-        # تنزيل الملف كبيانات ثنائية (bytes)
-        media_data = await client.download_media(media, in_memory=True)
+        # تنزيل الملف ككائن BytesIO
+        media_bytes_io = await client.download_media(media, in_memory=True)
+        
+        # تحويل BytesIO إلى bytes
+        media_data = media_bytes_io.getvalue()
         
         # كتابة البيانات في ملف
         async with aiofiles.open(file_path, mode='wb') as f:
