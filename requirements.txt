@@ -32,3 +32,4 @@ kurigram==2.1.36
 async-lru
 MukeshAPI
 nudenet
+moviepy
