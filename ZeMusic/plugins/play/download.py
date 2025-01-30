@@ -1,88 +1,55 @@
 import os
 import asyncio
-import yt_dlp
 from pyrogram import Client
+from pytube import YouTube
+from youtubesearchpython import VideosSearch
 from ZeMusic import app
-from ZeMusic.platforms.Youtube import cookies
 from ZeMusic.plugins.play.filters import command
 
-# إعدادات متقدمة مع تحسينات السرعة القصوى
-ULTRA_FAST_OPTS = {
-    "format": "bestaudio[filesize<5M]/bestaudio",
-    "quiet": True,
-    "no_warnings": True,
-    "geo_bypass": True,
-    "noplaylist": True,
-    "outtmpl": "dl/%(id)s.%(ext)s",
-    "concurrent_fragment_downloads": 16,
-    "external_downloader": "aria2c",
-    "external_downloader_args": ["-x", "32", "-s", "32", "-k", "2M"],
-    "postprocessor_args": ["-threads", "8"],
-    "writethumbnail": True,
-    "ffmpeg_location": "/usr/bin/ffmpeg",
-    "socket_timeout": 10,
-    "source_address": "0.0.0.0",
-    "cachedir": False,
-    "noprogress": True,
-    "allow_multiple_audio_streams": True,
-    "postprocessors": [
-        {
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "96",
-        },
-        {
-            "key": "FFmpegThumbnailsConvertor",
-            "format": "jpg",
-            "when": "before_dl"
-        }
-    ]
-}
-
 @app.on_message(command(["song", "/song", "بحث"]))
-async def ultra_fast_downloader(client, message):
-    cookies_path = await cookies()
-    ydl_opts = {**ULTRA_FAST_OPTS, "cookiefile": cookies_path}
-    
+async def pytube_downloader(client, message):
     query = " ".join(message.command[1:])
-    m = await message.reply_text("<b>⚡ معالجة سريعة...</b>")
-    
-    try:
-        # البحث الفوري مع التحميل المباشر
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = await asyncio.to_thread(
-                ydl.extract_info,
-                f"ytsearch1:{query}",
-                download=True
-            )
-            
-            if not info.get('entries'):
-                return await m.edit("⚠️ لم يتم العثور على النتائج")
-            
-            entry = info['entries'][0]
-            video_id = entry['id']
-            audio_file = f"dl/{video_id}.mp3"
-            thumb_file = f"dl/{video_id}.jpg"
+    m = await message.reply_text("<b>⚡ جـارِ البحث السريع...</b>")
 
-        # الإرسال الفوري مع التحميل المسبق
+    try:
+        # البحث الفوري بدون كوكيز
+        search = VideosSearch(query, limit=1)
+        result = search.result()
+        if not result['result']:
+            return await m.edit("⚠️ لم يتم العثور على نتائج")
+
+        video_url = result['result'][0]['link']
+        
+        # التحميل المباشر
+        yt = YouTube(video_url)
+        stream = yt.streams.filter(only_audio=True, file_extension='mp4').order_by('abr').desc().first()
+        
+        await m.edit("<b>🚀 جـارِ التحميل الفائق...</b>")
+        download_path = await asyncio.to_thread(stream.download, output_path="downloads")
+        
+        # التحويل السريع إلى MP3
+        base = os.path.splitext(download_path)[0]
+        audio_file = base + '.mp3'
+        os.rename(download_path, audio_file)
+
+        # الإرسال مع معالجة مسبقة
         await message.reply_chat_action("upload_audio")
-        await m.edit("<b>🚀 جـارِ الإرسال الفوري...</b>")
+        await m.edit("<b>📤 جـاري التحميل إلى التليجرام...</b>")
         await message.reply_audio(
             audio=audio_file,
-            caption=f"🎧 {entry['title'][:64]}",
-            duration=entry.get('duration', 0),
-            performer=entry.get('uploader', 'Unknown')[:32],
-            thumb=thumb_file if os.path.exists(thumb_file) else None,
-            file_name=entry['title'][:64] + ".mp3"
+            caption=f"🎵 {yt.title[:50]}",
+            duration=yt.length,
+            performer=yt.author[:30],
+            thumb=yt.thumbnail_url,
+            file_name=yt.title[:30] + ".mp3"
         )
 
     except Exception as e:
-        await m.edit(f"❌ خطأ فوري: {str(e)[:100]}")
+        await m.edit(f"❌ خطأ: {str(e)[:100]}")
     finally:
-        # تنظيف فوري للملفات
-        for f in [audio_file, thumb_file]:
-            if f and os.path.exists(f):
-                try:
-                    os.remove(f)
-                except:
-                    pass
+        # تنظيف الملفات المؤقتة
+        if 'audio_file' in locals():
+            try:
+                os.remove(audio_file)
+            except:
+                pass
