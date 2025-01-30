@@ -35,8 +35,12 @@ async def check_media(client, message):
             media = message.video.file_id
             file_path = f"temp_{message.id}.mp4"
         
+        # تنزيل الملف كبيانات ثنائية (bytes)
+        media_data = await client.download_media(media, in_memory=True)
+        
+        # كتابة البيانات في ملف
         async with aiofiles.open(file_path, mode='wb') as f:
-            await f.write(await client.download_media(media))
+            await f.write(media_data)
         
         # تحليل الملف
         results = detector.detect(file_path)
