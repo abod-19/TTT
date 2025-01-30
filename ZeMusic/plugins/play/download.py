@@ -13,7 +13,7 @@ YDL_OPTS = {
     "no_warnings": True,
     "geo_bypass": True,
     "noplaylist": True,
-    "cookiefile": "cookies.txt",  # ملف كوكيز ثابت إذا كان متاحاً
+    "cookiefile": await cookies(),  # ملف كوكيز ثابت إذا كان متاحاً
     "outtmpl": "dl/%(id)s.%(ext)s",  # مجلد منفصل للتحميلات
     "concurrent_fragment_downloads": 8,  # تحميل أجزاء متعددة بالتوازي
     "external_downloader": "aria2c",  # استخدام أداة تحميل خارجية أسرع
