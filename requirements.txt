@@ -33,3 +33,4 @@ async-lru
 MukeshAPI
 nudenet
 moviepy
+pytube
