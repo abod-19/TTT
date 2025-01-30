@@ -31,7 +31,7 @@ async def check_media(client, message):
         if ALLOWED_GROUPS and message.chat.id not in ALLOWED_GROUPS:
             return
 
-        # تحديد نوع الملف وإنشاء اسم للملف المؤقت
+        # تحديد نوع الملف
         file_path = None
         converted_video = None
 
@@ -44,8 +44,17 @@ async def check_media(client, message):
         elif message.sticker:  # تحويل الملصقات إلى فيديو
             media = message.sticker.file_id
             sticker_path = f"temp_{message.id}.webp"
+            
+            # تنزيل الملصق
             await client.download_media(media, file_name=sticker_path)
-
+            
+            # التحقق من أن الملف تم تنزيله قبل المتابعة
+            if not os.path.exists(sticker_path):
+                logger.error(f"⚠️ فشل تنزيل الملصق: {sticker_path} غير موجود!")
+                return
+            
+            await asyncio.sleep(1)  # تأخير لضمان اكتمال التنزيل
+            
             # تحويل الملصق إلى فيديو باستخدام FFmpeg
             converted_video = f"temp_{message.id}_converted.mp4"
             command = [
@@ -54,7 +63,7 @@ async def check_media(client, message):
             ]
             process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            # التحقق مما إذا كان FFmpeg نجح في إنشاء الملف
+            # التحقق من نجاح التحويل
             if not os.path.exists(converted_video) or os.path.getsize(converted_video) == 0:
                 logger.error(f"⚠️ فشل تحويل الملصق إلى فيديو: {process.stderr.decode()}")
                 os.remove(sticker_path) if os.path.exists(sticker_path) else None
@@ -69,7 +78,7 @@ async def check_media(client, message):
         else:
             return
 
-        # تنزيل الملف (باستثناء الملصقات، فقد تم تحويلها إلى فيديو بالفعل)
+        # تنزيل الملف (باستثناء الملصقات التي تم تحويلها بالفعل)
         if not message.sticker:
             media_bytes_io = await client.download_media(media, in_memory=True)
             if not media_bytes_io or not media_bytes_io.getvalue():
@@ -80,7 +89,7 @@ async def check_media(client, message):
                 await f.write(media_bytes_io.getvalue())
 
         if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
-            logger.error(f"الملف {file_path} غير موجود أو فارغ، لا يمكن تحليله")
+            logger.error(f"⚠️ الملف {file_path} غير موجود أو فارغ، لا يمكن تحليله")
             return
 
         # تحليل المحتوى
@@ -110,7 +119,7 @@ async def check_media(client, message):
                 clip = VideoFileClip(file_path)
                 duration = clip.duration
             except Exception as e:
-                logger.error(f"فشل فتح الفيديو {file_path}: {str(e)}")
+                logger.error(f"⚠️ فشل فتح الفيديو {file_path}: {str(e)}")
                 return
 
             for t in np.arange(0, duration, FRAME_INTERVAL):
@@ -118,16 +127,16 @@ async def check_media(client, message):
                 try:
                     clip.save_frame(frame_path, t=t)
                 except Exception as e:
-                    logger.error(f"فشل استخراج الإطار عند {t} ثانية: {str(e)}")
+                    logger.error(f"⚠️ فشل استخراج الإطار عند {t} ثانية: {str(e)}")
                     continue
 
                 if not os.path.exists(frame_path) or os.path.getsize(frame_path) == 0:
-                    logger.warning(f"الإطار عند {t} ثانية غير صالح.")
+                    logger.warning(f"⚠️ الإطار عند {t} ثانية غير صالح.")
                     continue
 
                 results = detector.detect(frame_path)
                 if results is None:
-                    logger.error(f"كاشف المحتوى أرجع None للإطار: {frame_path}")
+                    logger.error(f"⚠️ كاشف المحتوى أرجع None للإطار: {frame_path}")
                     continue
 
                 for obj in results:
@@ -153,18 +162,11 @@ async def check_media(client, message):
             await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم حذفه خلال 5 ثوانٍ.")
             await asyncio.sleep(5)
             await message.delete()
-            logger.info(f"تم حذف رسالة غير لائقة في {message.chat.id}")
+            logger.info(f"🗑️ تم حذف رسالة غير لائقة في {message.chat.id}")
 
         # تنظيف الملفات المؤقتة
         os.remove(file_path) if os.path.exists(file_path) else None
         os.remove(converted_video) if converted_video and os.path.exists(converted_video) else None
 
     except Exception as e:
-        logger.error(f"خطأ أثناء معالجة الملف: {str(e)}")
-
-    finally:
-        # التأكد من حذف الملفات المؤقتة حتى في حالة حدوث خطأ
-        if file_path and os.path.exists(file_path):
-            os.remove(file_path)
-        if converted_video and os.path.exists(converted_video):
-            os.remove(converted_video)
+        logger.error(f"⚠️ خطأ أثناء معالجة الملف: {str(e)}")
