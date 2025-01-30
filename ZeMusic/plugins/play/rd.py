@@ -49,20 +49,37 @@ async def check_media(client, message):
         # تنزيل الملف ككائن BytesIO
         media_bytes_io = await client.download_media(media, in_memory=True)
 
-        # تحويل BytesIO إلى bytes
+        # تحقق من نجاح التنزيل
+        if not media_bytes_io:
+            logger.error("فشل تنزيل الملف: media_bytes_io هو None")
+            return
+
         media_data = media_bytes_io.getvalue()
+
+        # تحقق مما إذا كانت البيانات فارغة
+        if not media_data:
+            logger.error("الملف الذي تم تنزيله فارغ!")
+            return
 
         # كتابة البيانات في ملف
         async with aiofiles.open(file_path, mode='wb') as f:
             await f.write(media_data)
+
+        # تأكد من أن الملف تم إنشاؤه
+        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+            logger.error(f"فشل في حفظ الملف: {file_path} غير موجود أو فارغ")
+            return
 
         # تحليل الملف
         inappropriate_detected = False
 
         if message.photo or message.sticker or message.animation:
             # تحليل الصور والملصقات والصور المتحركة
-            results = detector.detect(file_path)
-            #logger.info(f"نتائج تحليل الصورة: {results}")
+            if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                results = detector.detect(file_path)
+            else:
+                logger.error(f"الملف {file_path} غير موجود أو فارغ، لا يمكن تحليله")
+                return
 
             for obj in results:
                 if obj['class'] in [
@@ -77,16 +94,27 @@ async def check_media(client, message):
 
         elif message.video:
             # تحليل الفيديو (استخراج عدة إطارات)
-            clip = VideoFileClip(file_path)
-            duration = clip.duration  # مدة الفيديو بالثواني
+            try:
+                clip = VideoFileClip(file_path)
+                duration = clip.duration  # مدة الفيديو بالثواني
+            except Exception as e:
+                logger.error(f"فشل فتح الفيديو {file_path}: {str(e)}")
+                return
 
             for t in np.arange(0, duration, FRAME_INTERVAL):  # تحليل إطار كل FRAME_INTERVAL ثانية
                 frame_path = f"temp_frame_{message.id}_{int(t)}.jpg"
-                clip.save_frame(frame_path, t=t)  # حفظ الإطار كصورة
 
-                # تحليل الإطار
+                try:
+                    clip.save_frame(frame_path, t=t)
+                except Exception as e:
+                    logger.error(f"فشل استخراج الإطار عند {t} ثانية: {str(e)}")
+                    continue
+
+                if not os.path.exists(frame_path) or os.path.getsize(frame_path) == 0:
+                    logger.warning(f"الإطار عند {t} ثانية غير صالح.")
+                    continue
+
                 results = detector.detect(frame_path)
-                #logger.info(f"نتائج تحليل إطار الفيديو (الوقت: {t:.2f} ثانية): {results}")
 
                 for obj in results:
                     if obj['class'] in [
