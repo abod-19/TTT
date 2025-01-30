@@ -10,8 +10,8 @@ from ZeMusic.utils.database import get_client, is_active_chat, is_autoend
 
 
 async def auto_leave():
-    if config.AUTO_LEAVING_ASSISTANT == "True":
-        while not await asyncio.sleep(150):
+    if config.AUTO_LEAVING_ASSISTANT:
+        while not await asyncio.sleep(120):
             from ZeMusic.core.userbot import assistants
 
             for num in assistants:
