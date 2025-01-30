@@ -6,34 +6,42 @@ from ZeMusic import app
 from ZeMusic.platforms.Youtube import cookies
 from ZeMusic.plugins.play.filters import command
 
-# إعدادات متقدمة لـ yt-dlp
+# إعدادات متقدمة لـ yt-dlp (بدون cookiefile هنا)
 YDL_OPTS = {
-    "format": "bestaudio[filesize<10M]/bestaudio/best",  # تحديد حجم ملف أصغر
+    "format": "bestaudio[filesize<10M]/bestaudio/best",
     "quiet": True,
     "no_warnings": True,
     "geo_bypass": True,
     "noplaylist": True,
-    "cookiefile": await cookies(),  # ملف كوكيز ثابت إذا كان متاحاً
-    "outtmpl": "dl/%(id)s.%(ext)s",  # مجلد منفصل للتحميلات
-    "concurrent_fragment_downloads": 8,  # تحميل أجزاء متعددة بالتوازي
-    "external_downloader": "aria2c",  # استخدام أداة تحميل خارجية أسرع
+    "outtmpl": "dl/%(id)s.%(ext)s",
+    "concurrent_fragment_downloads": 8,
+    "external_downloader": "aria2c",
     "external_downloader_args": ["-x", "16", "-s", "16", "-k", "1M"],
     "postprocessors": [{
         "key": "FFmpegExtractAudio",
         "preferredcodec": "mp3",
-        "preferredquality": "128",  # جودة أقل لسرعة أكبر
+        "preferredquality": "128",
     }],
     "ffmpeg_location": "/usr/bin/ffmpeg"
 }
 
 @app.on_message(command(["song", "/song", "بحث"]))
 async def song_downloader(client, message):
+    # الحصول على الكوكيز داخل الدالة غير المتزامنة
+    cookies_path = await cookies()
+    
+    # تحديث YDL_OPTS بإضافة cookiefile
+    ydl_opts_updated = {
+        **YDL_OPTS,
+        "cookiefile": cookies_path
+    }
+    
     query = " ".join(message.command[1:])
     m = await message.reply_text("<b>جـارِ البحث ♪</b>")
     
     try:
         # مرحلة البحث السريع بدون تحميل
-        with yt_dlp.YoutubeDL({**YDL_OPTS, "skip_download": True}) as ydl:
+        with yt_dlp.YoutubeDL({**ydl_opts_updated, "skip_download": True}) as ydl:
             info = await asyncio.to_thread(
                 ydl.extract_info,
                 f"ytsearch1:{query}",
@@ -48,7 +56,7 @@ async def song_downloader(client, message):
             title = entry['title'][:64]
 
         # مرحلة التحميل المنفصلة
-        with yt_dlp.YoutubeDL(YDL_OPTS) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts_updated) as ydl:
             await asyncio.to_thread(ydl.download, [url])
             audio_file = f"dl/{entry['id']}.mp3"
 
@@ -69,13 +77,11 @@ async def song_downloader(client, message):
             await safe_delete(audio_file)
 
 async def get_thumbnail(video_id):
-    # تنزيل الثمبنايل بشكل منفصل إذا لزم الأمر
     return f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
 
 async def safe_delete(path):
-    # حذف الملفات بشكل آمن
     try:
-        for _ in range(3):  # 3 محاولات للحذف
+        for _ in range(3):
             if os.path.exists(path):
                 os.remove(path)
                 break
