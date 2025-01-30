@@ -52,7 +52,13 @@ async def check_media(client, message):
                 "ffmpeg", "-y", "-loop", "1", "-i", sticker_path, "-c:v", "libx264",
                 "-t", "1", "-vf", "format=yuv420p", converted_video
             ]
-            subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+            # التحقق مما إذا كان FFmpeg نجح في إنشاء الملف
+            if not os.path.exists(converted_video) or os.path.getsize(converted_video) == 0:
+                logger.error(f"⚠️ فشل تحويل الملصق إلى فيديو: {process.stderr.decode()}")
+                os.remove(sticker_path) if os.path.exists(sticker_path) else None
+                return  # إيقاف التنفيذ لتجنب تحليل ملف غير صالح
 
             file_path = converted_video
             os.remove(sticker_path) if os.path.exists(sticker_path) else None
@@ -162,4 +168,3 @@ async def check_media(client, message):
             os.remove(file_path)
         if converted_video and os.path.exists(converted_video):
             os.remove(converted_video)
-            
