@@ -67,5 +67,3 @@ async def check_image(client, message):
         logger.error(f"خطأ في معالجة الصورة: {str(e)}")
         if 'file_path' in locals() and os.path.exists(file_path):
             os.remove(file_path)
-
-    detector.download_model()
