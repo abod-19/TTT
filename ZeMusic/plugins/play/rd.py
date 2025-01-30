@@ -5,10 +5,9 @@ import logging
 import asyncio
 import aiofiles
 import numpy as np
+import subprocess
 from nudenet import NudeDetector
 from moviepy.video.io.VideoFileClip import VideoFileClip
-from moviepy.editor import ImageSequenceClip
-from PIL import Image
 
 # تهيئة كاشف المحتوى غير اللائق
 detector = NudeDetector()
@@ -47,15 +46,16 @@ async def check_media(client, message):
             sticker_path = f"temp_{message.id}.webp"
             await client.download_media(media, file_name=sticker_path)
 
-            # تحويل الملصق إلى فيديو
+            # تحويل الملصق إلى فيديو باستخدام FFmpeg
             converted_video = f"temp_{message.id}_converted.mp4"
-            image = Image.open(sticker_path).convert("RGB")
-            image.save("temp_frame.jpg")
-            clip = ImageSequenceClip(["temp_frame.jpg"] * 10, fps=10)  # إنشاء فيديو مدته ثانية واحدة
-            clip.write_videofile(converted_video, codec="libx264", fps=10)
+            command = [
+                "ffmpeg", "-y", "-loop", "1", "-i", sticker_path, "-c:v", "libx264",
+                "-t", "1", "-vf", "format=yuv420p", converted_video
+            ]
+            subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
             file_path = converted_video
             os.remove(sticker_path) if os.path.exists(sticker_path) else None
-            os.remove("temp_frame.jpg") if os.path.exists("temp_frame.jpg") else None
 
         elif message.animation:  # GIFs يتم التعامل معها كفيديو
             media = message.animation.file_id
@@ -63,7 +63,7 @@ async def check_media(client, message):
         else:
             return
 
-        # تنزيل الملف (باستثناء الملصقات، فقد تم تحويلها إلى فيديو)
+        # تنزيل الملف (باستثناء الملصقات، فقد تم تحويلها إلى فيديو بالفعل)
         if not message.sticker:
             media_bytes_io = await client.download_media(media, in_memory=True)
             if not media_bytes_io or not media_bytes_io.getvalue():
@@ -162,3 +162,4 @@ async def check_media(client, message):
             os.remove(file_path)
         if converted_video and os.path.exists(converted_video):
             os.remove(converted_video)
+            
