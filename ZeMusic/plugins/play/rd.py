@@ -12,8 +12,8 @@ detector = NudeDetector()
 
 # إعدادات البوت
 ALLOWED_GROUPS = []  # أضف أيدي المجموعات المسموح بها
-THRESHOLD = 0.45  # تم تخفيض العتبة
-FRAME_INTERVAL = 1  # تحليل إطار كل ثانية
+THRESHOLD = 0.35  # تم تخفيض العتبة
+FRAME_INTERVAL = 0.5  # تحليل إطار كل 0.5 ثانية
 
 # تكوين نظام التسجيل
 logging.basicConfig(
@@ -62,7 +62,8 @@ async def check_media(client, message):
                     'FEMALE_GENITALIA_COVERED', 
                     'BUTTOCKS_EXPOSED',
                     'FEMALE_BREAST_EXPOSED', 
-                    'MALE_GENITALIA_EXPOSED'
+                    'MALE_GENITALIA_EXPOSED',
+                    'FEMALE_GENITALIA_EXPOSED'
                 ] and obj['score'] >= THRESHOLD:
                     inappropriate_detected = True
                     logger.info(f"تم الكشف عن: {obj['class']} بثقة {obj['score']}")
@@ -73,7 +74,7 @@ async def check_media(client, message):
             clip = VideoFileClip(file_path)
             duration = int(clip.duration)  # مدة الفيديو بالثواني
             
-            for t in range(0, duration, FRAME_INTERVAL):  # تحليل إطار كل ثانية
+            for t in range(0, duration, FRAME_INTERVAL):  # تحليل إطار كل FRAME_INTERVAL ثوانٍ
                 frame_path = f"temp_frame_{message.id}_{t}.jpg"
                 clip.save_frame(frame_path, t=t)  # حفظ الإطار كصورة
                 
@@ -89,7 +90,8 @@ async def check_media(client, message):
                         'FEMALE_GENITALIA_COVERED', 
                         'BUTTOCKS_EXPOSED',
                         'FEMALE_BREAST_EXPOSED', 
-                        'MALE_GENITALIA_EXPOSED'
+                        'MALE_GENITALIA_EXPOSED',
+                        'FEMALE_GENITALIA_EXPOSED'
                     ] and obj['score'] >= THRESHOLD:
                         inappropriate_detected = True
                         logger.info(f"تم الكشف عن: {obj['class']} بثقة {obj['score']} في الإطار (الوقت: {t} ثانية)")
@@ -104,7 +106,7 @@ async def check_media(client, message):
         
         if inappropriate_detected:
             await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم حذف الملف خلال 10 ثوانٍ.")
-            await asyncio.sleep(10)  # تأخير 10 ثوانٍ
+            await asyncio.sleep(5)  # تأخير 10 ثوانٍ
             await message.delete()
             logger.info(f"تم حذف رسالة غير لائقة في {message.chat.id}")
         
