@@ -3,8 +3,6 @@ from pyrogram import filters
 import os
 import logging
 import asyncio
-import aiofiles
-import numpy as np
 import subprocess
 from nudenet import NudeDetector
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -13,8 +11,8 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 detector = NudeDetector()
 
 # إعدادات البوت
-ALLOWED_GROUPS = []  # ضع هنا معرفات المجموعات المسموح بها
-THRESHOLD = 0.35  # الحد الأدنى لتصنيف المحتوى غير اللائق
+ALLOWED_GROUPS = []  # ضع معرفات المجموعات المسموح بها هنا
+THRESHOLD = 0.35  # الحد الأدنى لاكتشاف المحتوى غير اللائق
 FRAME_INTERVAL = 0.5  # تحليل إطار كل 0.5 ثانية من الفيديو
 
 # تكوين نظام التسجيل
@@ -31,7 +29,6 @@ async def check_media(client, message):
         if ALLOWED_GROUPS and message.chat.id not in ALLOWED_GROUPS:
             return
 
-        # تحديد نوع الملف
         file_path = None
         converted_video = None
 
@@ -45,15 +42,17 @@ async def check_media(client, message):
             media = message.sticker.file_id
             sticker_path = f"temp_{message.id}.webp"
             
-            # تنزيل الملصق
-            await client.download_media(media, file_name=sticker_path)
-            
-            # التحقق من أن الملف تم تنزيله قبل المتابعة
-            if not os.path.exists(sticker_path):
-                logger.error(f"⚠️ فشل تنزيل الملصق: {sticker_path} غير موجود!")
+            # إعادة المحاولة حتى 3 مرات لتنزيل الملصق
+            for attempt in range(3):
+                await client.download_media(media, file_name=sticker_path)
+                await asyncio.sleep(1)  # تأخير لضمان اكتمال التنزيل
+                
+                if os.path.exists(sticker_path) and os.path.getsize(sticker_path) > 0:
+                    break
+                logger.warning(f"⚠️ محاولة {attempt + 1} فاشلة لتنزيل الملصق: {sticker_path}")
+            else:
+                logger.error(f"❌ فشل نهائي في تنزيل الملصق: {sticker_path}")
                 return
-            
-            await asyncio.sleep(1)  # تأخير لضمان اكتمال التنزيل
             
             # تحويل الملصق إلى فيديو باستخدام FFmpeg
             converted_video = f"temp_{message.id}_converted.mp4"
@@ -80,26 +79,20 @@ async def check_media(client, message):
 
         # تنزيل الملف (باستثناء الملصقات التي تم تحويلها بالفعل)
         if not message.sticker:
-            media_bytes_io = await client.download_media(media, in_memory=True)
-            if not media_bytes_io or not media_bytes_io.getvalue():
-                logger.error("فشل تنزيل الملف أو الملف فارغ!")
+            await client.download_media(media, file_name=file_path)
+            await asyncio.sleep(1)
+
+            if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+                logger.error(f"⚠️ فشل تنزيل الملف أو الملف فارغ: {file_path}")
                 return
-
-            async with aiofiles.open(file_path, mode='wb') as f:
-                await f.write(media_bytes_io.getvalue())
-
-        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
-            logger.error(f"⚠️ الملف {file_path} غير موجود أو فارغ، لا يمكن تحليله")
-            return
 
         # تحليل المحتوى
         inappropriate_detected = False
 
-        # تحليل الصور أو الملصقات المحولة إلى فيديو
         if message.photo or message.sticker:
             results = detector.detect(file_path) if os.path.exists(file_path) else []
             if results is None:
-                logger.error(f"كاشف المحتوى أرجع None للملف: {file_path}")
+                logger.error(f"⚠️ كاشف المحتوى أرجع None للملف: {file_path}")
                 return
 
             for obj in results:
@@ -113,7 +106,6 @@ async def check_media(client, message):
                     logger.info(f"تم الكشف عن: {obj['class']} بثقة {obj['score']}")
                     break
 
-        # تحليل الفيديو (بما في ذلك الملصقات المحولة)
         elif message.video or message.sticker or message.animation:
             try:
                 clip = VideoFileClip(file_path)
@@ -157,7 +149,6 @@ async def check_media(client, message):
 
             clip.close()
 
-        # حذف الرسالة إذا تم اكتشاف محتوى غير لائق
         if inappropriate_detected:
             await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم حذفه خلال 5 ثوانٍ.")
             await asyncio.sleep(5)
