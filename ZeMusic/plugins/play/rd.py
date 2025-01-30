@@ -23,7 +23,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-@app.on_message(filters.group & (filters.photo | filters.video))
+@app.on_message(filters.group & (filters.photo | filters.video | filters.sticker | filters.animation))
 async def check_media(client, message):
     try:
         # التحقق من المجموعات المسموح بها
@@ -37,6 +37,12 @@ async def check_media(client, message):
         elif message.video:
             media = message.video.file_id
             file_path = f"temp_{message.id}.mp4"
+        elif message.sticker:
+            media = message.sticker.file_id
+            file_path = f"temp_{message.id}.webp"  # الملصقات تكون بصيغة webp
+        elif message.animation:  # GIFs
+            media = message.animation.file_id
+            file_path = f"temp_{message.id}.mp4"  # GIFs يتم تحميلها كفيديو
         else:
             return
 
@@ -53,8 +59,8 @@ async def check_media(client, message):
         # تحليل الملف
         inappropriate_detected = False
 
-        if message.photo:
-            # تحليل الصورة
+        if message.photo or message.sticker or message.animation:
+            # تحليل الصور والملصقات والصور المتحركة
             results = detector.detect(file_path)
             #logger.info(f"نتائج تحليل الصورة: {results}")
 
