@@ -64,31 +64,24 @@ class SoundAPI:
             print(f"فشل في تنزيل الصورة: {e}")
             return None
 
-@app.on_message(command(["يوت"]))
+@app.on_message(command(["ساوند"]))
 async def download_sound(_, message):
     if len(message.command) < 2:
-        await message.reply("⚠️ يرجى إدخال اسم المقطع المطلوب!\nمثال: `/يوت اسم الأغنية`")
         return
     
     query = " ".join(message.command[1:])
     sound_api = SoundAPI()
     
-    m = await message.reply("⏳ جاري التحميل...")
+    m = await message.reply("- جـارِ البحث ♪.")
     result = await sound_api.search_and_download(query)
     
     if not result:
-        await m.edit("❌ فشل في العثور على المقطع أو تنزيله!")
+        await m.edit("- فشل في العثور على المقطع.")
         return
     
     track_details, file_path = result
     
-    await m.edit(f"""
-✅ **تم التحميل بنجاح!**
-🏷 **العنوان:** {track_details['title']}
-⏳ **المدة:** {track_details['duration_min']}
-👤 **الرفع بواسطة:** {track_details['uploader']}
-📤 **جاري الإرسال...**
-""")
+    await m.edit(f"- جـارِ التحميل ♪.")
     
     try:
         # إرسال الملف مع الصورة المصغرة
@@ -101,7 +94,8 @@ async def download_sound(_, message):
         )
         await m.delete()
     except Exception as e:
-        await message.reply(f"❌ فشل في إرسال الملف!\n```\n{e}\n```")
+        await message.reply(f"- فشل في إرسال الملف.")
+        print(e)
     finally:
         # حذف الملفات المؤقتة
         try:
