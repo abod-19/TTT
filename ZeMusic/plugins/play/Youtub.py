@@ -1,112 +1,98 @@
-import future
-
-import asyncio
+from os import path, remove, makedirs
 import os
-import time
-from urllib.parse import urlparse
-#from ZeMusic.platforms.Youtube import cookies
-import wget
-from pyrogram import filters
-from pyrogram.types import Message
-from youtubesearchpython import SearchVideos
 from yt_dlp import YoutubeDL
-
 from ZeMusic import app
+from ZeMusic.plugins.play.filters import command
+from ZeMusic.utils.formatters import seconds_to_min
+import config
 
+lnk = "https://t.me/" + config.CHANNEL_LINK
 
-def get_file_extension_from_url(url):
-    url_path = urlparse(url).path
-    basename = os.path.basename(url_path)
-    return basename.split(".")[-1]
+class Youtube:
+    def __init__(self):
+        self.opts = {
+            "outtmpl": "downloads/%(id)s.%(ext)s",
+            "format": "bestaudio/best",
+            "retries": 3,
+            "nooverwrites": False,
+            "continuedl": True,
+            "default_search": "ytsearch",
+            "quiet": True,
+            "keepvideo": False,
+            "nopart": True,
+            "writethumbnail": True,
+            "postprocessors": [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "320",
+                },
+                {"key": "EmbedThumbnail"},
+            ],
+        }
 
+    async def search_and_download(self, query: str):
+        with YoutubeDL(self.opts) as ydl:
+            try:
+                info = ydl.extract_info(f"ytsearch:{query}", download=True)
+                if not info:
+                    return False
+                
+                track = info["entries"][0]
+                file_path = ydl.prepare_filename(track).replace(".webm", ".mp3")
+                thumbnail_path = f"downloads/{track['id']}.webp"
+                
+                duration_sec = int(track.get("duration", 0))
+                duration_min = seconds_to_min(duration_sec)
+                
+                track_details = {
+                    "title": track['title'],
+                    "duration_sec": duration_sec,
+                    "duration_min": duration_min,
+                    "uploader": track.get('uploader', 'Unknown Channel'),
+                    "filepath": file_path,
+                    "thumbnail": thumbnail_path if path.exists(thumbnail_path) else None,
+                }
+                return track_details, file_path
+            except Exception as e:
+                print(f"Error: {e}")
+                return False
 
-def get_text(message: Message) -> [None, str]:
-    """Extract Text From Commands"""
-    text_to_return = message.text
-    if message.text is None:
-        return None
-    if " " in text_to_return:
-        try:
-            return message.text.split(None, 1)[1]
-        except IndexError:
-            return None
-    else:
-        return None
-
-
-@app.on_message(filters.command(["yوt", "يوتيوباانظ"],""))
-async def ytmusic(client, message: Message):
-    urlissed = get_text(message)
-    await message.delete()
-    user_id = message.from_user.id
-    user_name = message.from_user.first_name
-    chutiya = "[" + user_name + "](tg://user?id=" + str(user_id) + ")"
-
-    pablo = await client.send_message(message.chat.id, f"sᴇᴀʀᴄʜɪɴɢ, ᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
-    if not urlissed:
-        await pablo.edit(
-            "😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ.\n\n» ᴍᴀʏʙᴇ ᴛᴜɴᴇ ɢᴀʟᴛɪ ʟɪᴋʜᴀ ʜᴏ, ᴩᴀᴅʜᴀɪ - ʟɪᴋʜᴀɪ ᴛᴏʜ ᴋᴀʀᴛᴀ ɴᴀʜɪ ᴛᴜ !"
-        )
-        return
-
-    search = SearchVideos(f"{urlissed}", offset=1, mode="dict", max_results=1)
-    mi = search.result()
-    mio = mi["search_result"]
-    mo = mio[0]["link"]
-    thum = mio[0]["title"]
-    fridayz = mio[0]["id"]
-    thums = mio[0]["channel"]
-    kekme = f"https://img.youtube.com/vi/{fridayz}/hqdefault.jpg"
-    await asyncio.sleep(0.6)
-    url = mo
-    sedlyf = wget.download(kekme)
-    opts = {
-        "format": "best",
-        "addmetadata": True,
-        "key": "FFmpegMetadata",
-        "prefer_ffmpeg": True,
-        "geo_bypass": True,
-        "nocheckcertificate": True,
-        "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
-        "outtmpl": "%(id)s.mp4",
-        "logtostderr": False,
-        "quiet": True,
-        "cookiefile": f"{await cookies()}",
-    }
+@app.on_message(command(["يوت"]))
+async def download_youtube(_, message):
+    if len(message.command) < 2:
+        return await message.reply("⚠️ يرجى إدخال اسم المقطع المطلوب!")
+    
+    query = " ".join(message.command[1:])
+    yt_api = Youtube()
+    
+    m = await message.reply("🔎 جـارِ البحث...")
+    result = await yt_api.search_and_download(query)
+    
+    if not result:
+        return await m.edit("❌ لم يتم العثور على النتيجة!")
+    
+    track_details, file_path = result    
+    await m.edit("⬇️ جـارِ التحميل...")
+    
     try:
-        with YoutubeDL(opts) as ytdl:
-            infoo = ytdl.extract_info(url, False)
-            round(infoo["duration"] / 60)
-            ytdl_data = ytdl.extract_info(url, download=True)
-
+        await message.reply_audio(
+            audio=file_path,
+            #caption=f"<b>➲ العنوان:</b> {track_details['title']}\n<b>➲ القناة:</b> {track_details['uploader']}\n\n{lnk}",
+            title=track_details["title"],
+            performer=track_details["uploader"],
+            duration=track_details["duration_sec"],
+            thumb=track_details["thumbnail"],
+        )
     except Exception as e:
-        await pablo.edit(f"**ғᴀɪʟᴇᴅ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ.** \n**ᴇʀʀᴏʀ :** `{str(e)}`")
-        return
-    c_time = time.time()
-    file_stark = f"{ytdl_data['id']}.mp4"
-    capy = f"❄ **ᴛɪᴛʟᴇ :** [{thum}]({mo})\n💫 **ᴄʜᴀɴɴᴇʟ :** {thums}\n✨ **sᴇᴀʀᴄʜᴇᴅ :** {urlissed}\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {chutiya}"
-    await client.send_video(
-        message.chat.id,
-        video=open(file_stark, "rb"),
-        duration=int(ytdl_data["duration"]),
-        file_name=str(ytdl_data["title"]),
-        thumb=sedlyf,
-        caption=capy,
-        supports_streaming=True,
-        progress_args=(
-            pablo,
-            c_time,
-            f"» ᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...\n\nᴜᴩʟᴏᴀᴅɪɴɢ `{urlissed}` ғʀᴏᴍ ʏᴏᴜᴛᴜʙᴇ sᴇʀᴠᴇʀs...💫",
-            file_stark,
-        ),
-    )
-    await pablo.delete()
-    for files in (sedlyf, file_stark):
-        if files and os.path.exists(files):
-            os.remove(files)
-
-
-__mod_name__ = "Vɪᴅᴇᴏ"
-__help__ = """ 
-/video to download video song
-/yt to download video song """
+        await message.reply("❌ فشل في إرسال الملف!")
+        print(e)
+    finally:
+        await m.delete()
+        # تنظيف الملفات المؤقتة
+        for file in [file_path, track_details["thumbnail"]]:
+            try:
+                if file and path.exists(file):
+                    remove(file)
+            except Exception as delete_error:
+                print(f"خطأ في الحذف: {delete_error}")
