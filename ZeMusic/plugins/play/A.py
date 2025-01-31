@@ -24,13 +24,14 @@ class SoundAPI:
                     return False
                 
                 track = info["entries"][0]
-                # استبدل .m4a بالامتداد الفعلي من البيانات
                 file_path = path.join("downloads", f"{track['id']}.{track['ext']}")
                 
-                duration_min = seconds_to_min(track["duration"])
+                # تحويل المدة إلى integer هنا
+                duration_sec = int(track.get("duration", 0))  # التعديل الأساسي
+                duration_min = seconds_to_min(duration_sec)
                 track_details = {
-                    "title": track["title"],
-                    "duration_sec": track["duration"],
+                    "title": track['title'],
+                    "duration_sec": duration_sec,
                     "duration_min": duration_min,
                     "uploader": track.get("uploader", "غير معروف"),
                     "filepath": file_path,
@@ -71,7 +72,7 @@ async def download_sound(_, message):
             audio=file_path,
             title=track_details["title"],
             performer=track_details["uploader"],
-            duration=track_details["duration_sec"]
+            duration=track_details["duration_sec"]  # القيمة الآن integer
         )
         await m.delete()
     except Exception as e:
