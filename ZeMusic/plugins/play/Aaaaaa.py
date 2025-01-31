@@ -12,7 +12,7 @@ from tempfile import gettempdir
 
 detector = NudeDetector()
 ALLOWED_GROUPS = []
-THRESHOLD = 0.25
+THRESHOLD = 0.10
 FRAME_INTERVAL = 1.0
 
 # إعداد مجلد مؤقت خاص للتطبيق
