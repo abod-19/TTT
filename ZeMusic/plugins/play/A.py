@@ -1,4 +1,5 @@
-from os import path
+from os import path, remove
+import os
 from yt_dlp import YoutubeDL
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
@@ -14,6 +15,9 @@ class SoundAPI:
             "continuedl": True,
             "default_search": "ytsearch",
             "quiet": True,
+            # حذف الملفات المؤقتة التلقائية
+            "keepvideo": False,
+            "nopart": True,
         }
 
     async def search_and_download(self, query: str):
@@ -26,8 +30,7 @@ class SoundAPI:
                 track = info["entries"][0]
                 file_path = path.join("downloads", f"{track['id']}.{track['ext']}")
                 
-                # تحويل المدة إلى integer هنا
-                duration_sec = int(track.get("duration", 0))  # التعديل الأساسي
+                duration_sec = int(track.get("duration", 0))
                 duration_min = seconds_to_min(duration_sec)
                 track_details = {
                     "title": track['title'],
@@ -72,8 +75,20 @@ async def download_sound(_, message):
             audio=file_path,
             title=track_details["title"],
             performer=track_details["uploader"],
-            duration=track_details["duration_sec"]  # القيمة الآن integer
+            duration=track_details["duration_sec"]
         )
         await m.delete()
     except Exception as e:
         await message.reply(f"❌ فشل في إرسال الملف!\n```\n{e}\n```")
+    finally:
+        # حذف الملف سواء نجح الإرسال أو فشل
+        try:
+            if path.exists(file_path):
+                remove(file_path)
+                print(f"تم حذف الملف: {file_path}")
+            # حذف المجلد إذا كان فارغًا (اختياري)
+            downloads_dir = path.dirname(file_path)
+            if not os.listdir(downloads_dir):
+                os.rmdir(downloads_dir)
+        except Exception as delete_error:
+            print(f"خطأ في الحذف: {delete_error}")
