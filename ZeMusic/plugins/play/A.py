@@ -5,6 +5,7 @@ from yt_dlp import YoutubeDL
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.formatters import seconds_to_min
+import config
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
 
