@@ -1,5 +1,4 @@
-from os import path, remove, makedirs
-import os
+from os import path, remove
 from yt_dlp import YoutubeDL
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
@@ -10,7 +9,7 @@ import config
 lnk = "https://t.me/" + config.CHANNEL_LINK
 
 class Youtube:
-    async def __init__(self):
+    def __init__(self):  # ✅ إزالة async
         self.opts = {
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "format": "bestaudio/best",
@@ -22,7 +21,7 @@ class Youtube:
             "keepvideo": False,
             "nopart": True,
             "writethumbnail": True,
-            "cookiefile": f"{await cookies()}",
+            "cookiefile": None,  # سيتم تحميل الكوكيز لاحقًا
             "postprocessors": [
                 {
                     "key": "FFmpegExtractAudio",
@@ -33,11 +32,15 @@ class Youtube:
             ],
         }
 
+    async def setup(self):
+        """ يتم استدعاء هذه الدالة بشكل يدوي لتحميل الكوكيز. """
+        self.opts["cookiefile"] = await cookies()
+
     async def search_and_download(self, query: str):
         with YoutubeDL(self.opts) as ydl:
             try:
                 info = ydl.extract_info(f"ytsearch:{query}", download=True)
-                if not info:
+                if not info or "entries" not in info or not info["entries"]:
                     return False
                 
                 track = info["entries"][0]
@@ -48,10 +51,10 @@ class Youtube:
                 duration_min = seconds_to_min(duration_sec)
                 
                 track_details = {
-                    "title": track['title'],
+                    "title": track["title"],
                     "duration_sec": duration_sec,
                     "duration_min": duration_min,
-                    "uploader": track.get('uploader', 'Unknown Channel'),
+                    "uploader": track.get("uploader", "Unknown Channel"),
                     "filepath": file_path,
                     "thumbnail": thumbnail_path if path.exists(thumbnail_path) else None,
                 }
@@ -66,7 +69,8 @@ async def download_youtube(_, message):
         return await message.reply("⚠️ يرجى إدخال اسم المقطع المطلوب!")
     
     query = " ".join(message.command[1:])
-    yt_api = Youtube()
+    yt_api = Youtube()  
+    await yt_api.setup()  # ✅ استدعاء الدالة لتجهيز الكوكيز
     
     m = await message.reply("🔎 جـارِ البحث...")
     result = await yt_api.search_and_download(query)
@@ -80,7 +84,6 @@ async def download_youtube(_, message):
     try:
         await message.reply_audio(
             audio=file_path,
-            #caption=f"<b>➲ العنوان:</b> {track_details['title']}\n<b>➲ القناة:</b> {track_details['uploader']}\n\n{lnk}",
             title=track_details["title"],
             performer=track_details["uploader"],
             duration=track_details["duration_sec"],
