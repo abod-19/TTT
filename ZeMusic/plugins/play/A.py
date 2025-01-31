@@ -1,55 +1,71 @@
-"""
-import os
-import re
-import requests
-import config
-import yt_dlp
-from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from youtube_search import YoutubeSearch
-from ZeMusic.platforms.Youtube import cookies
+from os import path
+from yt_dlp import YoutubeDL
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
-from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
-from ZeMusic.core.mongo import mongodb
+from ZeMusic.utils.formatters import seconds_to_min
 
-def remove_if_exists(path):
-    if os.path.exists(path):
-        os.remove(path)
+class SoundAPI:
+    def __init__(self):
+        self.opts = {
+            "outtmpl": "downloads/%(id)s.%(ext)s",
+            "format": "bestaudio/best",
+            "retries": 3,
+            "nooverwrites": False,
+            "continuedl": True,
+            # إضافة خيارات البحث في SoundCloud
+            "default_search": "ytsearch",
+            "quiet": True,
+        }
 
-songdb = mongodb.song
-lnk = "https://t.me/" + config.CHANNEL_LINK
+    async def search_and_download(self, query: str):
+        # البحث والتنزيل باستخدام الاستعلام
+        with YoutubeDL(self.opts) as ydl:
+            try:
+                info = ydl.extract_info(f"scsearch:{query}", download=True)
+                if not info:
+                    return False
+                # الحصول على أول نتيجة
+                track = info["entries"][0]
+                xyz = path.join("downloads", f"{track['id']}.{track['ext']}")
+                duration_min = seconds_to_min(track["duration"])
+                track_details = {
+                    "title": track["title"],
+                    "duration_sec": track["duration"],
+                    "duration_min": duration_min,
+                    "uploader": track["uploader"],
+                    "filepath": xyz,
+                }
+                return track_details, xyz
+            except Exception as e:
+                print(f"Error: {e}")
+                return False
 
-@app.on_message(command(["يو", "/song", "يوت"]))
-async def song_downloader(client, message: Message):
-    query = " ".join(message.command[1:])
-        
-    m = await message.reply_text("<b>جـارِ البحث ♪</b>")
+@app.on_message(command(["يوت"]))
+async def download_sound(_, message):
+    # التحقق من وجود استعلام
+    if len(message.command) < 2:
+        await message.reply("⚠️ يرجى إدخال اسم المقطع المطلوب!\nمثال: `/يوت اسم الأغنية`")
+        return
     
-    try:
-        results = YoutubeSearch(query, max_results=1).to_dict()
-        if not results:
-            await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
-            return
-
-        video_id = results[0]['id']
-        try:
-            # تحقق من وجود المقطع في قاعدة البيانات
-            existing_entry = await songdb.find_one({"video_id": video_id})
-            if existing_entry:
-                channel_link = existing_entry["channel_link"]
-                await client.send_voice(
-                    chat_id=message.chat.id,
-                    voice=channel_link,
-                    caption=f" ⇒ <a href='{lnk}'>{app.name}</a>\nㅤ",
-                    reply_to_message_id=message.id,
-                )
-                await m.delete()
-                return
-        except Exception as q:
-            print(str(q))
-
-    except Exception as e:
-        await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا") 
-        print(e)
-"""
+    query = " ".join(message.command[1:])
+    sound_api = SoundAPI()
+    
+    # إرسال رسالة تفيد بأن التنزيل بدأ
+    m = await message.reply("⏳ جاري التحميل...")
+    
+    # البحث والتنزيل
+    result = await sound_api.search_and_download(query)
+    
+    if not result:
+        await m.edit("❌ فشل في العثور على المقطع أو تنزيله!")
+        return
+    
+    track_details, file_path = result
+    # إرسال التفاصيل بعد التنزيل
+    await m.edit(f"""
+✅ **تم التحميل بنجاح!**
+🏷 **العنوان:** {track_details['title']}
+⏳ **المدة:** {track_details['duration_min']}
+👤 **الرفع بواسطة:** {track_details['uploader']}
+📁 **المسار:** `{file_path}`
+""")
