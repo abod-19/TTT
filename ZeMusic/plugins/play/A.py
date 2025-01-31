@@ -1,5 +1,6 @@
-from os import path, remove
+from os import path, remove, makedirs
 import os
+import requests
 from yt_dlp import YoutubeDL
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
@@ -15,9 +16,9 @@ class SoundAPI:
             "continuedl": True,
             "default_search": "ytsearch",
             "quiet": True,
-            # حذف الملفات المؤقتة التلقائية
             "keepvideo": False,
             "nopart": True,
+            "writethumbnail": True,  # تفعيل حفظ الصورة المصغرة
         }
 
     async def search_and_download(self, query: str):
@@ -30,6 +31,12 @@ class SoundAPI:
                 track = info["entries"][0]
                 file_path = path.join("downloads", f"{track['id']}.{track['ext']}")
                 
+                # تنزيل الصورة المصغرة
+                thumbnail_url = track.get("thumbnail")
+                thumbnail_path = None
+                if thumbnail_url:
+                    thumbnail_path = self.download_thumbnail(track['id'], thumbnail_url)
+                
                 duration_sec = int(track.get("duration", 0))
                 duration_min = seconds_to_min(duration_sec)
                 track_details = {
@@ -38,11 +45,24 @@ class SoundAPI:
                     "duration_min": duration_min,
                     "uploader": track.get("uploader", "غير معروف"),
                     "filepath": file_path,
+                    "thumbnail": thumbnail_path,
                 }
                 return track_details, file_path
             except Exception as e:
                 print(f"Error: {e}")
                 return False
+
+    def download_thumbnail(self, track_id: str, url: str):
+        try:
+            makedirs("thumbnails", exist_ok=True)
+            thumbnail_path = f"thumbnails/{track_id}.jpg"
+            response = requests.get(url)
+            with open(thumbnail_path, "wb") as f:
+                f.write(response.content)
+            return thumbnail_path
+        except Exception as e:
+            print(f"فشل في تنزيل الصورة: {e}")
+            return None
 
 @app.on_message(command(["يوت"]))
 async def download_sound(_, message):
@@ -71,24 +91,23 @@ async def download_sound(_, message):
 """)
     
     try:
+        # إرسال الملف مع الصورة المصغرة
         await message.reply_audio(
             audio=file_path,
             title=track_details["title"],
             performer=track_details["uploader"],
-            duration=track_details["duration_sec"]
+            duration=track_details["duration_sec"],
+            thumb=track_details["thumbnail"] or None,  # إضافة الصورة هنا
         )
         await m.delete()
     except Exception as e:
         await message.reply(f"❌ فشل في إرسال الملف!\n```\n{e}\n```")
     finally:
-        # حذف الملف سواء نجح الإرسال أو فشل
+        # حذف الملفات المؤقتة
         try:
             if path.exists(file_path):
                 remove(file_path)
-                print(f"تم حذف الملف: {file_path}")
-            # حذف المجلد إذا كان فارغًا (اختياري)
-            downloads_dir = path.dirname(file_path)
-            if not os.listdir(downloads_dir):
-                os.rmdir(downloads_dir)
+            if track_details["thumbnail"] and path.exists(track_details["thumbnail"]):
+                remove(track_details["thumbnail"])
         except Exception as delete_error:
             print(f"خطأ في الحذف: {delete_error}")
