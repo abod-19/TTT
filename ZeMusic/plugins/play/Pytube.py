@@ -35,7 +35,7 @@ def get_yt_object(video_url):
     
     return yt
 
-@app.on_message(command(["song", "/song", "بحث"]))
+@app.on_message(command(["بح"]))
 async def ultimate_downloader(client, message):
     query = " ".join(message.command[1:])
     m = await message.reply_text("<b>🔍 جـارِ البحث الآمن...</b>")
