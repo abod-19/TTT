@@ -127,8 +127,8 @@ async def enhanced_check(client: Client, message):
 
         # إجراءات الحذف
         if inappropriate:
-            await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم الحذف خلال 5 ثوانٍ.")
-            await asyncio.sleep(5)
+            await message.reply_text(f"- عذراً عزيزي ↤ {message.from_user.mention}\n- رسالتك محتواها غير لائق.")
+            #await asyncio.sleep(5)
             await message.delete()
             logger.info(f"تم حذف محتوى في الدردشة {message.chat.id}")
 
