@@ -1,5 +1,4 @@
 #هذا الكود يعمل على معرفه نوع الرساله المرسله قابل للتعديل
-"""
 import os
 from pyrogram import Client, filters
 from pyrogram.types import Message
@@ -64,4 +63,3 @@ async def handle_media(client: Client, message: Message):
     else:
         # إذا كانت الرسالة نصية أو غير معروفة
         await message.reply_text("تم استلام رسالة نصية أو نوع غير معروف.")
-"""
