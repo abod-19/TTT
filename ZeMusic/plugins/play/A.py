@@ -8,7 +8,7 @@ class SoundAPI:
     def __init__(self):
         self.opts = {
             "outtmpl": "downloads/%(id)s.%(ext)s",
-            "format": "bestaudio[ext=m4a]",  # تحميل بصيغة M4A
+            "format": "bestaudio/best",  # تحميل بصيغة M4A
             "retries": 3,
             "nooverwrites": False,
             "continuedl": True,
