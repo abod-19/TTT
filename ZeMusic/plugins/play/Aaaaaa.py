@@ -1,3 +1,4 @@
+"""
 from ZeMusic import app
 from pyrogram import filters
 import os
@@ -183,3 +184,4 @@ async def check_media(client, message):
         # التأكد من حذف الملفات المؤقتة حتى في حالة حدوث خطأ
         if 'file_path' in locals() and os.path.exists(file_path):
             os.remove(file_path)
+"""
