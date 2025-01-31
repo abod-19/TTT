@@ -26,7 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 async def convert_webp_to_png(webp_path, png_path):
-    """تحويل ملف webp إلى png باستخدام Pillow"""
+    #تحويل ملف webp إلى png باستخدام Pillow
     try:
         with Image.open(webp_path) as img:
             img.save(png_path, "PNG")
