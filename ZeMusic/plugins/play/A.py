@@ -8,7 +8,7 @@ class SoundAPI:
     def __init__(self):
         self.opts = {
             "outtmpl": "downloads/%(id)s.%(ext)s",
-            "format": "bestaudio/best",  # تحميل بصيغة M4A
+            "format": "bestaudio/best",
             "retries": 3,
             "nooverwrites": False,
             "continuedl": True,
@@ -24,7 +24,8 @@ class SoundAPI:
                     return False
                 
                 track = info["entries"][0]
-                file_path = path.join("downloads", f"{track['id']}.m4a")  # تحديد المسار
+                # استبدل .m4a بالامتداد الفعلي من البيانات
+                file_path = path.join("downloads", f"{track['id']}.{track['ext']}")
                 
                 duration_min = seconds_to_min(track["duration"])
                 track_details = {
@@ -65,7 +66,6 @@ async def download_sound(_, message):
 📤 **جاري الإرسال...**
 """)
     
-    # إرسال الملف الصوتي مباشرةً
     try:
         await message.reply_audio(
             audio=file_path,
@@ -73,6 +73,6 @@ async def download_sound(_, message):
             performer=track_details["uploader"],
             duration=track_details["duration_sec"]
         )
-        await m.delete()  # حذف رسالة "جاري الإرسال..."
+        await m.delete()
     except Exception as e:
         await message.reply(f"❌ فشل في إرسال الملف!\n```\n{e}\n```")
