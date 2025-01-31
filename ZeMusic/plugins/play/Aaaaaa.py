@@ -1,5 +1,5 @@
 from ZeMusic import app
-from pyrogram import filters
+from pyrogram import filters, Client
 import os
 import logging
 import asyncio
@@ -8,11 +8,16 @@ import numpy as np
 from nudenet import NudeDetector
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from PIL import Image
+from tempfile import gettempdir
 
 detector = NudeDetector()
 ALLOWED_GROUPS = []
 THRESHOLD = 0.35
 FRAME_INTERVAL = 1.0
+
+# إعداد مجلد مؤقت خاص للتطبيق
+TEMP_DIR = os.path.join(gettempdir(), "ZeMusic")
+os.makedirs(TEMP_DIR, exist_ok=True)
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -20,118 +25,115 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-async def convert_webp_to_png(webp_path, png_path):
+async def safe_download(client: Client, message, file_path: str) -> bool:
+    """تنزيل الملف مع معالجة الأخطاء المحسنة"""
+    try:
+        download_path = await client.download_media(
+            message,
+            file_name=file_path,
+            in_memory=False
+        )
+        return os.path.exists(download_path) and os.path.getsize(download_path) > 0
+    except Exception as e:
+        logger.error(f"فشل التنزيل: {str(e)}")
+        return False
+
+async def convert_webp_to_png(webp_path: str) -> str:
+    """تحويل WEBP إلى PNG مع تعقب الأخطاء"""
+    png_path = os.path.join(TEMP_DIR, f"{os.path.basename(webp_path)}.png")
     try:
         with Image.open(webp_path) as img:
             img.save(png_path, "PNG")
-        return True
+        return png_path
     except Exception as e:
-        logger.error(f"فشل تحويل {webp_path} إلى {png_path}: {str(e)}")
-        return False
+        logger.error(f"فشل التحويل: {str(e)}")
+        return None
 
-async def analyze_media(file_path, is_video=False):
-    inappropriate_detected = False
-    
-    if is_video:
-        try:
+async def analyze_media(file_path: str, is_video: bool = False) -> bool:
+    """تحليل المحتوى مع تعزيز معالجة الأخطاء"""
+    try:
+        if is_video:
             with VideoFileClip(file_path) as clip:
                 duration = clip.duration
                 for t in np.arange(0, duration, FRAME_INTERVAL):
-                    frame_path = f"temp_frame_{os.path.basename(file_path)}_{int(t)}.jpg"
+                    frame_path = os.path.join(TEMP_DIR, f"frame_{os.path.basename(file_path)}_{int(t)}.jpg")
                     try:
                         clip.save_frame(frame_path, t=t)
-                    except Exception as e:
-                        logger.error(f"فشل استخراج الإطار: {str(e)}")
-                        continue
-
-                    if os.path.exists(frame_path) and os.path.getsize(frame_path) > 0:
-                        results = detector.detect(frame_path)
-                        inappropriate_detected = check_results(results)
-                        os.remove(frame_path)
-                        
-                    if inappropriate_detected:
-                        break
-        except Exception as e:
-            logger.error(f"فشل تحليل الفيديو: {str(e)}")
-    else:
-        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
-            results = detector.detect(file_path)
-            inappropriate_detected = check_results(results)
-            
-    return inappropriate_detected
-
-def check_results(results):
-    for obj in results:
-        if obj['class'] in [
-            'EXPOSED_ANUS', 'COVERED_GENITALIA', 'EXPOSED_GENITALIA',
-            'FEMALE_GENITALIA_COVERED', 'BUTTOCKS_EXPOSED',
-            'FEMALE_BREAST_EXPOSED', 'MALE_GENITALIA_EXPOSED',
-            'FEMALE_GENITALIA_EXPOSED'
-        ] and obj['score'] >= THRESHOLD:
-            logger.info(f"تم الكشف عن: {obj['class']} بثقة {obj['score']}")
-            return True
+                        if check_results(detector.detect(frame_path)):
+                            return True
+                    finally:
+                        if os.path.exists(frame_path):
+                            os.remove(frame_path)
+        else:
+            return check_results(detector.detect(file_path))
+    except Exception as e:
+        logger.error(f"فشل التحليل: {str(e)}")
     return False
 
+def check_results(results: list) -> bool:
+    """فحص النتائج بكفاءة"""
+    target_classes = {
+        'EXPOSED_ANUS', 'COVERED_GENITALIA', 'EXPOSED_GENITALIA',
+        'FEMALE_GENITALIA_COVERED', 'BUTTOCKS_EXPOSED',
+        'FEMALE_BREAST_EXPOSED', 'MALE_GENITALIA_EXPOSED',
+        'FEMALE_GENITALIA_EXPOSED'
+    }
+    return any(obj['score'] >= THRESHOLD for obj in results if obj['class'] in target_classes)
+
 @app.on_message(filters.group & (filters.photo | filters.video | filters.sticker | filters.animation))
-async def check_media(client, message):
+async def enhanced_check(client: Client, message):
+    """الإصدار المحسن مع معالجة أخطاء موسعة"""
     try:
         if ALLOWED_GROUPS and message.chat.id not in ALLOWED_GROUPS:
             return
 
-        file_path = None
-        is_video = False
-        
+        # توليد اسم ملف فريد
+        file_id = message.id
+        temp_file = os.path.join(TEMP_DIR, f"temp_{file_id}")
+
         # تحديد نوع الملف
         if message.sticker:
             mime_type = message.sticker.mime_type
             if mime_type == "image/webp":
-                file_path = f"temp_{message.id}.webp"
-                converted_path = f"temp_{message.id}.png"
+                temp_file += ".webp"
             elif mime_type == "video/webm":
-                file_path = f"temp_{message.id}.webm"
-                is_video = True
+                temp_file += ".webm"
             else:
                 return
         elif message.photo:
-            file_path = f"temp_{message.id}.jpg"
-        elif message.video:
-            file_path = f"temp_{message.id}.mp4"
-            is_video = True
-        elif message.animation:
-            file_path = f"temp_{message.id}.mp4"
-            is_video = True
+            temp_file += ".jpg"
+        elif message.video or message.animation:
+            temp_file += ".mp4"
 
-        if not file_path:
-            return
-
-        # تنزيل الملف
-        media = await client.download_media(message, file_name=file_path)
-        if not media or not os.path.exists(file_path):
-            logger.error("فشل تنزيل الملف")
+        # تنزيل الملف مع التعامل مع الأخطاء
+        if not await safe_download(client, message, temp_file):
+            logger.error(f"فشل تنزيل الملف: {temp_file}")
             return
 
         # معالجة خاصة للملصقات
         if message.sticker:
-            if mime_type == "image/webp":
-                if await convert_webp_to_png(file_path, converted_path):
+            if message.sticker.mime_type == "image/webp":
+                converted_path = await convert_webp_to_png(temp_file)
+                if not converted_path:
+                    return
+                try:
                     inappropriate = await analyze_media(converted_path)
+                finally:
                     os.remove(converted_path)
-                else:
-                    inappropriate = False
-            elif mime_type == "video/webm":
-                inappropriate = await analyze_media(file_path, is_video=True)
+            else:
+                inappropriate = await analyze_media(temp_file, is_video=True)
         else:
-            inappropriate = await analyze_media(file_path, is_video=is_video)
+            inappropriate = await analyze_media(temp_file, is_video=message.video or message.animation)
 
-        # الحذف إذا تم اكتشاف محتوى غير لائق
+        # إجراءات الحذف
         if inappropriate:
-            await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم حذف الملف خلال 5 ثوانٍ.")
+            await message.reply_text("⚠️ تم اكتشاف محتوى غير لائق. سيتم الحذف خلال 5 ثوانٍ.")
             await asyncio.sleep(5)
             await message.delete()
-            logger.info(f"تم حذف رسالة غير لائقة في {message.chat.id}")
+            logger.info(f"تم حذف محتوى في الدردشة {message.chat.id}")
 
     except Exception as e:
-        logger.error(f"خطأ في المعالجة: {str(e)}")
+        logger.error(f"خطأ جسيم: {str(e)}")
     finally:
-        if file_path and os.path.exists(file_path):
-            os.remove(file_path)
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
