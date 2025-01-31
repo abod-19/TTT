@@ -4,6 +4,7 @@ from yt_dlp import YoutubeDL
 from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.formatters import seconds_to_min
+from ZeMusic.platforms.Youtube import cookies
 import config
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
@@ -21,6 +22,7 @@ class Youtube:
             "keepvideo": False,
             "nopart": True,
             "writethumbnail": True,
+            "cookiefile": f"{await cookies()}",
             "postprocessors": [
                 {
                     "key": "FFmpegExtractAudio",
