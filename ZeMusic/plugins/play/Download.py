@@ -81,9 +81,6 @@ async def song_downloader(client, message: Message):
             thumb=thumb_name,
             duration=duration_in_seconds,
         )
-
-        channel_link = message_to_channel.link
-        await songdb.insert_one({"video_id": video_id, "channel_link": channel_link})
         
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
