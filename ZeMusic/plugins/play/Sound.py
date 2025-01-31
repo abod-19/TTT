@@ -9,7 +9,7 @@ import config
 
 lnk = "https://t.me/" + config.CHANNEL_LINK
 
-class SoundAPI:
+class Sound:
     def __init__(self):
         self.opts = {
             "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -73,7 +73,7 @@ async def download_sound(_, message):
         return
     
     query = " ".join(message.command[1:])
-    sound_api = SoundAPI()
+    sound_api = Sound()
     
     m = await message.reply("- جـارِ البحث ♪.")
     result = await sound_api.search_and_download(query)
