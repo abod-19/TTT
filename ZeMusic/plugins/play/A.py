@@ -6,6 +6,8 @@ from ZeMusic import app
 from ZeMusic.plugins.play.filters import command
 from ZeMusic.utils.formatters import seconds_to_min
 
+lnk = "https://t.me/" + config.CHANNEL_LINK
+
 class SoundAPI:
     def __init__(self):
         self.opts = {
@@ -79,14 +81,13 @@ async def download_sound(_, message):
         await m.edit("- فشل في العثور على المقطع.")
         return
     
-    track_details, file_path = result
-    
+    track_details, file_path = result    
     await m.edit(f"- جـارِ التحميل ♪.")
     
     try:
-        # إرسال الملف مع الصورة المصغرة
         await message.reply_audio(
             audio=file_path,
+            caption=f"<p>- </p><a href='{lnk}'>{app.name}</a>\nㅤ",
             title=track_details["title"],
             performer=track_details["uploader"],
             duration=track_details["duration_sec"],
