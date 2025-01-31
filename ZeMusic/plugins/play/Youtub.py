@@ -10,7 +10,7 @@ import config
 lnk = "https://t.me/" + config.CHANNEL_LINK
 
 class Youtube:
-    def __init__(self):
+    async def __init__(self):
         self.opts = {
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "format": "bestaudio/best",
