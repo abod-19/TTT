@@ -73,12 +73,10 @@ async def analyze_media(file_path: str, is_video: bool = False) -> bool:
 def check_results(results: list) -> bool:
     """فحص النتائج بكفاءة"""
     target_classes = {
-        'BUTTOCKS_EXPOSED', 'ANUS_EXPOSED', 'FEMALE_BREAST_EXPOSED', 
-        'FEMALE_GENITALIA_EXPOSED', 'MALE_GENITALIA_EXPOSED', 'BELLY_EXPOSED',
-        'FEMALE_GENITALIA_COVERED', 'FACE_FEMALE', 'MALE_BREAST_EXPOSED', 
-        'FEET_EXPOSED', 'BELLY_COVERED', 'FEET_COVERED', 'ARMPITS_COVERED', 
-        'ARMPITS_EXPOSED', 'FACE_MALE', 'ANUS_COVERED', 'FEMALE_BREAST_COVERED', 
-        'BUTTOCKS_COVERED', 'EXPOSED_ANUS', 'COVERED_GENITALIA', 'EXPOSED_GENITALIA'
+         'EXPOSED_ANUS', 'COVERED_GENITALIA', 'EXPOSED_GENITALIA',
+        'FEMALE_GENITALIA_COVERED', 'BUTTOCKS_EXPOSED',
+        'FEMALE_BREAST_EXPOSED', 'MALE_GENITALIA_EXPOSED',
+        'FEMALE_GENITALIA_EXPOSED' 
     }
     return any(obj['score'] >= THRESHOLD for obj in results if obj['class'] in target_classes)
 
