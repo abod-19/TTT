@@ -75,8 +75,7 @@ def check_results(results: list) -> bool:
     target_classes = {
         'BUTTOCKS_EXPOSED', 'ANUS_EXPOSED', 'FEMALE_BREAST_EXPOSED', 
         'FEMALE_GENITALIA_EXPOSED', 'MALE_GENITALIA_EXPOSED', 
-        'EXPOSED_GENITALIA', 'EXPOSED_ANUS', 'COVERED_GENITALIA', 
-        'FEMALE_GENITALIA_COVERED'
+        'EXPOSED_GENITALIA', 'EXPOSED_ANUS'
     }
     return any(obj['score'] >= THRESHOLD for obj in results if obj['class'] in target_classes)
 
