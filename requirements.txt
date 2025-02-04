@@ -36,3 +36,4 @@ moviepy
 pytube
 openai
 requests
+pySmartDL
