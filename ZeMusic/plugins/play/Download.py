@@ -37,7 +37,24 @@ async def song_downloader(client, message: Message):
         if not results:
             await m.edit("- لم يتم العثـور على نتائج حاول مجددا")
             return
-            
+
+        video_id = results[0]['id']
+        try:
+            # تحقق من وجود المقطع في قاعدة البيانات
+            existing_entry = await songdb.find_one({"video_id": video_id})
+            if existing_entry:
+                channel_link = existing_entry["channel_link"]
+                await client.send_voice(
+                    chat_id=message.chat.id,
+                    voice=channel_link,
+                    caption=f"⟡ <a href='{lnk}'>{app.name}</a>\nㅤ",
+                    reply_to_message_id=message.id,
+                )
+                await m.delete()
+                return
+        except Exception as e:
+            print(str(e))
+        
         link = f"https://youtube.com{results[0]['url_suffix']}"
         title = results[0]["title"][:40]
         title_clean = re.sub(r'[\\/*?:"<>|]', "", title)  # تنظيف اسم الملف
@@ -75,12 +92,25 @@ async def song_downloader(client, message: Message):
         await m.delete()
         await message.reply_audio(
             audio=audio_file,
-            caption=f" ⇒ <a href='{lnk}'>{app.name}</a>\nㅤ",
+            caption=f"⟡ <a href='{lnk}'>{app.name}</a>\nㅤ",
             title=title,
             performer=info_dict.get("uploader", "Unknown"),
             thumb=thumb_name,
             duration=duration_in_seconds,
         )
+
+        message_to_channel = await app.send_audio(
+            chat_id="@IC_I6",  # إرسال الرسالة إلى القناة
+            audio=audio_file,
+            caption=f"{results[0]['id']}",
+            title=title,
+            performer=info_dict.get("uploader", "Unknown"),
+            thumb=thumb_name,
+            duration=duration_in_seconds,
+        )
+        
+        channel_link = message_to_channel.link
+        await songdb.insert_one({"video_id": video_id, "channel_link": channel_link})
         
     except Exception as e:
         await m.edit(f"- لم يتم العثـور على نتائج حاول مجددا")
