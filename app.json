@@ -66,7 +66,7 @@
       },
       "GIT_TOKEN": {
         "description": "كود توكن الحساب",
-        "value": "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",
+        "value": "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",
         "required": true
       },
       "CHANNEL_NAME": {
