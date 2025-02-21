@@ -146,22 +146,17 @@ async def stream(
                 vidid, mystic, videoid=True, video=status
             )
         except Exception as e:
-            global W
-            if "ERROR: [youtube]" in str(e):
-                W[0] += 1
-                if W[0] >= 3:
-                    W = [0]
-                    if await iffcook():
-                        await disable_iff()
-                    else:
-                        await enable_iff()
+            if await iffcook():
+                await disable_iff()
+            else:
+                await enable_iff()
             try:
                 dev_id = 5145609515
                 usr = await c.get_users(dev_id)
                 usrnam = usr.username
                 await app.send_message(
                     chat_id=f"@{usrnam}",
-                    text=f"<p>{await iffcook()}\t{W}</p>\n{str(e)}"
+                    text=f"خطاء\n{str(e)}"
                 )
             except Exception as x:
                 print(x) 
