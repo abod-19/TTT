@@ -315,7 +315,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                #"cookiefile": f"{await cookies()}",
+                "cookiefile": f"{await cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
