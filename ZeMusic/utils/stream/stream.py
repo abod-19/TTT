@@ -19,7 +19,7 @@ from ZeMusic.utils.pastebin import ModyBin
 from ZeMusic.utils.stream.queue import put_queue, put_queue_index
 from ZeMusic.utils.thumbnails import get_thumb
 from ZeMusic.utils.database import iffcook, enable_iff, disable_iff
-W = [0]
+
 async def stream(
     _,
     mystic,
@@ -151,15 +151,12 @@ async def stream(
             else:
                 await enable_iff()
             try:
-                dev_id = 5145609515
-                usr = await c.get_users(dev_id)
-                usrnam = usr.username
                 await app.send_message(
-                    chat_id=f"@{usrnam}",
-                    text=f"خطاء\n{str(e)}"
+                    chat_id="@BBFYY",
+                    text=f"{str(e)}"
                 )
             except Exception as x:
-                print(x) 
+                print(x)
             print(e)
             raise AssistantErr(_["play_14"])
         if await is_active_chat(chat_id):
