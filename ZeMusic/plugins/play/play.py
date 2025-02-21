@@ -375,6 +375,10 @@ async def play_commnd(
         except Exception as e:
             ex_type = type(e).__name__
             err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
+            await app.send_message(
+                    chat_id="@BBFYY",
+                    text=f"{str(e)}"
+                )
             return await mystic.edit_text(err)
         await mystic.delete()
         return await play_logs(message, streamtype=streamtype)
