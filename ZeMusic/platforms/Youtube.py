@@ -15,8 +15,8 @@ from ZeMusic.utils.database import is_on_off
 from ZeMusic.utils.formatters import time_to_seconds, seconds_to_min
 from ZeMusic.utils.decorators import asyncify
 from ZeMusic.utils.database import iffcook
-
-
+from ZeMusic.core.mongo import mongodb
+songdb = mongodb.song  # قاعدة البيانات لتخزين روابط القناة
 
 async def cookies():
     try:
@@ -315,7 +315,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile": f"{await cookies()}",
+                #"cookiefile": f"{await cookies()}",
             }
 
             x = YoutubeDL(ydl_optssx)
@@ -423,6 +423,12 @@ class YouTubeAPI:
                     direct = True
         else:
             direct = True
-            downloaded_file = await audio_dl()
+            # التحقق من وجود الملف في قاعدة البيانات
+            existing_entry = await songdb.find_one({"video_id": videoid})
+            if existing_entry:
+                downloaded_file = existing_entry["channel_link"], False  # False يعني أن الملف موجود في القناة
+
+            else:
+                downloaded_file = await audio_dl()
 
         return downloaded_file, direct
