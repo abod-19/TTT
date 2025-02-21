@@ -311,8 +311,18 @@ class YouTubeAPI:
         async def audio_dl():
             existing_entry = await songdb.find_one({"video_id": vid})
             if existing_entry:
-                return existing_entry["channel_link"]
-            
+                x = existing_entry["channel_link"]
+                xyz = os.path.join("downloads", f"{vid}.m4a")
+                if os.path.exists(xyz):
+                    return xyz
+                response = requests.get(x, stream=True)
+                response.raise_for_status()
+                # حفظ الملف بصيغة m4a
+                with open(xyz, "wb") as file:
+                    for chunk in response.iter_content(chunk_size=1024):
+                        file.write(chunk)
+                return xyz
+
             ydl_optssx = {
                 "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
