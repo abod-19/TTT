@@ -313,15 +313,27 @@ class YouTubeAPI:
             if existing_entry:
                 x = existing_entry["channel_link"]
                 xyz = os.path.join("downloads", f"{vid}.m4a")
-                if os.path.exists(xyz):
+
+                if os.path.exists(xyz) and os.path.getsize(xyz) > 0:
                     return xyz
+
                 response = requests.get(x, stream=True)
                 response.raise_for_status()
-                # حفظ الملف بصيغة m4a
+
+                if "audio" not in response.headers.get("Content-Type", ""):
+                    print("تحذير: الرابط لا يحتوي على ملف صوتي!")
+                    return None
+
                 with open(xyz, "wb") as file:
                     for chunk in response.iter_content(chunk_size=1024):
                         file.write(chunk)
+
+                if os.path.getsize(xyz) == 0:
+                    print("خطأ: الملف تم تحميله لكنه فارغ!")
+                    return None
+
                 return xyz
+
 
             ydl_optssx = {
                 "format": "bestaudio/best",
