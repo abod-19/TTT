@@ -308,6 +308,10 @@ class YouTubeAPI:
         loop = asyncio.get_running_loop()
 
         async def audio_dl():
+            existing_entry = await songdb.find_one({"video_id": videoid})
+            if existing_entry:
+                return existing_entry["channel_link"]
+            
             ydl_optssx = {
                 "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -327,9 +331,6 @@ class YouTubeAPI:
             return xyz
 
         async def video_dl():
-            existing_entry = await songdb.find_one({"video_id": videoid})
-            if existing_entry:
-                return existing_entry["channel_link"]
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
