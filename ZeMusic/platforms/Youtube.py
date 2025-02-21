@@ -327,6 +327,9 @@ class YouTubeAPI:
             return xyz
 
         async def video_dl():
+            existing_entry = await songdb.find_one({"video_id": videoid})
+            if existing_entry:
+                return existing_entry["channel_link"]
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -423,12 +426,6 @@ class YouTubeAPI:
                     direct = True
         else:
             direct = True
-            # التحقق من وجود الملف في قاعدة البيانات
-            existing_entry = await songdb.find_one({"video_id": videoid})
-            if existing_entry:
-                downloaded_file = existing_entry["channel_link"], False  # False يعني أن الملف موجود في القناة
-
-            else:
-                downloaded_file = await audio_dl()
+            downloaded_file = await audio_dl()
 
         return downloaded_file, direct
