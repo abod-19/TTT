@@ -310,47 +310,45 @@ class YouTubeAPI:
 
         async def audio_dl():
             existing_entry = await songdb.find_one({"video_id": vid})
-            if existing_entry:
-                x = existing_entry["channel_link"]
-                xyz = os.path.join("downloads", f"{vid}.m4a")
+            if not existing_entry or "channel_link" not in existing_entry:
+                print("خطأ: لا يوجد إدخال لهذا الفيديو في قاعدة البيانات!")
+                return None
+            
+            x = existing_entry["channel_link"]
+            if not x:
+                print("خطأ: الرابط غير موجود!")
+                return None
 
-                if os.path.exists(xyz) and os.path.getsize(xyz) > 0:
-                    return xyz
+            xyz = os.path.join("downloads", f"{vid}.m4a")
 
+            # التأكد من أن الملف موجود وصالح
+            if os.path.exists(xyz) and os.path.getsize(xyz) > 0:
+                return xyz
+
+            try:
                 response = requests.get(x, stream=True)
                 response.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                print(f"خطأ في تحميل الملف: {e}")
+                return None
 
-                if "audio" not in response.headers.get("Content-Type", ""):
-                    print("تحذير: الرابط لا يحتوي على ملف صوتي!")
-                    return None
+            # التحقق من نوع الملف
+            content_type = response.headers.get("Content-Type", "")
+            if "audio" not in content_type:
+                print(f"تحذير: الرابط لا يحتوي على ملف صوتي! (نوع المحتوى: {content_type})")
+                return None
 
-                with open(xyz, "wb") as file:
-                    for chunk in response.iter_content(chunk_size=1024):
-                        file.write(chunk)
+            # تحميل الملف وحفظه
+            with open(xyz, "wb") as file:
+                for chunk in response.iter_content(chunk_size=1024):
+                    file.write(chunk)
 
-                if os.path.getsize(xyz) == 0:
-                    print("خطأ: الملف تم تحميله لكنه فارغ!")
-                    return None
+            # التأكد من أن الملف تم تحميله بشكل صحيح
+            if os.path.getsize(xyz) == 0:
+                print("خطأ: الملف تم تحميله لكنه فارغ!")
+                os.remove(xyz)  # حذف الملف الفارغ
+                return None
 
-                return xyz
-
-
-            ydl_optssx = {
-                "format": "bestaudio/best",
-                "outtmpl": "downloads/%(id)s.%(ext)s",
-                "geo_bypass": True,
-                "nocheckcertificate": True,
-                "quiet": True,
-                "no_warnings": True,
-                "cookiefile": f"{await cookies()}",
-            }
-
-            x = YoutubeDL(ydl_optssx)
-            info = x.extract_info(link, False)
-            xyz = os.path.join("downloads", f"{info['id']}.{info['ext']}")
-            if os.path.exists(xyz):
-                return xyz
-            x.download([link])
             return xyz
 
         async def video_dl():
