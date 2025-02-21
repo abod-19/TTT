@@ -311,44 +311,43 @@ class YouTubeAPI:
         async def audio_dl():
             existing_entry = await songdb.find_one({"video_id": vid})
             if not existing_entry or "channel_link" not in existing_entry:
-                print("خطأ: لا يوجد إدخال لهذا الفيديو في قاعدة البيانات!")
-                return None
+                        print("خطأ: لا يوجد إدخال لهذا الفيديو في قاعدة البيانات!")
+                        return None
             
             x = existing_entry["channel_link"]
             if not x:
-                print("خطأ: الرابط غير موجود!")
-                return None
+                        print("خطأ: الرابط غير موجود!")
+                        return None
 
             xyz = os.path.join("downloads", f"{vid}.m4a")
 
-            # التأكد من أن الملف موجود وصالح
+            # التأكد من وجود مجلد "downloads"
+            os.makedirs("downloads", exist_ok=True)
+
+            # التحقق من أن الملف موجود وصالح
             if os.path.exists(xyz) and os.path.getsize(xyz) > 0:
-                return xyz
+                        print(f"الملف موجود مسبقًا: {xyz}")
+                        return xyz
 
             try:
-                response = requests.get(x, stream=True)
-                response.raise_for_status()
+                        response = requests.get(x, stream=True)
+                        response.raise_for_status()
             except requests.exceptions.RequestException as e:
-                print(f"خطأ في تحميل الملف: {e}")
-                return None
+                        print(f"خطأ في تحميل الملف: {e}")
+                        return None
 
-            # التحقق من نوع الملف
-            content_type = response.headers.get("Content-Type", "")
-            if "audio" not in content_type:
-                print(f"تحذير: الرابط لا يحتوي على ملف صوتي! (نوع المحتوى: {content_type})")
-                return None
-
-            # تحميل الملف وحفظه
+            # تحميل الملف وحفظه بامتداد m4a
             with open(xyz, "wb") as file:
-                for chunk in response.iter_content(chunk_size=1024):
-                    file.write(chunk)
+                        for chunk in response.iter_content(chunk_size=1024):
+                                    file.write(chunk)
 
             # التأكد من أن الملف تم تحميله بشكل صحيح
             if os.path.getsize(xyz) == 0:
-                print("خطأ: الملف تم تحميله لكنه فارغ!")
-                os.remove(xyz)  # حذف الملف الفارغ
-                return None
+                        print("خطأ: الملف تم تحميله لكنه فارغ!")
+                        os.remove(xyz)  # حذف الملف الفارغ
+                        return None
 
+            print(f"تم تحميل الملف بنجاح: {xyz}")
             return xyz
 
         async def video_dl():
