@@ -304,11 +304,12 @@ class YouTubeAPI:
         title: Union[bool, str] = None,
     ) -> str:
         if videoid:
+            vid = link
             link = self.base + link
         loop = asyncio.get_running_loop()
 
         async def audio_dl():
-            existing_entry = await songdb.find_one({"video_id": videoid})
+            existing_entry = await songdb.find_one({"video_id": vid})
             if existing_entry:
                 return existing_entry["channel_link"]
             
