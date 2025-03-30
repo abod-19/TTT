@@ -8,6 +8,7 @@ from ZeMusic.misc import SUDOERS
 from ZeMusic.utils.database import get_client
 from ZeMusic.utils.decorators.language import language
 from config import OWNER_ID
+from pyrogram.enums import ChatType
 
 IS_BROADCASTING = False
 
@@ -33,7 +34,7 @@ async def broadcast_message(client, message, _):
         sent = 0
         client = await get_client(num)
         async for dialog in client.get_dialogs():
-            if dialog.chat.type == "private":  # إرسال فقط إلى المحادثات الخاصة
+            if dialog.chat.type == ChatType.PRIVATE:  # إرسال فقط إلى المحادثات الخاصة
                 try:
                     if message.reply_to_message:
                         await client.forward_messages(dialog.chat.id, message.chat.id, message.reply_to_message.id)
@@ -53,3 +54,4 @@ async def broadcast_message(client, message, _):
         pass
     
     IS_BROADCASTING = False
+    
