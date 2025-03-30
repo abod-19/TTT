@@ -68,6 +68,9 @@ class Userbot(Client):
             self.one.username = self.one.me.username
             assistantids.append(self.one.id)
             LOGGER(__name__).info(f"تم تشغيل المساعد {self.one.name} على سورس الملك")
+            @self.one.on_message(filters.private & ~filters.me)
+            async def auto_reply(client, message):
+                await message.reply_text("مرحبًا! أنا مساعد تلقائي، كيف يمكنني مساعدتك؟")
 
         if config.STRING2:
             await self.two.start()
