@@ -39,7 +39,7 @@ class Userbot(Client):
             LOGGER(__name__).info(f"تم تشغيل المساعد {self.one.name} على سورس الملك")
 
             # إضافة ميزة الرد التلقائي
-            @self.one.on_message(filters.private & ~filters.me)
+            @self.one.on_message()
             async def auto_reply(client, message):
                 await message.reply_text("مرحبًا! أنا مساعد تلقائي، كيف يمكنني مساعدتك؟")
 
