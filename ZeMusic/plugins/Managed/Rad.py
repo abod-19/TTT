@@ -11,7 +11,7 @@ from config import OWNER_ID
 
 IS_BROADCASTING = False
 
-@app.on_message(filters.command(["اذ"],"") & SUDOERS)
+@app.on_message(filters.command(["اذ"], "") & SUDOERS)
 @language
 async def broadcast_message(client, message, _):
     global IS_BROADCASTING
@@ -33,17 +33,18 @@ async def broadcast_message(client, message, _):
         sent = 0
         client = await get_client(num)
         async for dialog in client.get_dialogs():
-            try:
-                if message.reply_to_message:
-                    await client.forward_messages(dialog.chat.id, message.chat.id, message.reply_to_message.id)
-                else:
-                    await client.send_message(dialog.chat.id, text=query)
-                sent += 1
-                await asyncio.sleep(3)
-            except FloodWait as fw:
-                await asyncio.sleep(fw.value)
-            except:
-                continue
+            if dialog.chat.type == "private":  # إرسال فقط إلى المحادثات الخاصة
+                try:
+                    if message.reply_to_message:
+                        await client.forward_messages(dialog.chat.id, message.chat.id, message.reply_to_message.id)
+                    else:
+                        await client.send_message(dialog.chat.id, text=query)
+                    sent += 1
+                    await asyncio.sleep(3)
+                except FloodWait as fw:
+                    await asyncio.sleep(fw.value)
+                except:
+                    continue
         text += _["broad_7"].format(num, sent)
     
     try:
@@ -52,4 +53,3 @@ async def broadcast_message(client, message, _):
         pass
     
     IS_BROADCASTING = False
-  
