@@ -24,7 +24,8 @@ async def auto_reply():
             print(f"خطأ أثناء الرد التلقائي: {e}")
     
     print("تم تشغيل نظام الرد التلقائي.")
-    await client.run()
+    await client.start()
+    await asyncio.Event().wait()  # إبقاء البوت قيد التشغيل
 
 # تشغيل وظيفة الرد التلقائي عند بدء التشغيل
-asyncio.run(auto_reply())
+asyncio.create_task(auto_reply())
