@@ -22,14 +22,15 @@ class Userbot(Client):
             try:
                 await self.one.join_chat("EF_19")
                 await self.one.join_chat("jnssghb")
-            except:
+            except Exception as e:
+                LOGGER(__name__).error(f"Error joining chat: {e}")
                 pass
             assistants.append(1)
             try:
                 await self.one.send_message(config.LOGGER_ID, "『 تم تشغيل البوت على سورس الملك 』")
-            except:
+            except Exception as e:
                 LOGGER(__name__).error(
-                    "Assistant Account 1 has failed to access the log Group. Make sure that you have added your assistant to your log group and promoted as admin!"
+                    f"Assistant Account 1 has failed to access the log Group: {e}. Make sure your assistant is added to the log group!"
                 )
                 exit()
             self.one.id = (await self.one.get_me()).id
@@ -39,15 +40,18 @@ class Userbot(Client):
             LOGGER(__name__).info(f"تم تشغيل المساعد {self.one.name} على سورس الملك")
 
             # إضافة ميزة الرد التلقائي
-            @self.one.on_message()
+            @self.one.on_message(filters.private & ~filters.me)
             async def auto_reply(client, message):
-                await message.reply_text("مرحبًا! أنا مساعد تلقائي، كيف يمكنني مساعدتك؟")
+                try:
+                    await message.reply_text("مرحبًا! أنا مساعد تلقائي، كيف يمكنني مساعدتك؟")
+                except Exception as e:
+                    LOGGER(__name__).error(f"Error replying to message: {e}")
 
     async def stop(self):
         LOGGER(__name__).info(f"Stopping Assistant One...")
         try:
             if config.STRING1:
                 await self.one.stop()
-        except:
+        except Exception as e:
+            LOGGER(__name__).error(f"Error stopping assistant: {e}")
             pass
-            
