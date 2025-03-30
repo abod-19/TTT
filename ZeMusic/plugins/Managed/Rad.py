@@ -30,23 +30,29 @@ async def broadcast_message(client, message, _):
     text = _["broad_6"]
     from ZeMusic.core.userbot import assistants
     
-    for num in assistants:
-        sent = 0
-        client = await get_client(num)
-        async for dialog in client.get_dialogs():
-            if dialog.chat.type == ChatType.PRIVATE:  # إرسال فقط إلى المحادثات الخاصة
-                try:
-                    if message.reply_to_message:
-                        await client.forward_messages(dialog.chat.id, message.chat.id, message.reply_to_message.id)
-                    else:
-                        await client.send_message(dialog.chat.id, text=query)
-                    sent += 1
-                    await asyncio.sleep(3)
-                except FloodWait as fw:
-                    await asyncio.sleep(fw.value)
-                except:
-                    continue
-        text += _["broad_7"].format(num, sent)
+    if not assistants:
+        return await message.reply_text("لا يوجد حسابات مساعدة متاحة.")
+    
+    # استخدام أول حساب فقط من القائمة
+    num = assistants[0]
+    sent = 0
+    client = await get_client(num)
+    
+    async for dialog in client.get_dialogs():
+        if dialog.chat.type == ChatType.PRIVATE:
+            try:
+                if message.reply_to_message:
+                    await client.forward_messages(dialog.chat.id, message.chat.id, message.reply_to_message.id)
+                else:
+                    await client.send_message(dialog.chat.id, text=query)
+                sent += 1
+                await asyncio.sleep(3)
+            except FloodWait as fw:
+                await asyncio.sleep(fw.value)
+            except:
+                continue
+    
+    text += _["broad_7"].format(num, sent)
     
     try:
         await aw.edit_text(text)
@@ -54,4 +60,3 @@ async def broadcast_message(client, message, _):
         pass
     
     IS_BROADCASTING = False
-    
