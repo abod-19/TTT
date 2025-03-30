@@ -11,7 +11,7 @@ from ZeMusic.utils.database import get_client, is_active_chat, is_autoend
 
 async def auto_leave():
     if config.AUTO_LEAVING_ASSISTANT:
-        while not await asyncio.sleep(120):
+        while not await asyncio.sleep(12000):
             from ZeMusic.core.userbot import assistants
 
             for num in assistants:
