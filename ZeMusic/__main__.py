@@ -42,7 +42,9 @@ async def start_auto_reply():
     else:
         LOGGER("AutoReply").info("العميل متصل مسبقاً، تخطي عملية start().")
     
-    await client.idle()  # إبقاء العميل المساعد قيد التشغيل
+    # استخدام حلقة انتظار لإبقاء العميل قيد التشغيل
+    while True:
+        await asyncio.sleep(1)
 
 async def init():
     """
