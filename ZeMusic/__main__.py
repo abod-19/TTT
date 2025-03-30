@@ -35,7 +35,13 @@ async def start_auto_reply():
             LOGGER("AutoReply").error(f"خطأ أثناء الرد التلقائي: {e}")
 
     LOGGER("AutoReply").info("تم تشغيل نظام الرد التلقائي للحساب المساعد.")
-    await client.start()
+    
+    # التحقق من حالة الاتصال قبل بدء العميل
+    if not client.is_connected:
+        await client.start()
+    else:
+        LOGGER("AutoReply").info("العميل متصل مسبقاً، تخطي عملية start().")
+    
     await client.idle()  # إبقاء العميل المساعد قيد التشغيل
 
 async def init():
@@ -102,4 +108,3 @@ async def init():
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(init())
-    
