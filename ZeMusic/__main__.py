@@ -95,13 +95,11 @@ async def init():
         "جاري تشغيل البوت\nتم التنصيب على سورس الملك بنجاح\nقناة السورس https://t.me/EF_19"
     )
     
-    # تشغيل الرد التلقائي في مهمة منفصلة للحساب المساعد
-    asyncio.create_task(start_auto_reply())
     
     await idle()
     await app.stop()
     await userbot.stop()
-    # تأكد من تعريف دالة azkar() أو قم بإزالتها إن لم تكن مستخدمة.
+    asyncio.create_task(start_auto_reply())
     try:
         await azkar()
     except Exception:
