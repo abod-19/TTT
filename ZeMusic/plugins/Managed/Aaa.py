@@ -1,25 +1,30 @@
 import asyncio
-from pyrogram import filters
-from pyrogram.errors import FloodWait
-from pyrogram.enums import ChatType
-from ZeMusic import app
+from pyrogram import Client, filters
 from ZeMusic.utils.database import get_client
+from pyrogram.enums import ChatType
 
-# الرد التلقائي من الحسابات المساعدة عند استقبال رسالة في الخاص
-async def auto_reply_assistants():
+# نص الرد التلقائي
+AUTO_REPLY_TEXT = "مرحبًا! أنا روبوت مساعد، كيف يمكنني مساعدتك؟"
+
+async def auto_reply():
     from ZeMusic.core.userbot import assistants
-    for num in assistants:
-        client = await get_client(num)
+    
+    if not assistants:
+        print("لا يوجد حسابات مساعدة متاحة.")
+        return
+    
+    num = assistants[0]  # استخدام أول حساب فقط
+    client = await get_client(num)
+    
+    @client.on_message(filters.private & ~filters.me)  # استقبال الرسائل الخاصة فقط (ليست من الحساب نفسه)
+    async def reply_auto(client, message):
+        try:
+            await message.reply_text(AUTO_REPLY_TEXT)
+        except Exception as e:
+            print(f"خطأ أثناء الرد التلقائي: {e}")
+    
+    print("تم تشغيل نظام الرد التلقائي.")
+    await client.run()
 
-        @client.on_message(filters.private & ~filters.me)
-        async def auto_reply(client, message):
-            try:
-                # طباعة للمساعدة في تحديد ما إذا كان الكود ينفذ
-                print(f"رسالة جديدة من {message.from_user.id} في الخاص.")
-                await message.reply_text("هذا حساب مساعد وليس مستخدم وهذا #رد_تلقائي")
-            except Exception as e:
-                # طباعة الأخطاء للمساعدة في التصحيح
-                print(f"حدث خطأ: {e}")
-
-# تشغيل الرد التلقائي عند تشغيل الكود
-asyncio.create_task(auto_reply_assistants())
+# تشغيل وظيفة الرد التلقائي عند بدء التشغيل
+asyncio.run(auto_reply())
