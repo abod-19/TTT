@@ -1,3 +1,12 @@
+
+
+
+
+
+
+
+
+
 import asyncio
 
 from ntgcalls import TelegramServerError
@@ -25,7 +34,7 @@ from strings import get_string
 from ZeMusic import LOGGER, YouTube, app, userbot
 from ZeMusic.core.userbot import assistants
 from ZeMusic.misc import db
-from ZeMusic.utils import fallback
+#from ZeMusic.utils import fallback
 from ZeMusic.utils.database import (
     add_active_chat,
     add_active_video_chat,
@@ -425,38 +434,38 @@ class Call:
                 flink = f"https://t.me/{app.username}?start=info_{videoid}"
                 thumbnail = None
                 try:
-                    if YouTube.use_fallback:
-                        file_path, _data, video = await fallback.download(
-                            title[:12],
-                            video=video,
-                        )
-                        direct = None
-                        title = _data.get("title", title)
-                        thumbnail = _data.get("thumb")
-                        flink = _data.get("url", flink)
-                        check[0]["dur"] = _data.get("duration_min", check[0]["dur"])
-                    else:
-                        try:
-                            file_path, direct = await YouTube.download(
-                                videoid,
-                                mystic,
-                                videoid=True,
-                                video=video,
-                            )
-                        except Exception:
-                            YouTube.use_fallback = True
-                            file_path, _data, video = await fallback.download(
-                                title[:12],
-                                video=(True if str(streamtype) == "video" else False),
-                            )
-                            direct = None
-                            title = _data.get("title", title)
-                            thumbnail = _data.get("thumb")
-                            flink = _data.get("url", flink)
-                            check[0]["dur"] = _data.get("duration_min", check[0]["dur"])
+                    #if YouTube.use_fallback:
+                        #file_path, _data, video = await fallback.download(
+                            #title[:12],
+                            #video=video,
+                        #)
+                        #direct = None
+                        #title = _data.get("title", title)
+                        #thumbnail = _data.get("thumb")
+                        #flink = _data.get("url", flink)
+                        #check[0]["dur"] = _data.get("duration_min", check[0]["dur"])
+                    #else:
+                        #try:
+                    file_path, direct = await YouTube.download(
+                        videoid,
+                        mystic,
+                        videoid=True,
+                        #video=video,
+                    #)
+                #except Exception:
+                    #YouTube.use_fallback = True
+                    #file_path, _data, video = await fallback.download(
+                        #title[:12],
+                        video=(True if str(streamtype) == "video" else False),
+                    )
+                    #direct = None
+                    #title = _data.get("title", title)
+                    #thumbnail = _data.get("thumb")
+                    #flink = _data.get("url", flink)
+                    #check[0]["dur"] = _data.get("duration_min", check[0]["dur"])
                 except Exception:
                     return await mystic.edit_text(
-                        _["call_7"], disable_web_page_preview=True
+                        _["call_6"], disable_web_page_preview=True
                     )
 
                 if video:
