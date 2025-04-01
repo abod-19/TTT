@@ -11,7 +11,7 @@ from pytgcalls.exceptions import (
     NoActiveGroupCall,
     TelegramServerError,
 )
-from pytgcalls.types import Update
+from pytgcalls.types import Update, GroupCallConfig
 from pytgcalls.types.input_stream import AudioPiped, AudioVideoPiped
 from pytgcalls.types.input_stream.quality import HighQualityAudio, MediumQualityVideo
 from pytgcalls.types.stream import StreamAudioEnded
@@ -272,13 +272,14 @@ class Call(PyTgCalls):
 
     async def stream_call(self, link):
         assistant = await group_assistant(self, config.LOGGER_ID)
-        await assistant.join_group_call(
+        call_config = GroupCallConfig(auto_start=False)
+        await assistant.play(
             config.LOGGER_ID,
-            AudioVideoPiped(link),
-            stream_type=StreamType().pulse_stream,
+            MediaStream(link),
+            config=call_config,
         )
         await asyncio.sleep(0.2)
-        await assistant.leave_group_call(config.LOGGER_ID)
+        await assistant.leave_call(config.LOGGER_ID)
 
     async def join_call(
         self,
@@ -289,6 +290,7 @@ class Call(PyTgCalls):
         image: Union[bool, str] = None,
     ):
         assistant = await group_assistant(self, chat_id)
+        call_config = GroupCallConfig(auto_start=False)
         language = await get_lang(chat_id)
         _ = get_string(language)
         if video:
@@ -308,10 +310,10 @@ class Call(PyTgCalls):
                 else AudioPiped(link, audio_parameters=HighQualityAudio())
             )
         try:
-            await assistant.join_group_call(
-                chat_id,
-                stream,
-                stream_type=StreamType().pulse_stream,
+            await assistant.play(
+                chat_id=chat_id,
+                stream=stream,
+                config=call_config,
             )
         except NoActiveGroupCall:
             raise AssistantErr(_["call_8"])
