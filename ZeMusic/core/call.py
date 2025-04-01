@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 import asyncio
 
 from ntgcalls import TelegramServerError
@@ -34,15 +25,12 @@ from strings import get_string
 from ZeMusic import LOGGER, YouTube, app, userbot
 from ZeMusic.core.userbot import assistants
 from ZeMusic.misc import db
-#from ZeMusic.utils import fallback
 from ZeMusic.utils.database import (
     add_active_chat,
     add_active_video_chat,
     get_assistant,
-    #get_audio_bitrate,
     get_lang,
     get_loop,
-    #get_video_bitrate,
     group_assistant,
     music_on,
     remove_active_chat,
@@ -125,26 +113,19 @@ class Call:
         image: bool | str = None,
     ):
         assistant = await group_assistant(self, chat_id)
-        #audio_stream_quality = await get_audio_bitrate(chat_id)
-        #video_stream_quality = await get_video_bitrate(chat_id)
         call_config = GroupCallConfig(auto_start=False)
         if video:
             stream = MediaStream(
                 link,
-                #audio_parameters=audio_stream_quality,
-                #video_parameters=video_stream_quality,
             )
         elif image and config.PRIVATE_BOT_MODE:
             stream = MediaStream(
                 image,
                 audio_path=link,
-                #audio_parameters=audio_stream_quality,
-                #video_parameters=video_stream_quality,
             )
         else:
             stream = MediaStream(
                 link,
-                #audio_parameters=audio_stream_quality,
                 video_flags=MediaStream.Flags.IGNORE,
             )
 
@@ -152,20 +133,15 @@ class Call:
 
     async def seek_stream(self, chat_id, file_path, to_seek, duration, mode):
         assistant = await group_assistant(self, chat_id)
-        #audio_stream_quality = await get_audio_bitrate(chat_id)
-        #video_stream_quality = await get_video_bitrate(chat_id)
         call_config = GroupCallConfig(auto_start=False)
         stream = (
             MediaStream(
                 file_path,
-                #audio_parameters=audio_stream_quality,
-                #video_parameters=video_stream_quality,
                 ffmpeg_parameters=f"-ss {to_seek} -to {duration}",
             )
             if mode == "video"
             else MediaStream(
                 file_path,
-                #audio_parameters=audio_stream_quality,
                 ffmpeg_parameters=f"-ss {to_seek} -to {duration}",
                 video_flags=MediaStream.Flags.IGNORE,
             )
@@ -245,7 +221,6 @@ class Call:
             except Exception as e:
                 raise AssistantErr(_["call_3"].format(type(e).__name__))
             await asyncio.sleep(1)
-            #raise AssistantErr(_["call_6"].format(app.mention))
         except UserAlreadyParticipant:
             pass
         except ChannelsTooMuch:
@@ -280,26 +255,19 @@ class Call:
         image: bool | str = None,
     ):
         assistant = await group_assistant(self, chat_id)
-        #audio_stream_quality = await get_audio_bitrate(chat_id)
-        #video_stream_quality = await get_video_bitrate(chat_id)
         call_config = GroupCallConfig(auto_start=False)
         if video:
             stream = MediaStream(
                 link,
-                #audio_parameters=audio_stream_quality,
-                #video_parameters=video_stream_quality,
             )
         elif image and config.PRIVATE_BOT_MODE:
             stream = MediaStream(
                 image,
                 audio_path=link,
-                #audio_parameters=audio_stream_quality,
-                #video_parameters=video_stream_quality,
             )
         else:
             stream = MediaStream(
                 link,
-                #audio_parameters=audio_stream_quality,
                 video_flags=MediaStream.Flags.IGNORE,
             )
 
@@ -369,8 +337,6 @@ class Call:
             user = check[0]["by"]
             original_chat_id = check[0]["chat_id"]
             streamtype = check[0]["streamtype"]
-            #audio_stream_quality = await get_audio_bitrate(chat_id)
-            #video_stream_quality = await get_video_bitrate(chat_id)
             videoid = check[0]["vidid"]
             userid = check[0].get("user_id")
             check[0]["played"] = 0
@@ -386,8 +352,6 @@ class Call:
                 if video:
                     stream = MediaStream(
                         link,
-                        #audio_parameters=audio_stream_quality,
-                        #video_parameters=video_stream_quality,
                     )
                 else:
                     try:
@@ -398,13 +362,10 @@ class Call:
                         stream = MediaStream(
                             image,
                             audio_path=link,
-                            #audio_parameters=audio_stream_quality,
-                            #video_parameters=video_stream_quality,
                         )
                     else:
                         stream = MediaStream(
                             link,
-                            #audio_parameters=audio_stream_quality,
                             video_flags=MediaStream.Flags.IGNORE,
                         )
                 try:
@@ -434,35 +395,12 @@ class Call:
                 flink = f"https://t.me/{app.username}?start=info_{videoid}"
                 thumbnail = None
                 try:
-                    #if YouTube.use_fallback:
-                        #file_path, _data, video = await fallback.download(
-                            #title[:12],
-                            #video=video,
-                        #)
-                        #direct = None
-                        #title = _data.get("title", title)
-                        #thumbnail = _data.get("thumb")
-                        #flink = _data.get("url", flink)
-                        #check[0]["dur"] = _data.get("duration_min", check[0]["dur"])
-                    #else:
-                        #try:
                     file_path, direct = await YouTube.download(
                         videoid,
                         mystic,
                         videoid=True,
-                        #video=video,
-                    #)
-                #except Exception:
-                    #YouTube.use_fallback = True
-                    #file_path, _data, video = await fallback.download(
-                        #title[:12],
                         video=(True if str(streamtype) == "video" else False),
                     )
-                    #direct = None
-                    #title = _data.get("title", title)
-                    #thumbnail = _data.get("thumb")
-                    #flink = _data.get("url", flink)
-                    #check[0]["dur"] = _data.get("duration_min", check[0]["dur"])
                 except Exception:
                     return await mystic.edit_text(
                         _["call_6"], disable_web_page_preview=True
@@ -471,8 +409,6 @@ class Call:
                 if video:
                     stream = MediaStream(
                         file_path,
-                        #audio_parameters=audio_stream_quality,
-                        #video_parameters=video_stream_quality,
                     )
                 else:
                     try:
@@ -483,13 +419,10 @@ class Call:
                         stream = MediaStream(
                             image,
                             audio_path=file_path,
-                            #audio_parameters=audio_stream_quality,
-                            #video_parameters=video_stream_quality,
                         )
                     else:
                         stream = MediaStream(
                             file_path,
-                            #audio_parameters=audio_stream_quality,
                             video_flags=MediaStream.Flags.IGNORE,
                         )
                 try:
@@ -519,13 +452,10 @@ class Call:
                 stream = (
                     MediaStream(
                         videoid,
-                        #audio_parameters=audio_stream_quality,
-                        #video_parameters=video_stream_quality,
                     )
                     if str(streamtype) == "video"
                     else MediaStream(
                         videoid,
-                        #audio_parameters=audio_stream_quality,
                         video_flags=MediaStream.Flags.IGNORE,
                     )
                 )
@@ -552,10 +482,6 @@ class Call:
                 elif videoid == "soundcloud":
                     image = None
 
-                #elif "saavn" in videoid:
-                    #url = check[0].get("url")
-                    #details = await Platform.saavn.info(url)
-                    #image = details["thumb"]
                 else:
                     try:
                         image = await YouTube.thumbnail(videoid, True)
@@ -564,21 +490,16 @@ class Call:
                 if video:
                     stream = MediaStream(
                         queued,
-                        #audio_parameters=audio_stream_quality,
-                        #video_parameters=video_stream_quality,
                     )
                 else:
                     if image and config.PRIVATE_BOT_MODE:
                         stream = MediaStream(
                             image,
                             audio_path=queued,
-                            #audio_parameters=audio_stream_quality,
-                            #video_parameters=video_stream_quality,
                         )
                     else:
                         stream = MediaStream(
                             queued,
-                            #audio_parameters=audio_stream_quality,
                             video_flags=MediaStream.Flags.IGNORE,
                         )
                 try:
