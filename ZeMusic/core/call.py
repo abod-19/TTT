@@ -2,20 +2,20 @@ import asyncio
 import os
 from datetime import datetime, timedelta
 from typing import Union
-from ntgcalls import TelegramServerError
+
 from pyrogram import Client
 from pyrogram.types import InlineKeyboardMarkup
-from pytgcalls import PyTgCalls
+from pytgcalls import PyTgCalls, StreamType
 from pytgcalls.exceptions import (
-    #AlreadyJoinedError,
+    AlreadyJoinedError,
     NoActiveGroupCall,
-    #TelegramServerError,
+    TelegramServerError,
 )
-from pytgcalls.types import Update, GroupCallConfig
-from pytgcalls.types import AudioVideoPiped
+from pytgcalls.types import Update
+from pytgcalls.types.input_stream import AudioPiped, AudioVideoPiped
 from pytgcalls.types.input_stream.quality import HighQualityAudio, MediumQualityVideo
 from pytgcalls.types.stream import StreamAudioEnded
-from pytgcalls.types import AudioPiped
+
 import config
 from ZeMusic import LOGGER, YouTube, app
 from ZeMusic.misc import db
@@ -272,14 +272,13 @@ class Call(PyTgCalls):
 
     async def stream_call(self, link):
         assistant = await group_assistant(self, config.LOGGER_ID)
-        call_config = GroupCallConfig(auto_start=False)
-        await assistant.play(
+        await assistant.join_group_call(
             config.LOGGER_ID,
-            MediaStream(link),
-            config=call_config,
+            AudioVideoPiped(link),
+            stream_type=StreamType().pulse_stream,
         )
         await asyncio.sleep(0.2)
-        await assistant.leave_call(config.LOGGER_ID)
+        await assistant.leave_group_call(config.LOGGER_ID)
 
     async def join_call(
         self,
@@ -290,7 +289,6 @@ class Call(PyTgCalls):
         image: Union[bool, str] = None,
     ):
         assistant = await group_assistant(self, chat_id)
-        call_config = GroupCallConfig(auto_start=False)
         language = await get_lang(chat_id)
         _ = get_string(language)
         if video:
@@ -310,15 +308,15 @@ class Call(PyTgCalls):
                 else AudioPiped(link, audio_parameters=HighQualityAudio())
             )
         try:
-            await assistant.play(
-                chat_id=chat_id,
-                stream=stream,
-                config=call_config,
+            await assistant.join_group_call(
+                chat_id,
+                stream,
+                stream_type=StreamType().pulse_stream,
             )
         except NoActiveGroupCall:
             raise AssistantErr(_["call_8"])
-        #except AlreadyJoinedError:
-            #raise AssistantErr(_["call_9"])
+        except AlreadyJoinedError:
+            raise AssistantErr(_["call_9"])
         except TelegramServerError:
             raise AssistantErr(_["call_10"])
         await add_active_chat(chat_id)
