@@ -9,11 +9,11 @@ from ntgcalls import StreamType
 from pytgcalls import PyTgCalls
 from pytgcalls.exceptions import NoActiveGroupCall
 
-#from ntgcalls import AlreadyJoinedError
+from pytgcalls.types import AudioPiped
 from ntgcalls import TelegramServerError
 
 from pytgcalls.types import Update
-from pytgcalls.types.input_stream import AudioPiped, AudioVideoPiped
+from pytgcalls.types.input_stream import AudioVideoPiped
 from pytgcalls.types.input_stream.quality import HighQualityAudio, MediumQualityVideo
 from pytgcalls.types.stream import StreamAudioEnded
 
