@@ -15,7 +15,7 @@ from pytgcalls.types import Update, GroupCallConfig
 from pytgcalls.types.stream import AudioVideoPiped
 from pytgcalls.types.input_stream.quality import HighQualityAudio, MediumQualityVideo
 from pytgcalls.types.stream import StreamAudioEnded
-from pytgcalls.types.stream import AudioPiped
+from pytgcalls.stream import AudioPiped
 import config
 from ZeMusic import LOGGER, YouTube, app
 from ZeMusic.misc import db
