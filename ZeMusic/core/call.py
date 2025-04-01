@@ -39,10 +39,10 @@ from ZeMusic.utils.database import (
     add_active_chat,
     add_active_video_chat,
     get_assistant,
-    get_audio_bitrate,
+    #get_audio_bitrate,
     get_lang,
     get_loop,
-    get_video_bitrate,
+    #get_video_bitrate,
     group_assistant,
     music_on,
     remove_active_chat,
@@ -125,26 +125,26 @@ class Call:
         image: bool | str = None,
     ):
         assistant = await group_assistant(self, chat_id)
-        audio_stream_quality = await get_audio_bitrate(chat_id)
-        video_stream_quality = await get_video_bitrate(chat_id)
+        #audio_stream_quality = await get_audio_bitrate(chat_id)
+        #video_stream_quality = await get_video_bitrate(chat_id)
         call_config = GroupCallConfig(auto_start=False)
         if video:
             stream = MediaStream(
                 link,
-                audio_parameters=audio_stream_quality,
-                video_parameters=video_stream_quality,
+                #audio_parameters=audio_stream_quality,
+                #video_parameters=video_stream_quality,
             )
         elif image and config.PRIVATE_BOT_MODE:
             stream = MediaStream(
                 image,
                 audio_path=link,
-                audio_parameters=audio_stream_quality,
-                video_parameters=video_stream_quality,
+                #audio_parameters=audio_stream_quality,
+                #video_parameters=video_stream_quality,
             )
         else:
             stream = MediaStream(
                 link,
-                audio_parameters=audio_stream_quality,
+                #audio_parameters=audio_stream_quality,
                 video_flags=MediaStream.Flags.IGNORE,
             )
 
@@ -152,20 +152,20 @@ class Call:
 
     async def seek_stream(self, chat_id, file_path, to_seek, duration, mode):
         assistant = await group_assistant(self, chat_id)
-        audio_stream_quality = await get_audio_bitrate(chat_id)
-        video_stream_quality = await get_video_bitrate(chat_id)
+        #audio_stream_quality = await get_audio_bitrate(chat_id)
+        #video_stream_quality = await get_video_bitrate(chat_id)
         call_config = GroupCallConfig(auto_start=False)
         stream = (
             MediaStream(
                 file_path,
-                audio_parameters=audio_stream_quality,
-                video_parameters=video_stream_quality,
+                #audio_parameters=audio_stream_quality,
+                #video_parameters=video_stream_quality,
                 ffmpeg_parameters=f"-ss {to_seek} -to {duration}",
             )
             if mode == "video"
             else MediaStream(
                 file_path,
-                audio_parameters=audio_stream_quality,
+                #audio_parameters=audio_stream_quality,
                 ffmpeg_parameters=f"-ss {to_seek} -to {duration}",
                 video_flags=MediaStream.Flags.IGNORE,
             )
@@ -280,26 +280,26 @@ class Call:
         image: bool | str = None,
     ):
         assistant = await group_assistant(self, chat_id)
-        audio_stream_quality = await get_audio_bitrate(chat_id)
-        video_stream_quality = await get_video_bitrate(chat_id)
+        #audio_stream_quality = await get_audio_bitrate(chat_id)
+        #video_stream_quality = await get_video_bitrate(chat_id)
         call_config = GroupCallConfig(auto_start=False)
         if video:
             stream = MediaStream(
                 link,
-                audio_parameters=audio_stream_quality,
-                video_parameters=video_stream_quality,
+                #audio_parameters=audio_stream_quality,
+                #video_parameters=video_stream_quality,
             )
         elif image and config.PRIVATE_BOT_MODE:
             stream = MediaStream(
                 image,
                 audio_path=link,
-                audio_parameters=audio_stream_quality,
-                video_parameters=video_stream_quality,
+                #audio_parameters=audio_stream_quality,
+                #video_parameters=video_stream_quality,
             )
         else:
             stream = MediaStream(
                 link,
-                audio_parameters=audio_stream_quality,
+                #audio_parameters=audio_stream_quality,
                 video_flags=MediaStream.Flags.IGNORE,
             )
 
@@ -369,8 +369,8 @@ class Call:
             user = check[0]["by"]
             original_chat_id = check[0]["chat_id"]
             streamtype = check[0]["streamtype"]
-            audio_stream_quality = await get_audio_bitrate(chat_id)
-            video_stream_quality = await get_video_bitrate(chat_id)
+            #audio_stream_quality = await get_audio_bitrate(chat_id)
+            #video_stream_quality = await get_video_bitrate(chat_id)
             videoid = check[0]["vidid"]
             userid = check[0].get("user_id")
             check[0]["played"] = 0
@@ -386,8 +386,8 @@ class Call:
                 if video:
                     stream = MediaStream(
                         link,
-                        audio_parameters=audio_stream_quality,
-                        video_parameters=video_stream_quality,
+                        #audio_parameters=audio_stream_quality,
+                        #video_parameters=video_stream_quality,
                     )
                 else:
                     try:
@@ -398,13 +398,13 @@ class Call:
                         stream = MediaStream(
                             image,
                             audio_path=link,
-                            audio_parameters=audio_stream_quality,
-                            video_parameters=video_stream_quality,
+                            #audio_parameters=audio_stream_quality,
+                            #video_parameters=video_stream_quality,
                         )
                     else:
                         stream = MediaStream(
                             link,
-                            audio_parameters=audio_stream_quality,
+                            #audio_parameters=audio_stream_quality,
                             video_flags=MediaStream.Flags.IGNORE,
                         )
                 try:
@@ -471,8 +471,8 @@ class Call:
                 if video:
                     stream = MediaStream(
                         file_path,
-                        audio_parameters=audio_stream_quality,
-                        video_parameters=video_stream_quality,
+                        #audio_parameters=audio_stream_quality,
+                        #video_parameters=video_stream_quality,
                     )
                 else:
                     try:
@@ -483,13 +483,13 @@ class Call:
                         stream = MediaStream(
                             image,
                             audio_path=file_path,
-                            audio_parameters=audio_stream_quality,
-                            video_parameters=video_stream_quality,
+                            #audio_parameters=audio_stream_quality,
+                            #video_parameters=video_stream_quality,
                         )
                     else:
                         stream = MediaStream(
                             file_path,
-                            audio_parameters=audio_stream_quality,
+                            #audio_parameters=audio_stream_quality,
                             video_flags=MediaStream.Flags.IGNORE,
                         )
                 try:
@@ -519,13 +519,13 @@ class Call:
                 stream = (
                     MediaStream(
                         videoid,
-                        audio_parameters=audio_stream_quality,
-                        video_parameters=video_stream_quality,
+                        #audio_parameters=audio_stream_quality,
+                        #video_parameters=video_stream_quality,
                     )
                     if str(streamtype) == "video"
                     else MediaStream(
                         videoid,
-                        audio_parameters=audio_stream_quality,
+                        #audio_parameters=audio_stream_quality,
                         video_flags=MediaStream.Flags.IGNORE,
                     )
                 )
@@ -564,21 +564,21 @@ class Call:
                 if video:
                     stream = MediaStream(
                         queued,
-                        audio_parameters=audio_stream_quality,
-                        video_parameters=video_stream_quality,
+                        #audio_parameters=audio_stream_quality,
+                        #video_parameters=video_stream_quality,
                     )
                 else:
                     if image and config.PRIVATE_BOT_MODE:
                         stream = MediaStream(
                             image,
                             audio_path=queued,
-                            audio_parameters=audio_stream_quality,
-                            video_parameters=video_stream_quality,
+                            #audio_parameters=audio_stream_quality,
+                            #video_parameters=video_stream_quality,
                         )
                     else:
                         stream = MediaStream(
                             queued,
-                            audio_parameters=audio_stream_quality,
+                            #audio_parameters=audio_stream_quality,
                             video_flags=MediaStream.Flags.IGNORE,
                         )
                 try:
