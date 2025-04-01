@@ -22,7 +22,7 @@ from pytgcalls.types import (
 
 import config
 from strings import get_string
-from ZeMusic import LOGGER, Platform, app, userbot
+from ZeMusic import LOGGER, YouTube, app, userbot
 from ZeMusic.core.userbot import assistants
 from ZeMusic.misc import db
 from ZeMusic.utils import fallback
@@ -368,7 +368,7 @@ class Call:
             video = True if str(streamtype) == "video" else False
             call_config = GroupCallConfig(auto_start=False)
             if "live_" in queued:
-                n, link = await Platform.youtube.video(videoid, True)
+                n, link = await YouTube.video(videoid, True)
                 if n == 0:
                     return await app.send_message(
                         original_chat_id,
@@ -382,7 +382,7 @@ class Call:
                     )
                 else:
                     try:
-                        image = await Platform.youtube.thumbnail(videoid, True)
+                        image = await YouTube.thumbnail(videoid, True)
                     except Exception:
                         image = None
                     if image and config.PRIVATE_BOT_MODE:
@@ -425,7 +425,7 @@ class Call:
                 flink = f"https://t.me/{app.username}?start=info_{videoid}"
                 thumbnail = None
                 try:
-                    if Platform.youtube.use_fallback:
+                    if YouTube.use_fallback:
                         file_path, _data, video = await fallback.download(
                             title[:12],
                             video=video,
@@ -437,14 +437,14 @@ class Call:
                         check[0]["dur"] = _data.get("duration_min", check[0]["dur"])
                     else:
                         try:
-                            file_path, direct = await Platform.youtube.download(
+                            file_path, direct = await YouTube.download(
                                 videoid,
                                 mystic,
                                 videoid=True,
                                 video=video,
                             )
                         except Exception:
-                            Platform.youtube.use_fallback = True
+                            YouTube.use_fallback = True
                             file_path, _data, video = await fallback.download(
                                 title[:12],
                                 video=(True if str(streamtype) == "video" else False),
@@ -467,7 +467,7 @@ class Call:
                     )
                 else:
                     try:
-                        image = await Platform.youtube.thumbnail(videoid, True)
+                        image = await YouTube.thumbnail(videoid, True)
                     except Exception:
                         image = None
                     if image and config.PRIVATE_BOT_MODE:
@@ -543,13 +543,13 @@ class Call:
                 elif videoid == "soundcloud":
                     image = None
 
-                elif "saavn" in videoid:
-                    url = check[0].get("url")
-                    details = await Platform.saavn.info(url)
-                    image = details["thumb"]
+                #elif "saavn" in videoid:
+                    #url = check[0].get("url")
+                    #details = await Platform.saavn.info(url)
+                    #image = details["thumb"]
                 else:
                     try:
-                        image = await Platform.youtube.thumbnail(videoid, True)
+                        image = await YouTube.thumbnail(videoid, True)
                     except Exception:
                         image = None
                 if video:
