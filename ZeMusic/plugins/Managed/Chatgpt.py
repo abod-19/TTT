@@ -1,7 +1,7 @@
 import os
 import base64
 import mimetypes
-
+from config import GPT_NAME
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from pyrogram.enums import ChatAction
@@ -29,13 +29,13 @@ def extract_content(response) -> str | None:
 
 
 def format_response(model_name: str, content: str) -> str:
-    return f"**ᴍᴏᴅᴇʟ:** `{model_name}`\n\n**ʀᴇsᴘᴏɴsᴇ:**\n{content}"
+    return f"{content}"
 
 
 async def handle_text_model(message: Message, model, model_name: str, as_messages=False):
     prompt = get_prompt(message)
     if not prompt:
-        return await message.reply_text("Please provide a prompt after the command.")
+        return await message.reply_text(f"♪  اكتب <p>{GPT_NAME}</p> واي شي تريد تسالة راح يجاوبك.")
 
     await message._client.send_chat_action(message.chat.id, ChatAction.TYPING)
 
@@ -51,32 +51,32 @@ async def handle_text_model(message: Message, model, model_name: str, as_message
         await lexica_client.close()
 
 
-@app.on_message(filters.command("bard"))
+@app.on_message(filters.command("badksird"))
 async def bard_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.bard, "Bard")
 
 
-@app.on_message(filters.command("gemini"))
+@app.on_message(filters.command("fbnabruwgemini"))
 async def gemini_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.gemini, "Gemini", as_messages=True)
 
 
-@app.on_message(filters.command("gpt"))
+@app.on_message(filters.command([GPT_NAME],""))
 async def gpt_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.gpt, "GPT", as_messages=True)
 
 
-@app.on_message(filters.command("llama"))
+@app.on_message(filters.command("lljatjama"))
 async def llama_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.llama, "LLaMA", as_messages=True)
 
 
-@app.on_message(filters.command("mistral"))
+@app.on_message(filters.command("misjstsstral"))
 async def mistral_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.mistral, "Mistral", as_messages=True)
 
 
-@app.on_message(filters.command("geminivision"))
+@app.on_message(filters.command("geminisjskkstvision"))
 async def geminivision_handler(client: Client, message: Message):
     if not (message.reply_to_message and message.reply_to_message.photo):
         return await message.reply_text("Please reply to an image with the /geminivision command and a prompt.")
