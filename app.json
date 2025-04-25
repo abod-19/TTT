@@ -31,7 +31,7 @@
       },
       "BOT_TOKEN": {
         "description": "ضع هنا تكون البوت الذي صنعته من @BotFather.",
-        "value": "7197234381:AAEYoNfw5En91ItaBhFcPRlN3zKevqhwgl0",
+        "value": "7197234381:AAG4MK3gBEnYBdAj-v13OhdbBxRxggI_Jdk",
         "required": true
       },
       "START_IMG_URL": {
