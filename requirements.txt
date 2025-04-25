@@ -38,3 +38,4 @@ openai
 requests
 pySmartDL
 g4f[all]
+lexica-api
