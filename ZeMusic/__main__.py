@@ -36,7 +36,7 @@ async def init():
     await app.start()
     for all_module in ALL_MODULES:
         importlib.import_module("ZeMusic.plugins" + all_module)
-    LOGGER("ZeMusic.plugins").info("تنزيل معلومات السورس...")
+    LOGGER("ZeMusic.plugins").info("\n- جلب معلومات المساعد ↻..")
     await userbot.start()
     await Mody.start()
     try:
@@ -50,13 +50,13 @@ async def init():
         pass
     await Mody.decorators()
     LOGGER("ZeMusic").info(
-        "جاري تشغيل البوت\nتم التنصيب على سورس الملك بنجاح\nقناة السورس https://t.me/EF_19"
+        "\n- تم التنصيب على سورس الملك بنجاح\n- قناة السورس https://t.me/EF_19"
     )
     await idle()
     await app.stop()
     await userbot.stop()
     await azkar()
-    LOGGER("ZeMusic").info("Stopping Ze Music Bot...")
+    LOGGER("ZeMusic").info("\n- تم ايقاف التنصيب 💔...")
 
 
 if __name__ == "__main__":
