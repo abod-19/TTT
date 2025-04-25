@@ -11,9 +11,9 @@ from ZeMusic import app
 
 
 def get_prompt(message: Message) -> str | None:
-    parts = message.text.split(' ', 1)
-    return parts[1] if len(parts) > 1 else None
-
+    #parts = message.text.split(' ', 1)
+    #return parts[1] if len(parts) > 1 else None
+    return message.text
 
 def extract_content(response) -> str | None:
     content = response.get('content')
@@ -61,7 +61,8 @@ async def gemini_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.gemini, "Gemini", as_messages=True)
 
 #@app.on_message(filters.command([GPT_NAME],""))
-@app.on_message(filters.command(["رون"],""))
+#@app.on_message(filters.command(["رون"],""))
+@app.on_message(filters.private)
 async def gpt_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.gpt, "GPT", as_messages=True)
 
