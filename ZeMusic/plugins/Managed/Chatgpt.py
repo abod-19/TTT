@@ -50,8 +50,8 @@ async def handle_text_model(message: Message, model, model_name: str, as_message
     finally:
         await lexica_client.close()
 
-# معالج رسالة لتنفيذ الكود النصي إذا كانت المحادثة مفعلة
-@app.on_message(filters.private & filters.create(lambda _, __, m: activated_chats.get(m.chat.id, False)))
+# معالج رسالة لتنفيذ الكود النصي إذا كانت المحادثة مفعلة ويحتوي على نص فقط
+@app.on_message(filters.private & filters.text & filters.create(lambda _, __, m: activated_chats.get(m.chat.id, False)))
 async def gpt_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.gpt, "GPT", as_messages=True)
 
