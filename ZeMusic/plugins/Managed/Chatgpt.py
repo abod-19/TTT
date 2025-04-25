@@ -1,7 +1,7 @@
 import os
 import base64
 import mimetypes
-from config import GPT_NAME
+#from config import GPT_NAME
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from pyrogram.enums import ChatAction
@@ -35,7 +35,7 @@ def format_response(model_name: str, content: str) -> str:
 async def handle_text_model(message: Message, model, model_name: str, as_messages=False):
     prompt = get_prompt(message)
     if not prompt:
-        return await message.reply_text(f"♪  اكتب <p>{GPT_NAME}</p> واي شي تريد تسالة راح يجاوبك.")
+        return await message.reply_text(f"♪  اكتب <p>رون</p> واي شي تريد تسالة راح يجاوبك.")
 
     await message._client.send_chat_action(message.chat.id, ChatAction.TYPING)
 
@@ -60,8 +60,8 @@ async def bard_handler(client: Client, message: Message):
 async def gemini_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.gemini, "Gemini", as_messages=True)
 
-
-@app.on_message(filters.command([GPT_NAME],""))
+#@app.on_message(filters.command([GPT_NAME],""))
+@app.on_message(filters.command(["رون"],""))
 async def gpt_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.gpt, "GPT", as_messages=True)
 
