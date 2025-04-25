@@ -51,8 +51,19 @@ async def handle_text_model(message: Message, model, model_name: str, as_message
         await lexica_client.close()
 
 # معالج رسالة لتنفيذ الكود النصي إذا كانت المحادثة مفعلة ويحتوي على نص فقط
-@app.on_message(filters.private & filters.text & filters.create(lambda _, __, m: activated_chats.get(m.chat.id, False)))
+@app.on_message(
+    filters.private
+    & filters.text
+    & filters.create(lambda _, __, m: activated_chats.get(m.chat.id, False))
+)
 async def gpt_handler(client: Client, message: Message):
+    # أمر تعطيل داخلي
+    if message.text in ["تعطيل", "/de_gpt"]:
+        activated_chats[message.chat.id] = False
+        await message.reply_text("❌ تم تعطيل البوت في هذه المحادثة.")
+        return
+
+    # إذا لم يكن الأمر تعطيل، ننفِّذ النموذج
     await handle_text_model(message, languageModels.gpt, "GPT", as_messages=True)
 
 # أمر تفعيل البوت في المحادثة
@@ -60,9 +71,3 @@ async def gpt_handler(client: Client, message: Message):
 async def enable_handler(client: Client, message: Message):
     activated_chats[message.chat.id] = True
     await message.reply_text("✅ تم تفعيل البوت في هذه المحادثة.")
-
-# أمر تعطيل البوت في المحادثة
-@app.on_message(filters.private & filters.command(["تعطيل","de_gpt"], prefixes=["/", ""]))
-async def disable_handler(client: Client, message: Message):
-    activated_chats[message.chat.id] = False
-    await message.reply_text("❌ تم تعطيل البوت في هذه المحادثة.")
