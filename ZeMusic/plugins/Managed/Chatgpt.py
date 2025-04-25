@@ -4,7 +4,7 @@ import mimetypes
 #from config import GPT_NAME
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from pyrogram.enums import ChatAction
+from pyrogram.enums import ChatAction, ParseMode
 
 from lexica import AsyncClient, languageModels, Messages
 from ZeMusic import app
@@ -44,7 +44,7 @@ async def handle_text_model(message: Message, model, model_name: str, as_message
         data = [Messages(content=prompt, role="user")] if as_messages else prompt
         response = await lexica_client.ChatCompletion(data, model)
         content = extract_content(response)
-        await message.reply_text(format_response(model_name, content) if content else "No content received from the API.")
+        await message.reply_text(format_response(model_name, content) if content else "No content received from the API.", parse_mode=ParseMode.MARKDOWN)
     except Exception as e:
         await message.reply_text(f"An error occurred: {e}")
     finally:
