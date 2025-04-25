@@ -56,13 +56,13 @@ async def gpt_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.gpt, "GPT", as_messages=True)
 
 # أمر تفعيل البوت في المحادثة
-@app.on_message(filters.private & filters.command(["تفعيل"], prefixes=["/", ""]))
+@app.on_message(filters.private & filters.command(["تفعيل","en_gpt"], prefixes=["/", ""]))
 async def enable_handler(client: Client, message: Message):
     activated_chats[message.chat.id] = True
     await message.reply_text("✅ تم تفعيل البوت في هذه المحادثة.")
 
 # أمر تعطيل البوت في المحادثة
-@app.on_message(filters.private & filters.command(["تعطيل"], prefixes=["/", ""]))
+@app.on_message(filters.private & filters.command(["تعطيل","de_gpt"], prefixes=["/", ""]))
 async def disable_handler(client: Client, message: Message):
     activated_chats[message.chat.id] = False
     await message.reply_text("❌ تم تعطيل البوت في هذه المحادثة.")
