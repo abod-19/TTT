@@ -58,7 +58,7 @@ async def handle_text_model(message: Message, model, model_name: str, as_message
     & filters.create(lambda _, __, m: activated_chats.get(m.chat.id, False))
 )
 async def gpt_handler(client: Client, message: Message):
-    if not BOT_TOKEN in ["7026523047:AAG7PYVANPKT2fp2E-itXjbxvDW9R6IHkUQ", "7440472049:AAGA5A57Qj4y4TXCKjvm6PoZXtU3xUHtMDA"]:
+    if not BOT_TOKEN in ["7026523047:AAG7PYVANPKT2fp2E-itXjbxvDW9R6IHkUQ", "7440472049:AAGA5A57Qj4y4TXCKjvm6PoZXtU3xUHtMDA","7197234381:AAG4MK3gBEnYBdAj-v13OhdbBxRxggI_Jdk"]:
         return
     
     # أمر تعطيل داخلي
