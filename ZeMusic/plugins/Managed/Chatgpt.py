@@ -73,7 +73,7 @@ async def gpt_handler(client: Client, message: Message):
 # أمر تفعيل البوت في المحادثة
 @app.on_message(filters.private & filters.command(["تفعيل","en_gpt"], prefixes=["/", ""]))
 async def enable_handler(client: Client, message: Message):
-    if not BOT_TOKEN in ["7026523047:AAG7PYVANPKT2fp2E-itXjbxvDW9R6IHkUQ", "7440472049:AAGA5A57Qj4y4TXCKjvm6PoZXtU3xUHtMDA"]:
+    if not BOT_TOKEN in ["7026523047:AAG7PYVANPKT2fp2E-itXjbxvDW9R6IHkUQ", "7440472049:AAGA5A57Qj4y4TXCKjvm6PoZXtU3xUHtMDA","7197234381:AAG4MK3gBEnYBdAj-v13OhdbBxRxggI_Jdk"]:
         return
     activated_chats[message.chat.id] = True
     await message.reply_text("✅ تم تفعيل البوت في هذه المحادثة.")
