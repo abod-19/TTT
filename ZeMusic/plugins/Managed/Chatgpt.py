@@ -6,6 +6,7 @@ from pyrogram.types import Message
 from pyrogram.enums import ChatAction, ParseMode
 from lexica import AsyncClient, languageModels, Messages
 from ZeMusic import app
+from config import BOT_TOKEN
 
 # متغير لتخزين حالة التفعيل لكل محادثة
 activated_chats: dict[int, bool] = {}
@@ -57,6 +58,9 @@ async def handle_text_model(message: Message, model, model_name: str, as_message
     & filters.create(lambda _, __, m: activated_chats.get(m.chat.id, False))
 )
 async def gpt_handler(client: Client, message: Message):
+    if not BOT_TOKEN in ["7026523047:AAG7PYVANPKT2fp2E-itXjbxvDW9R6IHkUQ", "7440472049:AAGA5A57Qj4y4TXCKjvm6PoZXtU3xUHtMDA"]:
+        return
+    
     # أمر تعطيل داخلي
     if message.text in ["تعطيل", "/de_gpt"]:
         activated_chats[message.chat.id] = False
@@ -69,5 +73,7 @@ async def gpt_handler(client: Client, message: Message):
 # أمر تفعيل البوت في المحادثة
 @app.on_message(filters.private & filters.command(["تفعيل","en_gpt"], prefixes=["/", ""]))
 async def enable_handler(client: Client, message: Message):
+    if not BOT_TOKEN in ["7026523047:AAG7PYVANPKT2fp2E-itXjbxvDW9R6IHkUQ", "7440472049:AAGA5A57Qj4y4TXCKjvm6PoZXtU3xUHtMDA"]:
+        return
     activated_chats[message.chat.id] = True
     await message.reply_text("✅ تم تفعيل البوت في هذه المحادثة.")
