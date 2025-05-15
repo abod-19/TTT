@@ -62,18 +62,19 @@ async def gpt_handler(client: Client, message: Message):
         return
     
     # أمر تعطيل داخلي
-    if message.text in ["تعطيل", "/de_gpt"]:
+    if message.text in ["تعطيل الدردشة", "/de_gpt", "تعطيل الدردشه"]:
         activated_chats[message.chat.id] = False
-        await message.reply_text("❌ تم تعطيل البوت في هذه المحادثة.")
+        await message.reply_text("- تم تعطيل الدردشة مع الذكاء ×.")
         return
 
     # إذا لم يكن الأمر تعطيل، ننفِّذ النموذج
     await handle_text_model(message, languageModels.gpt, "GPT", as_messages=True)
 
 # أمر تفعيل البوت في المحادثة
-@app.on_message(filters.private & filters.command(["تفعيل","en_gpt"], prefixes=["/", ""]))
+@app.on_message(filters.private & filters.command(["تفعيل الدردشة","en_gpt","تفعيل الدردشه"], prefixes=["/", ""]))
 async def enable_handler(client: Client, message: Message):
     if not BOT_TOKEN in ["7026523047:AAG7PYVANPKT2fp2E-itXjbxvDW9R6IHkUQ", "7440472049:AAGA5A57Qj4y4TXCKjvm6PoZXtU3xUHtMDA","7197234381:AAG4MK3gBEnYBdAj-v13OhdbBxRxggI_Jdk"]:
         return
     activated_chats[message.chat.id] = True
-    await message.reply_text("✅ تم تفعيل البوت في هذه المحادثة.")
+    await message.reply_text("- تم تفعيل الدردشة مع الذكاء ✓.")
+    await message.reply_text("- لأنهاء الدردشة اضغط /de_gpt.")
