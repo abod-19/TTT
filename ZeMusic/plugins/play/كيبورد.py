@@ -17,6 +17,9 @@ from ZeMusic import (Apple, Resso, SoundCloud, Spotify, Telegram, YouTube, app)
 REPLY_MESSAGE = "<b>⟡ اهلا بك عزيزي اليك قائمه الاوامر</b>"
 REPLY_MESSAGE_BUTTONS = [
           [
+             ("تفعيل الدردشة مع الذكاء")
+          ],
+          [
              ("‹ غنيلي ›")
           ],
           [
