@@ -2,7 +2,7 @@ import os
 import base64
 import mimetypes
 from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram.types import Message, ReplyKeyboardMarkup
 from pyrogram.enums import ChatAction, ParseMode
 from lexica import AsyncClient, languageModels, Messages
 from ZeMusic import app
