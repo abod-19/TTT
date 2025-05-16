@@ -62,7 +62,7 @@ async def gpt_handler(client: Client, message: Message):
         return
     
     # أمر تعطيل داخلي
-    if message.text in ["تعطيل الدردشة", "/de_gpt", "تعطيل الدردشه", "‹ تعطيل الدردشة ›"]:
+    if message.text in ["تعطيل الدردشة", "/de_gpt", "تعطيل الدردشه", "تعطيل الدردشة مع الذكاء"]:
         activated_chats[message.chat.id] = False
         await message.reply_text("- تم تعطيل الدردشة مع الذكاء ×.")
         return
@@ -71,22 +71,18 @@ async def gpt_handler(client: Client, message: Message):
     await handle_text_model(message, languageModels.gpt, "GPT", as_messages=True)
 
 # أمر تفعيل البوت في المحادثة
-#@app.on_message(filters.private & filters.command(["تفعيل الدردشة","en_gpt","تفعيل الدردشه"], prefixes=["/", ""]))
-#async def enable_handler(client: Client, message: Message):
-    #if not BOT_TOKEN in ["7026523047:AAG7PYVANPKT2fp2E-itXjbxvDW9R6IHkUQ", "7440472049:AAGA5A57Qj4y4TXCKjvm6PoZXtU3xUHtMDA","7197234381:AAG4MK3gBEnYBdAj-v13OhdbBxRxggI_Jdk"]:
-        #return
-    #activated_chats[message.chat.id] = True
-    #await message.reply_text("- تم تفعيل الدردشة مع الذكاء ✓.")
-    #await message.reply_text("- لأنهاء الدردشة اضغط /de_gpt.")
 REPLY_MESSAGE_BUTTONS = [
           [
-             ("‹ تعطيل الدردشة ›")
-          ],    
+             ("تعطيل الدردشة مع الذكاء")
+          ],
+          [
+             ("تفعيل الدردشة مع الذكاء")
+          ],
           [
              ("‹ اخفاء الكيبورد ›")
           ]
 ]  
-@app.on_message(filters.regex("^(تفعيل الدردشة|/en_gpt|تفعيل الدردشه)$") & filters.private)
+@app.on_message(filters.regex("^(تفعيل الدردشة|/en_gpt|تفعيل الدردشة مع الذكاء|تفعيل الدردشه)$") & filters.private)
 async def cpanel(_, message: Message):
     if not BOT_TOKEN in ["7026523047:AAG7PYVANPKT2fp2E-itXjbxvDW9R6IHkUQ", "7440472049:AAGA5A57Qj4y4TXCKjvm6PoZXtU3xUHtMDA","7197234381:AAG4MK3gBEnYBdAj-v13OhdbBxRxggI_Jdk"]:
         return
