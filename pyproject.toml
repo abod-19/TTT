@@ -9,10 +9,7 @@ description = "A Telegram Music Bot using Pyrogram and PyTgCalls"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-license-files = ["LICENSE"]
-authors = [
-  { name = "ZeMuzic" }
-]
+authors = [{ name = "ZeMuzic" }]
 keywords = ["telegram", "music", "bot", "pyrogram", "pytgcalls"]
 classifiers = [
   "Environment :: Console",
@@ -58,6 +55,10 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 include = ["ZeMusic", "cookies", "strings"]
+
+[tool.setuptools]
+include-package-data = true
+license-files = ["LICENSE"]
 
 [project.urls]
 Repository = "https://github.com/abod-19/AM"
