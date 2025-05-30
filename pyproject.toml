@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ZeMusic"
+version = "1.5.0"
+description = "A Telegram Music Bot using Pyrogram and PyTgCalls"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  { name = "ZeMuzic" }
+]
+keywords = ["telegram", "music", "bot", "pyrogram", "pytgcalls"]
+classifiers = [
+  "Environment :: Console",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Utilities",
+]
+
+dependencies = [
+    "aiofiles",
+    "aiohttp",
+    "asyncio",
+    "beautifulsoup4",
+    "dnspython",
+    "ffmpeg-python",
+    "gitpython",
+    "hachoir",
+    "heroku3",
+    "motor",
+    "pillow",
+    "psutil",
+    "py-tgcalls==0.9.7",
+    "pykeyboard",
+    "pyrogram==2.0.106",
+    "python-dotenv",
+    "pyyaml",
+    "requests",
+    "speedtest-cli",
+    "spotipy",
+    "tgcrypto",
+    "unidecode",
+    "telegraph",
+    "numpy",
+    "wget",
+    "youtube-search",
+    "youtube-search-python",
+    "yt-dlp",
+    "lexica-api"
+]
+
+[tool.setuptools.packages.find]
+include = ["ZeMusic", "cookies", "strings"]
+
+[project.urls]
+Repository = "https://github.com/abod-19/AM"
+Issues = "https://github.com/abod-19/AM/issues"
+
+[project.scripts]
+zemusic = "ZeMusic.__main__:main"
