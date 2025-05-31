@@ -114,11 +114,8 @@ class Call(PyTgCalls):
         
     async def stop_stream(self, chat_id: int):
         assistant = await group_assistant(self, chat_id)
-        try:
-            await _clear_(chat_id)
-            await assistant.leave_call(chat_id)
-        except:
-            pass
+        await _clear_(chat_id)
+        await assistant.leave_call(chat_id)
 
     async def stop_stream_force(self, chat_id: int):
         try:
@@ -571,13 +568,13 @@ class Call(PyTgCalls):
             await self.five.start()
 
     async def decorators(self):
-        @self.on_update(filters.chat_update(ChatUpdate.Status.LEFT_CALL))
+        @self.one.on_update(filters.chat_update(ChatUpdate.Status.LEFT_CALL))
         @self.two.on_update(filters.chat_update(ChatUpdate.Status.LEFT_CALL))
         @self.three.on_update(filters.chat_update(ChatUpdate.Status.LEFT_CALL))
         @self.four.on_update(filters.chat_update(ChatUpdate.Status.LEFT_CALL))
         @self.five.on_update(filters.chat_update(ChatUpdate.Status.LEFT_CALL))
-        async def stream_services_handler(_, u):
-            await self.stop_stream(u.chat_id)
+        async def stream_services_handler(_, chat_id: int):
+            await self.stop_stream(chat_id)
 
         @self.one.on_update(filters.stream_end())
         @self.two.on_update(filters.stream_end())
